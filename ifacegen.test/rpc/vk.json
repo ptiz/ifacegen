@@ -1,0 +1,41 @@
+{"iface":[
+
+{
+"struct": "vkCountable",
+"typedef": {
+		"count": "int32"
+	}
+},
+
+{
+"procedure": "vkWall",
+"prefix": "wall.get",
+"prerequest": {
+		"owner_id": "string",
+		"count": "string",
+		"v": "string"
+	},
+"request" : {},
+"response": {
+		"response": {
+			"count":"int32",
+			"items":[{
+				"id":"int64",
+				"from_id":"int64",
+				"owner_id":"int64",
+				"date":"int64",
+				"post_type":"string",
+				"text":"string",
+				"comments":"vkCountable",
+				"likes":"vkCountable",
+				"reposts":"vkCountable",
+                "copy_history": [{
+                     "from_id": "int32",
+                     "text":"string"
+                }]
+			}]
+		}
+	}
+}
+
+]}

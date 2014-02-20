@@ -18,7 +18,7 @@ def typeFromJSON( decoration, argName, value, typeList ):
 		typeList[newType.name] = newType
 
 	elif type( value ) == types.ListType:
-		newType = GenListType( decoration, argName )		
+		newType = GenListType( decoration, argName )
 		listItem = value[0]
 		newType.itemType = typeFromJSON( newType.name, 'item', listItem, typeList )
 		typeList[newType.name] = newType
@@ -38,7 +38,7 @@ def buildTypeFromStructJSON( jsonItem, typeList ):
 		if (parentTypeName is not None) and (parentTypeName in typeList):
 			retType.baseType = typeList[ parentTypeName ]
 		else:
-			raise Exception("Unknown base type %s for type %s", retType.name, parentTypeName )
+			raise Exception("Unknown base type %s for type %s" % retType.name, parentTypeName )
 	return retType
 
 def buildMethodFromJSON( jsonItem, typeList ):
@@ -53,15 +53,16 @@ def buildMethodFromJSON( jsonItem, typeList ):
 		prerequest = jsonItem["prerequest"]
 
 	method = GenMethod( methodName, prefix )
+	typeDecoration = capitalizeFirstLetter( methodName )	
 
 	for k in request.keys():
 		argument = request[k]
-		method.requestTypes[k] = typeFromJSON( methodName, k, argument, typeList )
+		method.requestTypes[k] = typeFromJSON( typeDecoration, k, argument, typeList )
 
 	if prerequest is not None:
 		for k in prerequest.keys():
 			argument = prerequest[k]
-			tp = typeFromJSON( methodName, k, argument, typeList )
+			tp = typeFromJSON( typeDecoration, k, argument, typeList )
 			if isinstance( tp, GenIntegralType ):
 				method.prerequestTypes[k] = tp
 			else:
@@ -70,13 +71,13 @@ def buildMethodFromJSON( jsonItem, typeList ):
 	# flatten return type if it is only one filed in dictionary
 	if len( response ) == 1:
 		if type( response ) == types.ListType:
-			method.responseType = typeFromJSON( methodName, "List", response, typeList )
+			method.responseType = typeFromJSON( typeDecoration, "List", response, typeList )
 			method.responseArgName = None
 		else:
-			method.responseType = typeFromJSON( methodName, response.keys()[0], response.values()[0], typeList )
+			method.responseType = typeFromJSON( typeDecoration, response.keys()[0], response.values()[0], typeList )
 			method.responseArgName = response.keys()[0]
 	else:
-		method.responseType = typeFromJSON( methodName, "Info", response, typeList )
+		method.responseType = typeFromJSON( typeDecoration, "Info", response, typeList )
 		method.responseArgName = None
 	
 	return method

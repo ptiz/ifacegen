@@ -15,13 +15,16 @@ def lowercaseFirstLetter( strToLo ):
 def makeAlias( strName ):
 	toks = strName.split('_')
 	alias = ''
+
 	if len(toks) > 1:
-		for t in toks:
+		alias += toks[0]
+		for t in toks[1:]:
 			alias += capitalizeFirstLetter(t)
 	else:
 		toks = strName.split('-')
 		if len(toks) > 1:
-			for t in toks:
+			alias += toks[0]
+			for t in toks[1:]:
 				alias += capitalizeFirstLetter(t)
 		else:
 			alias = strName
@@ -33,7 +36,7 @@ def makeAlias( strName ):
 		if alias.lower().startswith( tabooedStart ):
 			return 'the' + capitalizeFirstLetter(alias)
 
-	return lowercaseFirstLetter( alias )
+	return alias
 
 def strFromDictionary( d ):
 	s = ""
@@ -53,7 +56,7 @@ class GenType:
 		if len( GenType.namePrefix ) and not name.startswith( GenType.namePrefix ):
 			self.name = GenType.namePrefix + capitalizeFirstLetter( name )
 		else:
-			self.name = capitalizeFirstLetter( name )
+			self.name = name
 		self.nullable = False
 		self.ptr = "*"
 
@@ -76,7 +79,10 @@ class GenIntegralType( GenType ):
 
 class GenComplexType( GenType ):
 	def __init__( self, decoration, name ):
-		GenType.__init__( self, decoration + capitalizeFirstLetter( makeAlias( name ) ) )
+		if decoration is None or len( decoration ) == 0:
+			GenType.__init__( self, makeAlias( name ) )
+		else:
+			GenType.__init__( self, decoration + capitalizeFirstLetter( makeAlias( name ) ) )
 		self.fields_ = OrderedDict()
 		self.fieldAliases_ = {}
 		self.baseType = None

@@ -86,12 +86,12 @@ static NSString* const cellId = @"ViewControllerCellId";
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:cellId];
     }
 
-    VkWallResponseItemsItem* wallItem = self.wallItems[indexPath.row];
+    vkResponseItem* wallItem = self.wallItems[indexPath.row];
     cell.textLabel.text = [NSString stringWithFormat:@"From id: %lld", wallItem.fromId];
     if ( [wallItem.text length] > 0 ) {
         cell.detailTextLabel.text = wallItem.text;
     } else if ( [wallItem.theCopyHistory count] > 0 ) {
-        VkWallResponseItemsItemTheCopyHistoryItem* copyHistoryItem = wallItem.theCopyHistory[0];
+        vkResponseItemBase* copyHistoryItem = wallItem.theCopyHistory[0];
         cell.detailTextLabel.text = copyHistoryItem.text;
     }
 

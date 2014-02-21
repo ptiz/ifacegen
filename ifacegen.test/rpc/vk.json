@@ -1,7 +1,7 @@
 {"iface":[
 
 {
-"struct": "vkCountable",
+"struct": "vkCounter",
 "typedef": {
 		"count": "int32"
 	}
@@ -16,9 +16,9 @@
 		"date":"int64",
 		"post_type":"string",
 		"text":"string",
-		"comments":"vkCountable",
-		"likes":"vkCountable",
-		"reposts":"vkCountable"
+		"comments":"vkCounter",
+		"likes":"vkCounter",
+		"reposts":"vkCounter"
 	}
 },
 

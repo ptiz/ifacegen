@@ -19,4 +19,4 @@ iOS+ARC, Python 2.7
 - No readable error messages for parser and generator yet.
 
 ##Usage
-Example included. Tutorial see in repo wiki: https://bitbucket.org/ptiz/ifacegen/wiki/Home
+Example included. Tutorial see in repo wiki: https://bitbucket.org/ifreefree/ifacegen/wiki/Home

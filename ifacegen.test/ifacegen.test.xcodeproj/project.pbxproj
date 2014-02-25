@@ -226,7 +226,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "##\npushd rpc/\npython ../../generator/ifacegen.py vk.json vkimport.json -o ../ifacegen.test/\npopd";
+			shellScript = "##\npython ../generator/ifacegen.py rpc/vk.json rpc/vkimport.json -o ifacegen.test/";
 		};
 /* End PBXShellScriptBuildPhase section */
 

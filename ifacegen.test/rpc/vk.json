@@ -1,8 +1,6 @@
 {"iface":[
 
-{
-"import": "vkimport.json"
-},
+{ "import": "vkimport.json" },
 
 {
 "struct": "vkResponseItem",

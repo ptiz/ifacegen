@@ -18,7 +18,7 @@
 		7AD7A3BD18B5F02E00EB9A4F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AD7A3BC18B5F02E00EB9A4F /* ViewController.m */; };
 		7AD7A3BF18B5F02E00EB9A4F /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7AD7A3BE18B5F02E00EB9A4F /* Images.xcassets */; };
 		7AD7A3DE18B604A800EB9A4F /* vk.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AD7A3DD18B604A800EB9A4F /* vk.m */; };
-		7AD7A3E318B604CA00EB9A4F /* HTTPTransport.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AD7A3DF18B604CA00EB9A4F /* HTTPTransport.m */; };
+		7AD7A3E318B604CA00EB9A4F /* IFHTTPTransport.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AD7A3DF18B604CA00EB9A4F /* IFHTTPTransport.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,10 +40,10 @@
 		7AD7A3C518B5F02E00EB9A4F /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		7AD7A3DC18B604A800EB9A4F /* vk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vk.h; path = ifacegen.test/vk.h; sourceTree = "<group>"; };
 		7AD7A3DD18B604A800EB9A4F /* vk.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = vk.m; path = ifacegen.test/vk.m; sourceTree = "<group>"; };
-		7AD7A3DF18B604CA00EB9A4F /* HTTPTransport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = HTTPTransport.m; path = ../transport/HTTPTransport.m; sourceTree = "<group>"; };
-		7AD7A3E018B604CA00EB9A4F /* HTTPTransport+Protected.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "HTTPTransport+Protected.h"; path = "../transport/HTTPTransport+Protected.h"; sourceTree = "<group>"; };
-		7AD7A3E118B604CA00EB9A4F /* HTTPTransport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HTTPTransport.h; path = ../transport/HTTPTransport.h; sourceTree = "<group>"; };
-		7AD7A3E218B604CA00EB9A4F /* Transport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Transport.h; path = ../transport/Transport.h; sourceTree = "<group>"; };
+		7AD7A3DF18B604CA00EB9A4F /* IFHTTPTransport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IFHTTPTransport.m; path = ../transport/IFHTTPTransport.m; sourceTree = "<group>"; };
+		7AD7A3E018B604CA00EB9A4F /* IFHTTPTransport+Protected.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IFHTTPTransport+Protected.h"; path = "../transport/IFHTTPTransport+Protected.h"; sourceTree = "<group>"; };
+		7AD7A3E118B604CA00EB9A4F /* IFHTTPTransport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IFHTTPTransport.h; path = ../transport/IFHTTPTransport.h; sourceTree = "<group>"; };
+		7AD7A3E218B604CA00EB9A4F /* IFTransport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IFTransport.h; path = ../transport/IFTransport.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,7 +73,7 @@
 			children = (
 				7A2C13AE18B6340300B55F5B /* RPC */,
 				7AD7A3E718B62DCD00EB9A4F /* Generated */,
-				7AD7A3E418B604D600EB9A4F /* Transport */,
+				7AD7A3E418B604D600EB9A4F /* IFTransport */,
 				7AD7A3AC18B5F02E00EB9A4F /* ifacegen.test */,
 				7AD7A3A518B5F02E00EB9A4F /* Frameworks */,
 				7AD7A3A418B5F02E00EB9A4F /* Products */,
@@ -124,15 +124,15 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		7AD7A3E418B604D600EB9A4F /* Transport */ = {
+		7AD7A3E418B604D600EB9A4F /* IFTransport */ = {
 			isa = PBXGroup;
 			children = (
-				7AD7A3DF18B604CA00EB9A4F /* HTTPTransport.m */,
-				7AD7A3E018B604CA00EB9A4F /* HTTPTransport+Protected.h */,
-				7AD7A3E118B604CA00EB9A4F /* HTTPTransport.h */,
-				7AD7A3E218B604CA00EB9A4F /* Transport.h */,
+				7AD7A3DF18B604CA00EB9A4F /* IFHTTPTransport.m */,
+				7AD7A3E018B604CA00EB9A4F /* IFHTTPTransport+Protected.h */,
+				7AD7A3E118B604CA00EB9A4F /* IFHTTPTransport.h */,
+				7AD7A3E218B604CA00EB9A4F /* IFTransport.h */,
 			);
-			name = Transport;
+			name = IFTransport;
 			sourceTree = "<group>";
 		};
 		7AD7A3E718B62DCD00EB9A4F /* Generated */ = {
@@ -226,7 +226,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7AD7A3E318B604CA00EB9A4F /* HTTPTransport.m in Sources */,
+				7AD7A3E318B604CA00EB9A4F /* IFHTTPTransport.m in Sources */,
 				7AD7A3DE18B604A800EB9A4F /* vk.m in Sources */,
 				7AD7A3BD18B5F02E00EB9A4F /* ViewController.m in Sources */,
 				7AD7A3B718B5F02E00EB9A4F /* AppDelegate.m in Sources */,

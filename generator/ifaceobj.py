@@ -176,3 +176,11 @@ class GenMethod:
 	def __str__(self):
 		return "GenMethod " + self.name + ": ntREQ: " + strFromDictionary( self.requestTypes ) + "ntRESP: " + str( self.responseType )
 
+class GenModule:
+	def __init__( self, name ):
+		self.typeList = OrderedDict()
+		self.methods = []
+		self.structs = []
+		self.name = name
+
+		

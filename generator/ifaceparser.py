@@ -81,3 +81,20 @@ def buildMethodFromJSON( jsonItem, typeList ):
 		method.responseArgName = None
 	
 	return method
+
+def parseModule( jsonFile ):
+	with open( jsonFile, "rt" ) as jFile:
+		jsonObj = json.load( jFile, object_pairs_hook=OrderedDict )
+		if jsonObj["iface"] is not None:
+
+			inputNameParts = os.path.basename( jsonFile ).split('.')			
+			module = GenModule( inputNameParts[0] )
+
+			for jsonItem in jsonObj["iface"]:
+				if "struct" in jsonItem:
+					structType = buildTypeFromStructJSON( jsonItem, module.typeList )
+					if structType is not None:
+						module.structs.append( structType.name )
+				elif "procedure" in jsonItem:
+					module.methods.append( buildMethodFromJSON( jsonItem, module.typeList ) )
+	return module

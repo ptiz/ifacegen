@@ -441,61 +441,40 @@ def processJSONIface( jsonFile, typeNamePrefix, outDir ):
 		GenType.namePrefix = typeNamePrefix
 		GenMethod.namePrefix = typeNamePrefix
 
-	with open( jsonFile, "rt" ) as jFile:
-		jsonObj = json.load( jFile, object_pairs_hook=OrderedDict )
-		if jsonObj["iface"] is not None:
+	module = parseModule( jsonFile )
 
-			# parse
+	if not os.path.exists( genDir ):
+	    os.makedirs( genDir )
 
-			inputNameParts = os.path.basename( jsonFile ).split('.')
-			ifaceName = inputNameParts[0]
+	objCIface = open( os.path.join( genDir, module.name + ".h" ), "wt" )
+	objCImpl = open( os.path.join( genDir, module.name + ".m" ), "wt" )
 
-			typeList = OrderedDict()
-			methods = []
-			structs = []
+	writeWarning( objCIface, None )
+	writeWarning( objCImpl, None )
 
-			for jsonItem in jsonObj["iface"]:
-				if "struct" in jsonItem:
-					structType = buildTypeFromStructJSON( jsonItem, typeList )
-					if structType is not None:
-						structs.append( structType.name )
-				elif "procedure" in jsonItem:
-					methods.append( buildMethodFromJSON( jsonItem, typeList ) )
+	writeObjCIfaceHeader( objCIface, module.name )
+	writeObjCImplHeader( objCImpl, module.name )			
 
-			# generate
+	for genTypeKey in module.typeList.keys():
+		writeAll = ( genTypeKey in module.structs )							
+		writeOBJCTypeDeclaration( objCIface, module.typeList[genTypeKey], writeDump=writeAll, writeConstructors=writeAll )
+		writeOBJCTypeImplementation( objCImpl, module.typeList[genTypeKey], writeDump=writeAll, writeConstructors=writeAll )
 
-			if not os.path.exists( genDir ):
-			    os.makedirs( genDir )	
+	if len( module.methods ) != 0:
+		writeObjCIfaceDeclaration( objCIface, module.name )
+		writeObjCImplDeclaration( objCImpl, module.name )
+		objCIface.write("\n/* methods */\n\n")
+		objCImpl.write("\n/* implementation */\n\n")	
 
-			objCIface = open( os.path.join( genDir, ifaceName + ".h" ), "wt" )
-			objCImpl = open( os.path.join( genDir, ifaceName + ".m" ), "wt" )
+	for method in module.methods:
+		writeOBJCMethodDeclaration( objCIface, method, implementation = False )
+		writeOBJCMethodImplementation( objCImpl, method )
 
-			writeWarning( objCIface, None )
-			writeWarning( objCImpl, None )
+	if len( module.methods ) != 0:
+		writeObjCIfaceFooter( objCIface, module.name )
+		writeObjCImplFooter( objCImpl, module.name )
 
-			writeObjCIfaceHeader( objCIface, ifaceName )
-			writeObjCImplHeader( objCImpl, ifaceName )			
-
-			for genTypeKey in typeList.keys():
-				writeAll = ( genTypeKey in structs )							
-				writeOBJCTypeDeclaration( objCIface, typeList[genTypeKey], writeDump=writeAll, writeConstructors=writeAll )
-				writeOBJCTypeImplementation( objCImpl, typeList[genTypeKey], writeDump=writeAll, writeConstructors=writeAll )
-
-			if len( methods ) != 0:
-				writeObjCIfaceDeclaration( objCIface, ifaceName )
-				writeObjCImplDeclaration( objCImpl, ifaceName )
-				objCIface.write("\n/* methods */\n\n")
-				objCImpl.write("\n/* implementation */\n\n")		
-
-			for method in methods:
-				writeOBJCMethodDeclaration( objCIface, method, implementation = False )
-				writeOBJCMethodImplementation( objCImpl, method )
-
-			if len( methods ) != 0:
-				writeObjCIfaceFooter( objCIface, inputNameParts[0] )
-				writeObjCImplFooter( objCImpl, inputNameParts[0] )
-
-			writeObjCFooter( objCImpl )
+	writeObjCFooter( objCImpl )
 
 def main():
     parser = argparse.ArgumentParser(description='JSON-based interface generator')

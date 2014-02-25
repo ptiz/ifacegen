@@ -395,6 +395,10 @@ def writeObjCIfaceHeader( fileOut, inputName ):
 	fileOut.write("\n#import <Foundation/Foundation.h>\n")
 	fileOut.write('#import "IFTransport.h"\n')
 
+def writeObjCIfaceImports( fileOut, importNames ):
+	for name in importNames:
+		fileOut.write('#import "%s.h"\n' % name)
+
 def writeObjCIfaceDeclaration( fileOut, inputName ):
 	fileOut.write("\n@interface " + inputName + ": NSObject\n")
 	fileOut.write("\n- (id)initWithTransport:(id<IFTransport>)transport;\n\n")
@@ -442,6 +446,9 @@ def processJSONIface( jsonFile, typeNamePrefix, outDir ):
 		GenMethod.namePrefix = typeNamePrefix
 
 	module = parseModule( jsonFile )
+	if module is None:
+		print "Can't load module " + jsonFile;
+		return
 
 	if not os.path.exists( genDir ):
 	    os.makedirs( genDir )
@@ -453,6 +460,8 @@ def processJSONIface( jsonFile, typeNamePrefix, outDir ):
 	writeWarning( objCImpl, None )
 
 	writeObjCIfaceHeader( objCIface, module.name )
+	writeObjCIfaceImports( objCIface, module.importedModuleNames )
+
 	writeObjCImplHeader( objCImpl, module.name )			
 
 	for genTypeKey in module.typeList.keys():
@@ -477,19 +486,19 @@ def processJSONIface( jsonFile, typeNamePrefix, outDir ):
 	writeObjCFooter( objCImpl )
 
 def main():
-    parser = argparse.ArgumentParser(description='JSON-based interface generator')
+	parser = argparse.ArgumentParser(description='JSON-ObjC interface generator')
+	
+	parser.add_argument('rpcInput', metavar='I', type=unicode, nargs = '+', help = 'Input JSON RPC files')
+	parser.add_argument('--prefix', action='store', required=False, help='Class and methods prefix')
+	parser.add_argument('-o', '--outdir', action='store', default="gen-objc", required=False, help="Output directory name")
 
-    parser.add_argument('-i', '--input', action='store', required=True, help='JSON interface file name')
-    parser.add_argument('--prefix', action='store', required=False, help='Class and methods prefix')
-    parser.add_argument('-o', '--outdir', action='store', default="gen-objc", required=False, help="Output directory name")
+	parsedArgs = parser.parse_args()
+	if len(sys.argv) == 1:
+	    parser.print_help()
+	    return 0
 
-    parsedArgs = parser.parse_args()
-    if len(sys.argv) == 1:
-        parser.print_help()
-        return 0
-
-    if parsedArgs.input is not None:
-    	processJSONIface( parsedArgs.input, parsedArgs.prefix, parsedArgs.outdir )
+	for rpcInput in parsedArgs.rpcInput:
+		processJSONIface( rpcInput, parsedArgs.prefix, parsedArgs.outdir )
 
 #########
 

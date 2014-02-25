@@ -182,5 +182,7 @@ class GenModule:
 		self.methods = []
 		self.structs = []
 		self.name = name
+		self.importedModuleNames = []
+		self.importedTypeList = OrderedDict()
 
 		

@@ -1,8 +1,10 @@
 
 #import <Foundation/Foundation.h>
-#import "Transport.h"
+#import "IFTransport.h"
 
-@interface HTTPTransport : NSObject<Transport>
+extern NSString* const IFHTTPTransportErrorDomain;
+
+@interface IFHTTPTransport : NSObject<IFTransport>
 
 - (id)initWithURL:(NSURL*)url;
 - (NSHTTPURLResponse*)currentResponse;

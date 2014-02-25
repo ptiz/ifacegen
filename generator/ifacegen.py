@@ -327,7 +327,6 @@ def writeOBJCTypeImplementation( fileOut, genType, writeConstructors, writeDump 
 		fileOut.write('\tif ( jsonData == nil ) return nil;\n')		
 		fileOut.write('\tif (self = [super init]) {\n')
 		fileOut.write('\t\tNSDictionary* dict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:error];\n');
-		# fileOut.write('\t\tif ( *error != nil ) {\n\t\t\tNSLog(@"' + genType.name + ' init: Unable to parse JSON data: %@", *error);\n\t\t\treturn nil;\n\t\t}\n')
 		fileOut.write('\t\tif ( *error != nil ) {\n\t\t\treturn nil;\n\t\t}\n')		
 		fileOut.write('\t\t[self readDictionary:dict];\n')
 		fileOut.write('\t}\n\treturn self;\n}\n')
@@ -385,7 +384,6 @@ def writeOBJCMethodImplementation( fileOut, method ):
 		outputStatement = 'NSArray* ' + outputName
 
 	fileOut.write('\t' + outputStatement + ' = [NSJSONSerialization JSONObjectWithData:outputData options:NSJSONReadingAllowFragments error:error];\n');
-	# fileOut.write('\tif ( *error != nil ) {\n\t\tNSLog(@"' + method.name + ': Unable to parse JSON answer data: %@", *error);\n\t\treturn nil;\n\t}\n')
 	fileOut.write('\tif ( *error != nil ) {\n\t\treturn nil;\n\t}\n')
 
 	retVal = unwindReturnedTypeToOBJC( fileOut, outputName, method.responseType, method.responseArgName, 1, tmpVarName )
@@ -395,11 +393,11 @@ def writeOBJCMethodImplementation( fileOut, method ):
 
 def writeObjCIfaceHeader( fileOut, inputName ):
 	fileOut.write("\n#import <Foundation/Foundation.h>\n")
-	fileOut.write('#import "Transport.h"\n')
+	fileOut.write('#import "IFTransport.h"\n')
 
 def writeObjCIfaceDeclaration( fileOut, inputName ):
 	fileOut.write("\n@interface " + inputName + ": NSObject\n")
-	fileOut.write("\n- (id)initWithTransport:(NSObject<Transport>*)transport;\n\n")
+	fileOut.write("\n- (id)initWithTransport:(id<IFTransport>)transport;\n\n")
 
 def writeObjCIfaceFooter( fileOut, inputName ):
 	fileOut.write("\n@end")
@@ -411,9 +409,9 @@ def writeObjCImplHeader( fileOut, inputName ):
 	fileOut.write('\n#pragma clang diagnostic push\n#pragma clang diagnostic ignored "-Wunused"\n\n')
 
 def writeObjCImplDeclaration( fileOut, inputName ):
-	fileOut.write("\n@interface " + inputName + "() {\n\tNSObject<Transport>* transport;\n}\n@end\n")
+	fileOut.write("\n@interface " + inputName + "() {\n\tid<IFTransport> transport;\n}\n@end\n")
 	fileOut.write("\n@implementation " + inputName + "\n")
-	fileOut.write("\n- (id)initWithTransport:(NSObject<Transport>*)trans {\n")
+	fileOut.write("\n- (id)initWithTransport:(id<IFTransport>)trans {\n")
 	fileOut.write("\tif ( self = [super init] ) {\n\t\ttransport = trans;\n\t}\n\treturn self;\n}\n")
 	fileOut.write('- (NSError*)errorWithMessage:(NSString*)msg {\n')
 	fileOut.write('\tNSDictionary* errData = [NSDictionary dictionaryWithObject:msg forKey:NSLocalizedDescriptionKey];\n')

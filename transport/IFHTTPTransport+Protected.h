@@ -1,7 +1,7 @@
 
-#import "HTTPTransport.h"
+#import "IFHTTPTransport.h"
 
-@interface HTTPTransport (Protected)
+@interface IFHTTPTransport (Protected)
 
 - (NSMutableURLRequest*)prepareRequestWithURL:(NSURL*)url data:(NSData*)data;
 - (NSString*)buildRequestParamsString:(NSDictionary*)requestParams;

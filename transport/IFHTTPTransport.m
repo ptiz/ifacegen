@@ -1,27 +1,29 @@
 
-#import "HTTPTransport.h"
-#import "HTTPTransport+Protected.h"
+#import "IFHTTPTransport.h"
+#import "IFHTTPTransport+Protected.h"
 
 #ifdef DEBUG
-#   define NSLog(...) NSLog(__VA_ARGS__)
+#   define IFDebugLog(...) NSLog(__VA_ARGS__)
 #else
-#   define NSLog(...)
+#   define IFDebugLog(...)
 #endif
 
-@interface HTTPTransport()
+NSString* const IFHTTPTransportErrorDomain = @"com.ifree.ifacegen.transport.httperror";
 
-@property (nonatomic) NSURL* rootURL;
-@property (nonatomic) NSData* currentAnswer;
-@property (nonatomic) NSHTTPURLResponse* curentResponse;
-@property (nonatomic) NSDictionary* currentRequestParams;
+@interface IFHTTPTransport()
+
+@property (nonatomic, copy) NSURL* rootURL;
+@property (nonatomic, copy) NSData* currentAnswer;
+@property (nonatomic, copy) NSHTTPURLResponse* curentResponse;
+@property (nonatomic, copy) NSDictionary* currentRequestParams;
 
 @end
 
-@implementation HTTPTransport
+@implementation IFHTTPTransport
 
 - (id)initWithURL:(NSURL*)url {
     if ( self = [super init] ) {
-        self.rootURL = [url copy];
+        self.rootURL = url;
         self.retriesCount = 3;
 
         NSString* appVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
@@ -88,7 +90,7 @@
     self.currentRequestParams = nil;
     self.curentResponse = response;
 
-    NSLog(@"Response code: %d", [self.curentResponse statusCode]);
+    IFDebugLog(@"Response code: %d", [self.curentResponse statusCode]);
 
     if ( [self.curentResponse statusCode] < 200 || [self.curentResponse statusCode] > 202 ) {
 
@@ -96,7 +98,7 @@
                                                                    [self.curentResponse statusCode]
                                                                    ]};
 
-        *error = [[NSError alloc] initWithDomain:NSStringFromClass([self class])
+        *error = [[NSError alloc] initWithDomain:IFHTTPTransportErrorDomain
                                             code:[self.curentResponse statusCode]
                                         userInfo:userInfo];
 
@@ -107,7 +109,7 @@
         return YES;
     }
 
-    NSLog(@"Response body: %@", [[NSString alloc] initWithBytes:[self.currentAnswer bytes]
+    IFDebugLog(@"Response body: %@", [[NSString alloc] initWithBytes:[self.currentAnswer bytes]
                                                          length:[self.currentAnswer length]
                                                        encoding:NSUTF8StringEncoding]
                                                        );
@@ -128,7 +130,7 @@
 - (NSMutableURLRequest*)prepareRequestWithURL:(NSURL*)url data:(NSData*)data {
 
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
-    NSLog(@"Request: %@", request);
+    IFDebugLog(@"Request: %@", request);
 
     [request setHTTPMethod:( data == nil ? @"GET" : @"POST" )];
 
@@ -145,7 +147,7 @@
                                                   length:[request.HTTPBody length]
                                                 encoding:NSUTF8StringEncoding];
 
-        NSLog(@"HTTPTransport to be written in URL \"%@\": %@", [request.URL absoluteString], json);
+        IFDebugLog(@"HTTPTransport to be written in URL \"%@\": %@", [request.URL absoluteString], json);
     }
 
     [request setValue:self.userAgent forHTTPHeaderField:@"User-Agent"];

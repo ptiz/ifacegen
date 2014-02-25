@@ -1,6 +1,6 @@
 
 #import "ViewController.h"
-#import "HTTPTransport.h"
+#import "IFHTTPTransport.h"
 #import "vk.h"
 
 static NSString* const cellId = @"ViewControllerCellId";
@@ -28,7 +28,7 @@ static NSString* const cellId = @"ViewControllerCellId";
         self.wallItems = @[];
 
         NSURL* vkURL = [NSURL URLWithString:@"http://api.vk.com/method"];
-        NSObject<Transport>* transport = [[HTTPTransport alloc] initWithURL:vkURL];
+        id<IFTransport> transport = [[IFHTTPTransport alloc] initWithURL:vkURL];
         self.vkClient = [[vk alloc] initWithTransport:transport];
 
     }

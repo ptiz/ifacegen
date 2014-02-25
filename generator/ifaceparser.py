@@ -97,7 +97,9 @@ def parseModule( jsonFile ):
 		jsonObj = json.load( jFile, object_pairs_hook=OrderedDict )
 		if jsonObj["iface"] is not None:
 
-			inputNameParts = os.path.basename( jsonFile ).split('.')			
+			baseDir = os.path.dirname( jsonFile )
+
+			inputNameParts = os.path.basename( jsonFile ).split('.')		
 			module = GenModule( inputNameParts[0] )
 
 			for jsonItem in jsonObj["iface"]:
@@ -108,7 +110,7 @@ def parseModule( jsonFile ):
 				elif "procedure" in jsonItem:
 					module.methods.append( buildMethodFromJSON( jsonItem, module.typeList, module.importedTypeList ) )
 				elif "import" in jsonItem:
-					importModule( jsonItem["import"], fromModule=module )
+					importModule( os.path.join( baseDir, jsonItem["import"]), fromModule=module )
 
 	return module
 

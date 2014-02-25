@@ -497,8 +497,14 @@ def main():
 	    parser.print_help()
 	    return 0
 
-	for rpcInput in parsedArgs.rpcInput:
-		processJSONIface( rpcInput, parsedArgs.prefix, parsedArgs.outdir )
+	try:
+		for rpcInput in parsedArgs.rpcInput:
+			processJSONIface( rpcInput, parsedArgs.prefix, parsedArgs.outdir )
+	except Exception as ex:
+		print( str(ex) )
+		sys.exit(1)
+
+	return 0
 
 #########
 

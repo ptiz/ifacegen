@@ -3,7 +3,7 @@ import types
 import os
 from collections import OrderedDict
 
-tabooedNames = [ "type", "id", "new", "void" ]
+tabooedNames = [ "id" ] #"type", "id", "new", "void" ]
 tabooedStarts = [ "new", "alloc", "copy", "mutableCopy" ]
 
 def capitalizeFirstLetter( strToCap ):

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		7A2C13B018B6340C00B55F5B /* vk.json in Resources */ = {isa = PBXBuildFile; fileRef = 7A2C13AF18B6340C00B55F5B /* vk.json */; };
+		7A2C13B718BCD3E300B55F5B /* vkimport.json in Resources */ = {isa = PBXBuildFile; fileRef = 7A2C13B618BCD3E300B55F5B /* vkimport.json */; };
+		7A2C13BA18BCDC9900B55F5B /* vkimport.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A2C13B918BCDC9900B55F5B /* vkimport.m */; };
 		7AD7A3A718B5F02E00EB9A4F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7AD7A3A618B5F02E00EB9A4F /* Foundation.framework */; };
 		7AD7A3A918B5F02E00EB9A4F /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7AD7A3A818B5F02E00EB9A4F /* CoreGraphics.framework */; };
 		7AD7A3AB18B5F02E00EB9A4F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7AD7A3AA18B5F02E00EB9A4F /* UIKit.framework */; };
@@ -23,6 +25,9 @@
 
 /* Begin PBXFileReference section */
 		7A2C13AF18B6340C00B55F5B /* vk.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = vk.json; path = rpc/vk.json; sourceTree = "<group>"; };
+		7A2C13B618BCD3E300B55F5B /* vkimport.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = vkimport.json; path = rpc/vkimport.json; sourceTree = "<group>"; };
+		7A2C13B818BCDC9900B55F5B /* vkimport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vkimport.h; path = ifacegen.test/vkimport.h; sourceTree = "<group>"; };
+		7A2C13B918BCDC9900B55F5B /* vkimport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = vkimport.m; path = ifacegen.test/vkimport.m; sourceTree = "<group>"; };
 		7AD7A3A318B5F02E00EB9A4F /* ifacegen.test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ifacegen.test.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AD7A3A618B5F02E00EB9A4F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		7AD7A3A818B5F02E00EB9A4F /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -63,6 +68,7 @@
 		7A2C13AE18B6340300B55F5B /* RPC */ = {
 			isa = PBXGroup;
 			children = (
+				7A2C13B618BCD3E300B55F5B /* vkimport.json */,
 				7A2C13AF18B6340C00B55F5B /* vk.json */,
 			);
 			name = RPC;
@@ -138,6 +144,8 @@
 		7AD7A3E718B62DCD00EB9A4F /* Generated */ = {
 			isa = PBXGroup;
 			children = (
+				7A2C13B818BCDC9900B55F5B /* vkimport.h */,
+				7A2C13B918BCDC9900B55F5B /* vkimport.m */,
 				7AD7A3DC18B604A800EB9A4F /* vk.h */,
 				7AD7A3DD18B604A800EB9A4F /* vk.m */,
 			);
@@ -200,6 +208,7 @@
 				7AD7A3BF18B5F02E00EB9A4F /* Images.xcassets in Resources */,
 				7AD7A3B118B5F02E00EB9A4F /* InfoPlist.strings in Resources */,
 				7AD7A3BA18B5F02E00EB9A4F /* Main.storyboard in Resources */,
+				7A2C13B718BCD3E300B55F5B /* vkimport.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -217,7 +226,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "##\npython ../generator/ifacegen.py -i rpc/vk.json -o ifacegen.test/";
+			shellScript = "##\npushd rpc/\npython ../../generator/ifacegen.py vk.json vkimport.json -o ../ifacegen.test/\npopd";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -229,6 +238,7 @@
 				7AD7A3E318B604CA00EB9A4F /* IFHTTPTransport.m in Sources */,
 				7AD7A3DE18B604A800EB9A4F /* vk.m in Sources */,
 				7AD7A3BD18B5F02E00EB9A4F /* ViewController.m in Sources */,
+				7A2C13BA18BCDC9900B55F5B /* vkimport.m in Sources */,
 				7AD7A3B718B5F02E00EB9A4F /* AppDelegate.m in Sources */,
 				7AD7A3B318B5F02E00EB9A4F /* main.m in Sources */,
 			);

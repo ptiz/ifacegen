@@ -1,25 +1,7 @@
 {"iface":[
 
 {
-"struct": "vkCounter",
-"typedef": {
-		"count": "int32"
-	}
-},
-
-{
-"struct": "vkResponseItemBase",
-"typedef": {
-		"id":"int64",
-		"from_id":"int64",
-		"owner_id":"int64",
-		"date":"int64",
-		"post_type":"string",
-		"text":"string",
-		"comments":"vkCounter",
-		"likes":"vkCounter",
-		"reposts":"vkCounter"
-	}
+"import": "vkimport.json"
 },
 
 {

@@ -3,3 +3,5 @@ ifacegen.test/ifacegen.test/vk.m
 ifacegen.test/ifacegen.test.xcodeproj/project.xcworkspace/xcuserdata
 ifacegen.test/ifacegen.test.xcodeproj/xcuserdata
 *.pyc
+ifacegen.test/ifacegen.test/vkimport.h
+ifacegen.test/ifacegen.test/vkimport.m

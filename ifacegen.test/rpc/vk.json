@@ -23,6 +23,10 @@
 		"response": {
 			"count":"int32",
 			"items":[ "vkResponseItem" ]
+		},
+		"error": { 
+			"error_code": "int32",
+			"error_msg":"string"
 		}
 	}
 }

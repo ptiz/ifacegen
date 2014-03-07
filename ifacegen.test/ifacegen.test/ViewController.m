@@ -76,15 +76,32 @@ static NSString* const cellId = @"ViewControllerCellId";
         weakSelf.getWallButton.enabled = NO;
 
         NSError* error;
-        VkWallResponse* response = [weakSelf.vkClient vkWallWithOwnerId:userId
+        VkWallInfo* response = [weakSelf.vkClient vkWallWithOwnerId:userId
                                                            andCount:@"10"
                                                                andV:@"5.10"
                                                            andError:&error];
 
+        weakSelf.wallItems = @[];
+
         if ( error ) {
-            NSLog(@"%@", error);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[[UIAlertView alloc] initWithTitle:@"HTTP Error"
+                                           message:error.localizedDescription
+                                          delegate:nil
+                                 cancelButtonTitle:@"OK"
+                                 otherButtonTitles:nil] show];
+            });
+
+        } else if ( response.error ) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[[UIAlertView alloc] initWithTitle:@"VK Error"
+                                            message:response.error.errorMsg
+                                           delegate:nil
+                                  cancelButtonTitle:@"OK"
+                                  otherButtonTitles:nil] show];
+            });
         } else {
-            weakSelf.wallItems = response.items;
+            weakSelf.wallItems = response.response.items;
         }
 
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -95,7 +112,7 @@ static NSString* const cellId = @"ViewControllerCellId";
 
 }
 
-#pragma mark - TableView
+#pragma mark - UITableViewDataSource
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return self.wallItems.count;

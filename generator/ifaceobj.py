@@ -25,6 +25,7 @@ from collections import OrderedDict
 
 tabooedNames = [ "void", "id" ]
 tabooedStarts = [ "new", "alloc", "copy", "mutableCopy" ]
+prerequestSymbols = { '[':'_', ']':'_', '.':'_' }
 
 def capitalizeFirstLetter( strToCap ):
 	return strToCap[:1].capitalize() + strToCap[1:]
@@ -32,7 +33,12 @@ def capitalizeFirstLetter( strToCap ):
 def lowercaseFirstLetter( strToLo ):
 	return strToLo[:1].lower() + strToLo[1:]
 
-def makeAlias( strName ):
+def makeAlias( strNameIn ):
+	strName = strNameIn
+	
+	for i,j in prerequestSymbols.iteritems():
+		strName = strName.replace(i, j)
+
 	toks = strName.split('_')
 	alias = ''
 

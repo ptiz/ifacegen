@@ -162,7 +162,7 @@ def decorateOBJCReturnedType( levelTmpVar, objcRetTypeStr, retType ):
 	if retType.sType == "bool":
 		return formatNSNumberStr.format( levelTmpVar, objcRetTypeStr, 'NO', 'NSNumber*', 'boolValue' )
 	if retType.sType == "int32":
-		return formatNSNumberStr.format( levelTmpVar, objcRetTypeStr, '0', 'NSNumber*', 'integerValue' )
+		return formatNSNumberStr.format( levelTmpVar, objcRetTypeStr, '0', 'NSNumber*', 'intValue' )
 	if retType.sType == "int64":
 		return formatNSNumberStr.format( levelTmpVar, objcRetTypeStr, '0L', 'NSNumber*', 'longLongValue' )
 	if retType.sType == "double":

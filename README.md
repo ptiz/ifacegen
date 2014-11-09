@@ -1,7 +1,7 @@
 # ifacegen
 
 ## What it is
-ifacegen is a code generator, it simplifies using of existing REST+JSON APIs from Objective-C code. ifacegen makes native wrappers for remote service calls and JSON dictionaries. Simple IDL used for description of existing protocol.
+ifacegen is a code generator, it simplifies using of existing REST+JSON APIs from Objective-C code. ifacegen makes native wrappers for remote service calls and JSON dictionaries. Simple IDL used for description of existing protocol. This is a fork from initial repo, that you can find at https://bitbucket.org/ifreefree/ifacegen
 
 ## What is not
 ifacegen is not general purpose serialization tool. It's only compiles IDL given and generates special Objective-C classes accordingly. ifacegen doesn't support JSON Schema because of it's verbosity.
@@ -21,4 +21,4 @@ iOS+ARC, Python 2.7
     pod 'ifacegen', :git => 'https://github.com/ptiz/ifacegen.git'
 
 ##Usage
-Example included. Tutorial see in repo wiki: https://bitbucket.org/ifreefree/ifacegen/wiki/Home
+Example included. Tutorial see in [DOC file](DOC.md)

@@ -1,4 +1,16 @@
-#Google APIs example
+#Doc
+
+##ifacegen console tool
+Usage: 
+```
+$ python ifacegen.py [-h] [--prefix PREFIX] [-o OUTDIR] I [I ...]
+```
+- h shows help; 
+- PREFIX is a string, ObjC namespace prefix that is added to a name of each class to be generated; 
+- OUTDIR is a string, path to directory where the generated files to be placed. By default these files will be placed into a "gen-objc" subdirectory of working dir;
+- I [I ...] are IDL file names to be processed. 
+
+##Google APIs example
 To make calls to Google Places API (https://developers.google.com/places/documentation/details) all you need is URL, URL parameters and JSON response dictionary description. Here they are:
 
 URL:

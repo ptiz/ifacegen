@@ -21,4 +21,12 @@ iOS+ARC, Python 2.7
     pod 'ifacegen', :git => 'https://github.com/ptiz/ifacegen.git'
 
 ##Usage
+```
+$ python ifacegen.py [-h] [--prefix PREFIX] [-o OUTDIR] I [I ...]
+```
+- h shows help; 
+- PREFIX is a string, ObjC namespace prefix that is added to a name of each class to be generated; 
+- OUTDIR is a string, path to directory where the generated files to be placed. By default these files will be placed into a "gen-objc" subdirectory of working dir;
+- I [I ...] are IDL file names to be processed. 
+
 Example can be found in the repo. Also see a tutorial in [DOC file](DOC.md)

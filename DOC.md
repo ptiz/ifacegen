@@ -172,17 +172,21 @@ $ python ifacegen.py [-h] [--prefix PREFIX] [-o OUTDIR] I [I ...]
 - PREFIX is a string, ObjC namespace prefix that is added to a name of each class to be generated; 
 - OUTDIR is a string, path to directory where the generated files to be placed. By default these files will be placed into a "gen-objc" subdirectory of working dir;
 - I [I ...] are IDL file names to be processed.
-- 
+ 
 ##IDL description
 ifacegen uses pure JSON format for IDL without any extensions.
 
 ####IDL header
 ```json
 {"iface": [
-<your structures and methods go here>
+<imports>,
+<data structure declarations>,
+<remote method declarations>
 ]}
 ```
-####Structure
+From one IDL file one ObjC class will be created. All structures described will be declared in its header. All remote methods described will be declared as this class object methods.   
+
+####Structure declaration
 ```json
 {
 "struct": "<structure name>",
@@ -242,6 +246,20 @@ Explicitly declared structures can be imported from another IDL file:
 ...
 ]}
 ```
+####Remote method declaration
+```json
+{
+"procedure": "<procedure name for ObjC>",
+"prefix": "<remote service method prefix to be combined into resulting URL>",
+"prerequest": {
+		"<parameter to be passed in url>": "string",
+		...
+	},
+"request" : <any explicit structure name or implicit struct declaration in brackets>,
+"response": <any explicit structure name or implicit struct declaration in brackets>
+}
+```
+"prerequest" field describes parameters to be passed as URL parts. Their data type must be only "string". "request" field used for passing parameters throug JSON data. Any of them can be declared as empty JSON dictionary if not needed.
 
 ##Limitations
 - For ARC only;

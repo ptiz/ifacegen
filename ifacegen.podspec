@@ -8,9 +8,8 @@ Pod::Spec.new do |s|
   s.homepage     = "https://github.com/ptiz/ifacegen"
   s.license      = { :type => 'BSD' }
   s.author       = { "ptiz" => "ptiz@live.ru" }
-  s.platform     = :ios
   s.platform     = :ios, "6.0"
-  s.source       = { :git => "https://github.com/ptiz/ifacegen.git" }
+  s.source       = { :git => "https://github.com/ptiz/ifacegen.git", :tag => 'v0.1.0' }
   s.source_files  = "transport/**/*.{h,m}"
   s.public_header_files = "transport/**/*.h"
   s.resources = "generator/*.py"

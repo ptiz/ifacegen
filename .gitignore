@@ -5,3 +5,5 @@ ifacegen.test/ifacegen.test.xcodeproj/xcuserdata
 *.pyc
 ifacegen.test/ifacegen.test/vkimport.h
 ifacegen.test/ifacegen.test/vkimport.m
+ifacegen.test/ifacegen.test.xcworkspace
+ifacegen.test/Pods

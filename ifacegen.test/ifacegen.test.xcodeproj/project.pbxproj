@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		36A368EA7238CCAACECD45DE /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 669A32DFA01FBF7C130260C4 /* libPods.a */; };
 		7A2C13B018B6340C00B55F5B /* vk.json in Resources */ = {isa = PBXBuildFile; fileRef = 7A2C13AF18B6340C00B55F5B /* vk.json */; };
 		7A2C13B718BCD3E300B55F5B /* vkimport.json in Resources */ = {isa = PBXBuildFile; fileRef = 7A2C13B618BCD3E300B55F5B /* vkimport.json */; };
 		7A2C13BA18BCDC9900B55F5B /* vkimport.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A2C13B918BCDC9900B55F5B /* vkimport.m */; };
@@ -20,10 +21,11 @@
 		7AD7A3BD18B5F02E00EB9A4F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AD7A3BC18B5F02E00EB9A4F /* ViewController.m */; };
 		7AD7A3BF18B5F02E00EB9A4F /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7AD7A3BE18B5F02E00EB9A4F /* Images.xcassets */; };
 		7AD7A3DE18B604A800EB9A4F /* vk.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AD7A3DD18B604A800EB9A4F /* vk.m */; };
-		7AD7A3E318B604CA00EB9A4F /* IFHTTPTransport.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AD7A3DF18B604CA00EB9A4F /* IFHTTPTransport.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		044A33AC4C3614D405BE1585 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		669A32DFA01FBF7C130260C4 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A2C13AF18B6340C00B55F5B /* vk.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = vk.json; path = rpc/vk.json; sourceTree = "<group>"; };
 		7A2C13B618BCD3E300B55F5B /* vkimport.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = vkimport.json; path = rpc/vkimport.json; sourceTree = "<group>"; };
 		7A2C13B818BCDC9900B55F5B /* vkimport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vkimport.h; path = ifacegen.test/vkimport.h; sourceTree = "<group>"; };
@@ -45,10 +47,7 @@
 		7AD7A3C518B5F02E00EB9A4F /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		7AD7A3DC18B604A800EB9A4F /* vk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vk.h; path = ifacegen.test/vk.h; sourceTree = "<group>"; };
 		7AD7A3DD18B604A800EB9A4F /* vk.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = vk.m; path = ifacegen.test/vk.m; sourceTree = "<group>"; };
-		7AD7A3DF18B604CA00EB9A4F /* IFHTTPTransport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IFHTTPTransport.m; path = ../transport/IFHTTPTransport.m; sourceTree = "<group>"; };
-		7AD7A3E018B604CA00EB9A4F /* IFHTTPTransport+Protected.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IFHTTPTransport+Protected.h"; path = "../transport/IFHTTPTransport+Protected.h"; sourceTree = "<group>"; };
-		7AD7A3E118B604CA00EB9A4F /* IFHTTPTransport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IFHTTPTransport.h; path = ../transport/IFHTTPTransport.h; sourceTree = "<group>"; };
-		7AD7A3E218B604CA00EB9A4F /* IFTransport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IFTransport.h; path = ../transport/IFTransport.h; sourceTree = "<group>"; };
+		BF12EDDDE2476CC2A2E85E66 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +58,7 @@
 				7AD7A3A918B5F02E00EB9A4F /* CoreGraphics.framework in Frameworks */,
 				7AD7A3AB18B5F02E00EB9A4F /* UIKit.framework in Frameworks */,
 				7AD7A3A718B5F02E00EB9A4F /* Foundation.framework in Frameworks */,
+				36A368EA7238CCAACECD45DE /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,10 +79,10 @@
 			children = (
 				7A2C13AE18B6340300B55F5B /* RPC */,
 				7AD7A3E718B62DCD00EB9A4F /* Generated */,
-				7AD7A3E418B604D600EB9A4F /* IFTransport */,
 				7AD7A3AC18B5F02E00EB9A4F /* ifacegen.test */,
 				7AD7A3A518B5F02E00EB9A4F /* Frameworks */,
 				7AD7A3A418B5F02E00EB9A4F /* Products */,
+				983F80EFADAF03CEA97864BE /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -101,6 +101,7 @@
 				7AD7A3A818B5F02E00EB9A4F /* CoreGraphics.framework */,
 				7AD7A3AA18B5F02E00EB9A4F /* UIKit.framework */,
 				7AD7A3C518B5F02E00EB9A4F /* XCTest.framework */,
+				669A32DFA01FBF7C130260C4 /* libPods.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -130,17 +131,6 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		7AD7A3E418B604D600EB9A4F /* IFTransport */ = {
-			isa = PBXGroup;
-			children = (
-				7AD7A3DF18B604CA00EB9A4F /* IFHTTPTransport.m */,
-				7AD7A3E018B604CA00EB9A4F /* IFHTTPTransport+Protected.h */,
-				7AD7A3E118B604CA00EB9A4F /* IFHTTPTransport.h */,
-				7AD7A3E218B604CA00EB9A4F /* IFTransport.h */,
-			);
-			name = IFTransport;
-			sourceTree = "<group>";
-		};
 		7AD7A3E718B62DCD00EB9A4F /* Generated */ = {
 			isa = PBXGroup;
 			children = (
@@ -152,6 +142,15 @@
 			name = Generated;
 			sourceTree = "<group>";
 		};
+		983F80EFADAF03CEA97864BE /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				BF12EDDDE2476CC2A2E85E66 /* Pods.debug.xcconfig */,
+				044A33AC4C3614D405BE1585 /* Pods.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -159,10 +158,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 7AD7A3D518B5F02E00EB9A4F /* Build configuration list for PBXNativeTarget "ifacegen.test" */;
 			buildPhases = (
+				A99801CBF70E6C23A66A018E /* Check Pods Manifest.lock */,
 				7AD7A3DB18B603CE00EB9A4F /* ShellScript */,
 				7AD7A39F18B5F02E00EB9A4F /* Sources */,
 				7AD7A3A018B5F02E00EB9A4F /* Frameworks */,
 				7AD7A3A118B5F02E00EB9A4F /* Resources */,
+				E4DADFB5E3DEAC5C7128B7BE /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -226,7 +227,37 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "##\npython ../generator/ifacegen.py rpc/vk.json rpc/vkimport.json -o ifacegen.test/";
+			shellScript = "##\npython Pods/ifacegen/generator/ifacegen.py rpc/vk.json rpc/vkimport.json -o ifacegen.test/";
+		};
+		A99801CBF70E6C23A66A018E /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		E4DADFB5E3DEAC5C7128B7BE /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -235,7 +266,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7AD7A3E318B604CA00EB9A4F /* IFHTTPTransport.m in Sources */,
 				7AD7A3DE18B604A800EB9A4F /* vk.m in Sources */,
 				7AD7A3BD18B5F02E00EB9A4F /* ViewController.m in Sources */,
 				7A2C13BA18BCDC9900B55F5B /* vkimport.m in Sources */,
@@ -340,6 +370,7 @@
 		};
 		7AD7A3D618B5F02E00EB9A4F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BF12EDDDE2476CC2A2E85E66 /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -353,6 +384,7 @@
 		};
 		7AD7A3D718B5F02E00EB9A4F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 044A33AC4C3614D405BE1585 /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;

@@ -21,4 +21,4 @@ iOS+ARC, Python 2.7
     pod 'ifacegen', :git => 'https://github.com/ptiz/ifacegen.git'
 
 ##Usage
-Example included. Tutorial see in [DOC file](DOC.md)
+Example can be found in the repo. Also see a tutorial in [DOC file](DOC.md)

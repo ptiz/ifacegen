@@ -12,7 +12,6 @@ iOS+ARC, Python 2.7
 ##Limitations
 - For ARC only;
 - NSJSONSerialization used in generated code for JSON data creation, so there is intermediate dictionary created before a data writing in a transport;
-- You can not define global prefix for all the structs in generated code yet;
 - No "date", "enum" etc. in atomic IDL types. Only int32, int64, double, string, bool, raw и rawstr. "raw" will be converted in NSDictionary from JSON dictionary and "rawstr" — in NSDictionary from JSON dictionary encoded in string (like this: "data": "{\"weird\":42,\"str\":\"yes\"}");
 - No forwarding struct declaration;
 - No readable error messages for parser and generator yet.

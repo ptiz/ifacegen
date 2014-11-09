@@ -8,9 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		36A368EA7238CCAACECD45DE /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 669A32DFA01FBF7C130260C4 /* libPods.a */; };
+		5B0CA2DF1A0F6EB200E0CF12 /* vk.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B0CA2DC1A0F6EB200E0CF12 /* vk.m */; };
+		5B0CA2E01A0F6EB200E0CF12 /* vkimport.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B0CA2DE1A0F6EB200E0CF12 /* vkimport.m */; };
 		7A2C13B018B6340C00B55F5B /* vk.json in Resources */ = {isa = PBXBuildFile; fileRef = 7A2C13AF18B6340C00B55F5B /* vk.json */; };
 		7A2C13B718BCD3E300B55F5B /* vkimport.json in Resources */ = {isa = PBXBuildFile; fileRef = 7A2C13B618BCD3E300B55F5B /* vkimport.json */; };
-		7A2C13BA18BCDC9900B55F5B /* vkimport.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A2C13B918BCDC9900B55F5B /* vkimport.m */; };
 		7AD7A3A718B5F02E00EB9A4F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7AD7A3A618B5F02E00EB9A4F /* Foundation.framework */; };
 		7AD7A3A918B5F02E00EB9A4F /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7AD7A3A818B5F02E00EB9A4F /* CoreGraphics.framework */; };
 		7AD7A3AB18B5F02E00EB9A4F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7AD7A3AA18B5F02E00EB9A4F /* UIKit.framework */; };
@@ -20,24 +21,25 @@
 		7AD7A3BA18B5F02E00EB9A4F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7AD7A3B818B5F02E00EB9A4F /* Main.storyboard */; };
 		7AD7A3BD18B5F02E00EB9A4F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AD7A3BC18B5F02E00EB9A4F /* ViewController.m */; };
 		7AD7A3BF18B5F02E00EB9A4F /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7AD7A3BE18B5F02E00EB9A4F /* Images.xcassets */; };
-		7AD7A3DE18B604A800EB9A4F /* vk.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AD7A3DD18B604A800EB9A4F /* vk.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		044A33AC4C3614D405BE1585 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		5B0CA2DB1A0F6EB200E0CF12 /* vk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vk.h; path = ifacegen.example/vk.h; sourceTree = "<group>"; };
+		5B0CA2DC1A0F6EB200E0CF12 /* vk.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = vk.m; path = ifacegen.example/vk.m; sourceTree = "<group>"; };
+		5B0CA2DD1A0F6EB200E0CF12 /* vkimport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vkimport.h; path = ifacegen.example/vkimport.h; sourceTree = "<group>"; };
+		5B0CA2DE1A0F6EB200E0CF12 /* vkimport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = vkimport.m; path = ifacegen.example/vkimport.m; sourceTree = "<group>"; };
 		669A32DFA01FBF7C130260C4 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		7A2C13AF18B6340C00B55F5B /* vk.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = vk.json; path = rpc/vk.json; sourceTree = "<group>"; };
 		7A2C13B618BCD3E300B55F5B /* vkimport.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = vkimport.json; path = rpc/vkimport.json; sourceTree = "<group>"; };
-		7A2C13B818BCDC9900B55F5B /* vkimport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vkimport.h; path = ifacegen.test/vkimport.h; sourceTree = "<group>"; };
-		7A2C13B918BCDC9900B55F5B /* vkimport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = vkimport.m; path = ifacegen.test/vkimport.m; sourceTree = "<group>"; };
-		7AD7A3A318B5F02E00EB9A4F /* ifacegen.test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ifacegen.test.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7AD7A3A318B5F02E00EB9A4F /* ifacegen.example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ifacegen.example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AD7A3A618B5F02E00EB9A4F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		7AD7A3A818B5F02E00EB9A4F /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		7AD7A3AA18B5F02E00EB9A4F /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		7AD7A3AE18B5F02E00EB9A4F /* ifacegen.test-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ifacegen.test-Info.plist"; sourceTree = "<group>"; };
+		7AD7A3AE18B5F02E00EB9A4F /* ifacegen.example-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ifacegen.example-Info.plist"; sourceTree = "<group>"; };
 		7AD7A3B018B5F02E00EB9A4F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		7AD7A3B218B5F02E00EB9A4F /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		7AD7A3B418B5F02E00EB9A4F /* ifacegen.test-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ifacegen.test-Prefix.pch"; sourceTree = "<group>"; };
+		7AD7A3B418B5F02E00EB9A4F /* ifacegen.example-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ifacegen.example-Prefix.pch"; sourceTree = "<group>"; };
 		7AD7A3B518B5F02E00EB9A4F /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		7AD7A3B618B5F02E00EB9A4F /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		7AD7A3B918B5F02E00EB9A4F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -45,8 +47,6 @@
 		7AD7A3BC18B5F02E00EB9A4F /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		7AD7A3BE18B5F02E00EB9A4F /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		7AD7A3C518B5F02E00EB9A4F /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		7AD7A3DC18B604A800EB9A4F /* vk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vk.h; path = ifacegen.test/vk.h; sourceTree = "<group>"; };
-		7AD7A3DD18B604A800EB9A4F /* vk.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = vk.m; path = ifacegen.test/vk.m; sourceTree = "<group>"; };
 		BF12EDDDE2476CC2A2E85E66 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -79,7 +79,7 @@
 			children = (
 				7A2C13AE18B6340300B55F5B /* RPC */,
 				7AD7A3E718B62DCD00EB9A4F /* Generated */,
-				7AD7A3AC18B5F02E00EB9A4F /* ifacegen.test */,
+				7AD7A3AC18B5F02E00EB9A4F /* ifacegen.example */,
 				7AD7A3A518B5F02E00EB9A4F /* Frameworks */,
 				7AD7A3A418B5F02E00EB9A4F /* Products */,
 				983F80EFADAF03CEA97864BE /* Pods */,
@@ -89,7 +89,7 @@
 		7AD7A3A418B5F02E00EB9A4F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7AD7A3A318B5F02E00EB9A4F /* ifacegen.test.app */,
+				7AD7A3A318B5F02E00EB9A4F /* ifacegen.example.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -106,7 +106,7 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		7AD7A3AC18B5F02E00EB9A4F /* ifacegen.test */ = {
+		7AD7A3AC18B5F02E00EB9A4F /* ifacegen.example */ = {
 			isa = PBXGroup;
 			children = (
 				7AD7A3B518B5F02E00EB9A4F /* AppDelegate.h */,
@@ -117,16 +117,16 @@
 				7AD7A3BE18B5F02E00EB9A4F /* Images.xcassets */,
 				7AD7A3AD18B5F02E00EB9A4F /* Supporting Files */,
 			);
-			path = ifacegen.test;
+			path = ifacegen.example;
 			sourceTree = "<group>";
 		};
 		7AD7A3AD18B5F02E00EB9A4F /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				7AD7A3AE18B5F02E00EB9A4F /* ifacegen.test-Info.plist */,
+				7AD7A3AE18B5F02E00EB9A4F /* ifacegen.example-Info.plist */,
 				7AD7A3AF18B5F02E00EB9A4F /* InfoPlist.strings */,
 				7AD7A3B218B5F02E00EB9A4F /* main.m */,
-				7AD7A3B418B5F02E00EB9A4F /* ifacegen.test-Prefix.pch */,
+				7AD7A3B418B5F02E00EB9A4F /* ifacegen.example-Prefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -134,10 +134,10 @@
 		7AD7A3E718B62DCD00EB9A4F /* Generated */ = {
 			isa = PBXGroup;
 			children = (
-				7A2C13B818BCDC9900B55F5B /* vkimport.h */,
-				7A2C13B918BCDC9900B55F5B /* vkimport.m */,
-				7AD7A3DC18B604A800EB9A4F /* vk.h */,
-				7AD7A3DD18B604A800EB9A4F /* vk.m */,
+				5B0CA2DB1A0F6EB200E0CF12 /* vk.h */,
+				5B0CA2DC1A0F6EB200E0CF12 /* vk.m */,
+				5B0CA2DD1A0F6EB200E0CF12 /* vkimport.h */,
+				5B0CA2DE1A0F6EB200E0CF12 /* vkimport.m */,
 			);
 			name = Generated;
 			sourceTree = "<group>";
@@ -154,9 +154,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		7AD7A3A218B5F02E00EB9A4F /* ifacegen.test */ = {
+		7AD7A3A218B5F02E00EB9A4F /* ifacegen.example */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7AD7A3D518B5F02E00EB9A4F /* Build configuration list for PBXNativeTarget "ifacegen.test" */;
+			buildConfigurationList = 7AD7A3D518B5F02E00EB9A4F /* Build configuration list for PBXNativeTarget "ifacegen.example" */;
 			buildPhases = (
 				A99801CBF70E6C23A66A018E /* Check Pods Manifest.lock */,
 				7AD7A3DB18B603CE00EB9A4F /* ShellScript */,
@@ -169,9 +169,9 @@
 			);
 			dependencies = (
 			);
-			name = ifacegen.test;
-			productName = ifacegen.test;
-			productReference = 7AD7A3A318B5F02E00EB9A4F /* ifacegen.test.app */;
+			name = ifacegen.example;
+			productName = ifacegen.example;
+			productReference = 7AD7A3A318B5F02E00EB9A4F /* ifacegen.example.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -182,7 +182,7 @@
 			attributes = {
 				LastUpgradeCheck = 0500;
 			};
-			buildConfigurationList = 7AD7A39E18B5F02E00EB9A4F /* Build configuration list for PBXProject "ifacegen.test" */;
+			buildConfigurationList = 7AD7A39E18B5F02E00EB9A4F /* Build configuration list for PBXProject "ifacegen.example" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -195,7 +195,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				7AD7A3A218B5F02E00EB9A4F /* ifacegen.test */,
+				7AD7A3A218B5F02E00EB9A4F /* ifacegen.example */,
 			);
 		};
 /* End PBXProject section */
@@ -227,7 +227,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "##\npython Pods/ifacegen/generator/ifacegen.py rpc/vk.json rpc/vkimport.json -o ifacegen.test/";
+			shellScript = "##\npython Pods/ifacegen/generator/ifacegen.py rpc/vk.json rpc/vkimport.json -o ifacegen.example/";
 		};
 		A99801CBF70E6C23A66A018E /* Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -266,9 +266,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7AD7A3DE18B604A800EB9A4F /* vk.m in Sources */,
+				5B0CA2E01A0F6EB200E0CF12 /* vkimport.m in Sources */,
+				5B0CA2DF1A0F6EB200E0CF12 /* vk.m in Sources */,
 				7AD7A3BD18B5F02E00EB9A4F /* ViewController.m in Sources */,
-				7A2C13BA18BCDC9900B55F5B /* vkimport.m in Sources */,
 				7AD7A3B718B5F02E00EB9A4F /* AppDelegate.m in Sources */,
 				7AD7A3B318B5F02E00EB9A4F /* main.m in Sources */,
 			);
@@ -375,9 +375,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "ifacegen.test/ifacegen.test-Prefix.pch";
-				INFOPLIST_FILE = "ifacegen.test/ifacegen.test-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				GCC_PREFIX_HEADER = "ifacegen.example/ifacegen.example-Prefix.pch";
+				INFOPLIST_FILE = "ifacegen.example/ifacegen.example-Info.plist";
+				PRODUCT_NAME = ifacegen.example;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -389,9 +389,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "ifacegen.test/ifacegen.test-Prefix.pch";
-				INFOPLIST_FILE = "ifacegen.test/ifacegen.test-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				GCC_PREFIX_HEADER = "ifacegen.example/ifacegen.example-Prefix.pch";
+				INFOPLIST_FILE = "ifacegen.example/ifacegen.example-Info.plist";
+				PRODUCT_NAME = ifacegen.example;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -399,7 +399,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		7AD7A39E18B5F02E00EB9A4F /* Build configuration list for PBXProject "ifacegen.test" */ = {
+		7AD7A39E18B5F02E00EB9A4F /* Build configuration list for PBXProject "ifacegen.example" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7AD7A3D318B5F02E00EB9A4F /* Debug */,
@@ -408,7 +408,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7AD7A3D518B5F02E00EB9A4F /* Build configuration list for PBXNativeTarget "ifacegen.test" */ = {
+		7AD7A3D518B5F02E00EB9A4F /* Build configuration list for PBXNativeTarget "ifacegen.example" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7AD7A3D618B5F02E00EB9A4F /* Debug */,

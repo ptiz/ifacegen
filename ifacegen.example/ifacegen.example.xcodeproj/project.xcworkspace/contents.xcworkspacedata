@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:ifacegen.test.xcodeproj">
+      location = "self:ifacegen.example.xcodeproj">
    </FileRef>
 </Workspace>

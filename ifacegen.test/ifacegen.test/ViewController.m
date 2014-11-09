@@ -77,7 +77,7 @@ static NSString* const cellId = @"ViewControllerCellId";
 
         NSError* error;
         VkWallInfo* response = [weakSelf.vkClient vkWallWithOwnerId:userId
-                                                           andCount:@"10"
+                                                           andCount:@"30"
                                                                andV:@"5.10"
                                                            andError:&error];
 
@@ -101,7 +101,16 @@ static NSString* const cellId = @"ViewControllerCellId";
                                   otherButtonTitles:nil] show];
             });
         } else {
-            weakSelf.wallItems = response.response.items;
+            weakSelf.wallItems = [response.response.items sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+                vkResponseItem* item1 = (vkResponseItem*)obj1;
+                vkResponseItem* item2 = (vkResponseItem*)obj2;
+                if ( item1.date < item2.date ) {
+                    return NSOrderedDescending;
+                } else if ( item1.date == item2.date ) {
+                    return NSOrderedSame;
+                } else
+                    return NSOrderedAscending;
+            }];
         }
 
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -126,12 +135,18 @@ static NSString* const cellId = @"ViewControllerCellId";
     }
 
     vkResponseItem* wallItem = self.wallItems[indexPath.row];
-    cell.textLabel.text = [NSString stringWithFormat:@"From id: %lld", wallItem.fromId];
-    if ( [wallItem.text length] > 0 ) {
+
+    NSDate* date = [NSDate dateWithTimeIntervalSince1970:wallItem.date];
+    NSString* dateFormatted = [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterShortStyle];
+    
+    cell.textLabel.text = [NSString stringWithFormat:@"%@ (%lu att.)", dateFormatted, (unsigned long)wallItem.attachments.count];
+    if ( [wallItem.text length] ) {
         cell.detailTextLabel.text = wallItem.text;
-    } else if ( [wallItem.theCopyHistory count] > 0 ) {
+    } else if ( [wallItem.theCopyHistory count] ) {
         vkResponseItemBase* copyHistoryItem = wallItem.theCopyHistory[0];
         cell.detailTextLabel.text = copyHistoryItem.text;
+    } else {
+        cell.detailTextLabel.text = @"---";
     }
 
     return cell;

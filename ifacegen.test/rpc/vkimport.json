@@ -11,10 +11,10 @@
 "struct": "vkResponseItemBase",
     "typedef": {
         "id":"int64",
+        "type":"string",
         "from_id":"int64",
         "owner_id":"int64",
         "date":"int64",
-        "post_type":"string",
         "text":"string",
         "comments":"vkCounter",
         "likes":"vkCounter",

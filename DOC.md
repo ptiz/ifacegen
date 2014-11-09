@@ -1,15 +1,5 @@
 #Doc
 
-##ifacegen console tool
-Usage: 
-```
-$ python ifacegen.py [-h] [--prefix PREFIX] [-o OUTDIR] I [I ...]
-```
-- h shows help; 
-- PREFIX is a string, ObjC namespace prefix that is added to a name of each class to be generated; 
-- OUTDIR is a string, path to directory where the generated files to be placed. By default these files will be placed into a "gen-objc" subdirectory of working dir;
-- I [I ...] are IDL file names to be processed. 
-
 ##Google APIs example
 To make calls to Google Places API (https://developers.google.com/places/documentation/details) all you need is URL, URL parameters and JSON response dictionary description. Here they are:
 
@@ -173,9 +163,61 @@ That's all. Now you can create a client and start making calls! Somewhere in you
 
 Transport protocol (and its out-of-the-box realization HTTPTransport) used by generated classes to make network calls has only synchronous methods. No blocks of callback delegates at all. Client code is free to wrap these calls in async manner according its needs.
 
-##Some additional features
+##ifacegen console tool
+Usage: 
+```
+$ python ifacegen.py [-h] [--prefix PREFIX] [-o OUTDIR] I [I ...]
+```
+- h shows help; 
+- PREFIX is a string, ObjC namespace prefix that is added to a name of each class to be generated; 
+- OUTDIR is a string, path to directory where the generated files to be placed. By default these files will be placed into a "gen-objc" subdirectory of working dir;
+- I [I ...] are IDL file names to be processed.
+- 
+##IDL description
+ifacegen uses pure JSON format for IDL without any extensions.
 
-You can inherit one struct from another:
+####IDL header
+```json
+{"iface": [
+<your structures and methods go here>
+]}
+```
+####Structure
+```json
+{
+"struct": "<structure name>",
+"typedef": {
+	"<field name>":"<field IDL type>", 
+	...
+	}
+}
+```
+####Field types supported
+- int32: translated into int32_t aka int ObjC type;
+- int64: translated into int64_t aka long long ObjC type;
+- bool: translated into BOOL ObjC type;
+- double: translated into double ObjC type;
+- string: translated into NSString* ObjC type;
+- raw: translated into NSDictionary* ObjC type;
+- rawstr: translated into NSDictionary* from JSON-encoded string;
+
+JSON dictionaries nested into "typedef" are translated to structures with automatic naming:
+```json
+"typedef": {
+	"nested":{
+		"field":"int32"
+	}
+}
+```
+Arrays are also supported. Following code will be translated into class with "stringItems" property of type NSArray*:
+```json
+"typedef": {
+	"string_items":[<item type>]
+}
+```
+Field names like "id" and"void" will be decorated in code with "the" prefix, so "id" changes into "theId". The same happens with fields which names starting with "new", "alloc", "copy" and "mutableCopy". Names in code also will be converted in CamelCase if they_are_not_yet.
+
+You can inherit one struct from another. Generated class ExtendedItem explicitly inherits BaseItem with all fields serialization/deserialization:
 ```json
 {
 "struct": "BaseItem",
@@ -183,7 +225,7 @@ You can inherit one struct from another:
     "field": "int32"
   }
 }
-...
+
 {
 "struct": "ExtendedItem",
 "extends": "BaseItem",
@@ -192,17 +234,14 @@ You can inherit one struct from another:
   }
 }
 ```
-Generated class ExtendedItem explicitly inherits BaseItem with all fields serialization/deserialization.
 
-Types importing. You can import some external IDL modules with their explicit types like this:
+Explicitly declared structures can be imported from another IDL file:
 ```json
 {"iface": [
 { "import": "OtherModule.json" },
-
 ...
+]}
 ```
-
-Name decoration: field names like "id" and"void" will be decorated in code with "the" prefix, so "id" changes into "theId". The same happens with fields which names starting with "new", "alloc", "copy" and "mutableCopy". Names in code also will be converted in CamelCase if they_are_not_yet. All user type names remain untouchable.
 
 ##Limitations
 - For ARC only;

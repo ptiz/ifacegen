@@ -112,7 +112,7 @@ NSString* const IFHTTPTransportErrorDomain = @"com.ifree.ifacegen.transport.http
     self.currentRequestParams = nil;
     self.curentResponse = response;
 
-    IFDebugLog(@"Response code: %d", [self.curentResponse statusCode]);
+    IFDebugLog(@"Response code: %ld", (long)[self.curentResponse statusCode]);
 
     if ( [self.curentResponse statusCode] < 200 || [self.curentResponse statusCode] > 202 ) {
 
@@ -162,7 +162,7 @@ NSString* const IFHTTPTransportErrorDomain = @"com.ifree.ifacegen.transport.http
 
     if ( request.HTTPBody != nil ) {
         [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-        [request setValue:[NSString stringWithFormat:@"%d", [request.HTTPBody length]]
+        [request setValue:[NSString stringWithFormat:@"%lu", (unsigned long)[request.HTTPBody length]]
        forHTTPHeaderField:@"Content-Length"];
 
         NSString* json = [[NSString alloc] initWithBytes:[request.HTTPBody bytes]

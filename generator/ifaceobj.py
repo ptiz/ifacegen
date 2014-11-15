@@ -23,7 +23,7 @@ import types
 import os
 from collections import OrderedDict
 
-tabooedNames = [ "void", "id" ]
+tabooedNames = [ "void", "id", "description" ]
 tabooedStarts = [ "new", "alloc", "copy", "mutableCopy" ]
 prerequestSymbols = { '[':'_', ']':'_', '.':'_' }
 

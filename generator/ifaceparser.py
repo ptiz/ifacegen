@@ -74,20 +74,27 @@ def buildTypeFromStructJSON( jsonItem, typeList, importedTypeList ):
 def buildMethodFromJSON( jsonItem, typeList, importedTypeList ):
 
 	methodName = jsonItem["procedure"]
-	prefix = jsonItem["prefix"]
-	request = jsonItem["request"]
 	response = jsonItem["response"]
+
+	prefix = None
+	if 'prefix' in jsonItem.keys():
+		prefix = jsonItem["prefix"]
 
 	prerequest = None
 	if "prerequest" in jsonItem.keys():
 		prerequest = jsonItem["prerequest"]
 
+	request = None
+	if "request" in jsonItem.keys():
+		request = jsonItem["request"]
+
 	method = GenMethod( methodName, prefix )
 	typeDecoration = capitalizeFirstLetter( methodName )	
 
-	for k in request.keys():
-		argument = request[k]
-		method.requestTypes[k] = typeFromJSON( typeDecoration, k, argument, typeList, importedTypeList )
+	if request is not None:
+		for k in request.keys():
+			argument = request[k]
+			method.requestTypes[k] = typeFromJSON( typeDecoration, k, argument, typeList, importedTypeList )
 
 	if prerequest is not None:
 		for k in prerequest.keys():

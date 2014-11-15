@@ -130,6 +130,10 @@ def writeOBJCMethodDeclaration( fileOut, method, implementation ):
 	
 	pref = "With"
 
+	if method.prefix is None:
+		fileOut.write( pref + "Prefix:(NSString*)prefix")
+		pref = argDecoration + "and"		
+
 	prerequestFormalType = method.formalPrerequestType();
 	requestFormalType = method.formalRequestType();
 
@@ -373,6 +377,10 @@ def writeOBJCMethodImplementation( fileOut, method ):
 			pref = ',\n\t\t'
 		fileOut.write('\n\t}];\n')
 
+	methodPrefix = "prefix"
+	if method.prefix is not None:
+		methodPrefix = '@"' + method.prefix + '"'
+
 	if requestFormalType is not None:		
 		fileOut.write("\tNSDictionary* inputDict = ")
 		unwindInputTypeToOBJC( fileOut, method.formalRequestType(), None, 2 )
@@ -380,9 +388,9 @@ def writeOBJCMethodImplementation( fileOut, method ):
 		fileOut.write(";\n")
 
 		fileOut.write("\tNSData* inputData = [NSJSONSerialization dataWithJSONObject:inputDict options:jsonFormatOption error:error];\n")
-		fileOut.write('\tif ( ![transport writeAll:inputData prefix:@"' + method.prefix + '" error:error] ) {\n')
+		fileOut.write('\tif ( ![transport writeAll:inputData prefix:' + methodPrefix + ' error:error] ) {\n')
 	else:
-		fileOut.write('\tif ( ![transport writeAll:nil prefix:@"' + method.prefix + '" error:error] ) {\n')
+		fileOut.write('\tif ( ![transport writeAll:nil prefix:' + methodPrefix + ' error:error] ) {\n')
 
 	# fileOut.write('\t\tNSLog(@"' + method.name + ': server call failed, %@", *error);\n')
 

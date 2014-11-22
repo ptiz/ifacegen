@@ -1,0 +1,28 @@
+{"iface":[
+    
+{
+"struct": "Employee",
+"typedef": {
+		"name":"string",
+		"id":"int64",
+		"dimension":"double",
+		"passport":{
+				"id": "int32",
+				"organization": "string"
+			},
+		"children":[{
+				"name":"string",
+				"birthdate":"int64"
+			}]
+	}
+},
+
+{
+"struct": "Employer",
+"typedef": {
+		"stuff":["Employee"],
+		"info": "raw"
+	}
+}
+    
+]}

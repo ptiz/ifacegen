@@ -1,0 +1,314 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		C156F3C81A20994B004FB842 /* ifacegen_test_test.swift in Sources */ = {isa = PBXBuildFile; fileRef = C156F3C71A20994B004FB842 /* ifacegen_test_test.swift */; };
+		C156F3CE1A209B23004FB842 /* test.json in Resources */ = {isa = PBXBuildFile; fileRef = C156F3CD1A209B23004FB842 /* test.json */; };
+		C156F3D11A209B49004FB842 /* test.m in Sources */ = {isa = PBXBuildFile; fileRef = C156F3D01A209B49004FB842 /* test.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		C156F3BA1A2088E4004FB842 /* IFHTTPTransport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IFHTTPTransport.h; path = ../transport/IFHTTPTransport.h; sourceTree = "<group>"; };
+		C156F3BB1A2088E4004FB842 /* IFHTTPTransport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IFHTTPTransport.m; path = ../transport/IFHTTPTransport.m; sourceTree = "<group>"; };
+		C156F3BC1A2088E4004FB842 /* IFHTTPTransport+Protected.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IFHTTPTransport+Protected.h"; path = "../transport/IFHTTPTransport+Protected.h"; sourceTree = "<group>"; };
+		C156F3BD1A2088E4004FB842 /* IFTransport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IFTransport.h; path = ../transport/IFTransport.h; sourceTree = "<group>"; };
+		C156F3C31A20994A004FB842 /* ifacegen.test.test.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ifacegen.test.test.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C156F3C61A20994B004FB842 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C156F3C71A20994B004FB842 /* ifacegen_test_test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ifacegen_test_test.swift; sourceTree = "<group>"; };
+		C156F3CD1A209B23004FB842 /* test.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = test.json; sourceTree = "<group>"; };
+		C156F3CF1A209B49004FB842 /* test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = test.h; sourceTree = "<group>"; };
+		C156F3D01A209B49004FB842 /* test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = test.m; sourceTree = "<group>"; };
+		C156F3D21A209B97004FB842 /* test-Bridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "test-Bridging.h"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C156F3C01A20994A004FB842 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C156F3A11A208680004FB842 = {
+			isa = PBXGroup;
+			children = (
+				C156F3B91A2088C5004FB842 /* ifacegen */,
+				C156F3C41A20994B004FB842 /* ifacegen.test.test */,
+				C156F3AB1A208681004FB842 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C156F3AB1A208681004FB842 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C156F3C31A20994A004FB842 /* ifacegen.test.test.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C156F3B91A2088C5004FB842 /* ifacegen */ = {
+			isa = PBXGroup;
+			children = (
+				C156F3BA1A2088E4004FB842 /* IFHTTPTransport.h */,
+				C156F3BB1A2088E4004FB842 /* IFHTTPTransport.m */,
+				C156F3BC1A2088E4004FB842 /* IFHTTPTransport+Protected.h */,
+				C156F3BD1A2088E4004FB842 /* IFTransport.h */,
+			);
+			name = ifacegen;
+			sourceTree = "<group>";
+		};
+		C156F3C41A20994B004FB842 /* ifacegen.test.test */ = {
+			isa = PBXGroup;
+			children = (
+				C156F3CF1A209B49004FB842 /* test.h */,
+				C156F3D01A209B49004FB842 /* test.m */,
+				C156F3CD1A209B23004FB842 /* test.json */,
+				C156F3C71A20994B004FB842 /* ifacegen_test_test.swift */,
+				C156F3C51A20994B004FB842 /* Supporting Files */,
+			);
+			path = ifacegen.test.test;
+			sourceTree = "<group>";
+		};
+		C156F3C51A20994B004FB842 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				C156F3D21A209B97004FB842 /* test-Bridging.h */,
+				C156F3C61A20994B004FB842 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C156F3C21A20994A004FB842 /* ifacegen.test.test */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C156F3C91A20994B004FB842 /* Build configuration list for PBXNativeTarget "ifacegen.test.test" */;
+			buildPhases = (
+				C156F3CC1A209A70004FB842 /* ShellScript */,
+				C156F3BF1A20994A004FB842 /* Sources */,
+				C156F3C01A20994A004FB842 /* Frameworks */,
+				C156F3C11A20994A004FB842 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ifacegen.test.test;
+			productName = ifacegen.test.test;
+			productReference = C156F3C31A20994A004FB842 /* ifacegen.test.test.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C156F3A21A208680004FB842 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0610;
+				ORGANIZATIONNAME = ptiz;
+				TargetAttributes = {
+					C156F3C21A20994A004FB842 = {
+						CreatedOnToolsVersion = 6.1;
+					};
+				};
+			};
+			buildConfigurationList = C156F3A51A208680004FB842 /* Build configuration list for PBXProject "ifacegen.test" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = C156F3A11A208680004FB842;
+			productRefGroup = C156F3AB1A208681004FB842 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C156F3C21A20994A004FB842 /* ifacegen.test.test */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C156F3C11A20994A004FB842 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C156F3CE1A209B23004FB842 /* test.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		C156F3CC1A209A70004FB842 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "python ../generator/ifacegen.py -o ifacegen.test.test/ --prefix OBC ifacegen.test.test/test.json";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C156F3BF1A20994A004FB842 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C156F3C81A20994B004FB842 /* ifacegen_test_test.swift in Sources */,
+				C156F3D11A209B49004FB842 /* test.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		C156F3AF1A208681004FB842 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		C156F3B01A208681004FB842 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		C156F3CA1A20994B004FB842 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = ifacegen.test.test/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "ifacegen.test.test/test-Bridging.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		C156F3CB1A20994B004FB842 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = ifacegen.test.test/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "ifacegen.test.test/test-Bridging.h";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C156F3A51A208680004FB842 /* Build configuration list for PBXProject "ifacegen.test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C156F3AF1A208681004FB842 /* Debug */,
+				C156F3B01A208681004FB842 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C156F3C91A20994B004FB842 /* Build configuration list for PBXNativeTarget "ifacegen.test.test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C156F3CA1A20994B004FB842 /* Debug */,
+				C156F3CB1A20994B004FB842 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C156F3A21A208680004FB842 /* Project object */;
+}

@@ -1,8 +1,10 @@
 *.pyc
+*xcuserdata
 ifacegen.example/ifacegen.example/vk.h
 ifacegen.example/ifacegen.example/vk.m
 ifacegen.example/ifacegen.example/vkimport.h
 ifacegen.example/ifacegen.example/vkimport.m
-ifacegen.example/ifacegen.example.xcodeproj/xcuserdata
 ifacegen.example/ifacegen.example.xcworkspace
 ifacegen.example/Pods
+ifacegen.test/ifacegen.test.test/test.h
+ifacegen.test/ifacegen.test.test/test.m

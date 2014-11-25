@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 ptiz. All rights reserved.
 //
 
-import Cocoa
+import UIKit
 import XCTest
 
 class ifacegen_test_test: XCTestCase {

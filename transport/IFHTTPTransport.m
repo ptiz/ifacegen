@@ -184,7 +184,7 @@ NSString* const IFHTTPTransportErrorDomain = @"com.ifree.ifacegen.transport.http
 
     for ( NSString* key in [self.currentRequestParams allKeys] ) {
     
-        NSString* keyValue = [self.currentRequestParams objectForKey:key];
+        NSString* keyValue = [NSString stringWithFormat:@"%@", [self.currentRequestParams objectForKey:key]];
         if ( [keyValue isEqual:[NSNull null]] || [keyValue length] == 0 ) {
             continue;
         }

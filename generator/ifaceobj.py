@@ -169,45 +169,45 @@ class GenListType( GenType ):
 		return "GenListType " + self.name + ", item: " + str( self.itemType )
 
 class GenMethod:
-	namePrefix = ""
 	def __init__( self, name, prefix ):
-		if len( GenMethod.namePrefix ) and not name.startswith( GenMethod.namePrefix ):
-			self.name = GenMethod.namePrefix + name
-		else:
-			self.name = name
+		self.name = name
 		self.prefix = prefix
-		self.requestTypes = OrderedDict()
-		self.prerequestTypes = OrderedDict()
+		self.requestJsonTypes = OrderedDict() #probably change this to ComplexType instead of dict
+		self.requestUrlTypes = OrderedDict()
 		self.responseType = None
 		self.responseArgName = None
 
-	def formalRequestType( self ):
-		if len( self.requestTypes ) == 0:
+	def formalRequestJsonType( self ):
+		if len( self.requestJsonTypes ) == 0:
 			return None
 
-		tp = GenComplexType( "", self.name )
-		for k in self.requestTypes.keys():
-			tp.addFieldType( k, self.requestTypes[k] )
+		tp = GenComplexType( "Json", self.name )
+		for k in self.requestJsonTypes.keys():
+			tp.addFieldType( k, self.requestJsonTypes[k] )
 		return tp
 
-	def formalPrerequestType( self ):
-		if len( self.prerequestTypes ) == 0:
+	def formalRequestUrlType( self ):
+		if len( self.requestUrlTypes ) == 0:
 			return None
 
-		tp = GenComplexType( "Pre", self.name )
-		for k in self.prerequestTypes.keys():
-			tp.addFieldType( k, self.prerequestTypes[k] )
+		tp = GenComplexType( "Url", self.name )
+		for k in self.requestUrlTypes.keys():
+			tp.addFieldType( k, self.requestUrlTypes[k] )
 		return tp;
 
 	def __str__(self):
-		return "GenMethod " + self.name + ": ntREQ: " + strFromDictionary( self.requestTypes ) + "ntRESP: " + str( self.responseType )
+		return "GenMethod " + self.name + ": ntREQ_JSON: " + strFromDictionary( self.requestJsonTypes ) + "ntREQ_URL: " + strFromDictionary(self.requestUrlTypes) + "ntRESP: " + str( self.responseType )
 
 class GenModule:
+	namePrefix = ""
 	def __init__( self, name ):
 		self.typeList = OrderedDict()
 		self.methods = []
 		self.structs = []
-		self.name = name
+		if len(GenModule.namePrefix) and not name.startswith( GenModule.namePrefix ):
+			self.name = GenModule.namePrefix + capitalizeFirstLetter(name)
+		else:
+			self.name = name
 		self.importedModuleNames = []
 		self.importedTypeList = OrderedDict()
 

@@ -29,4 +29,9 @@
 - (NSString*)buildRequestParamsString:(NSDictionary*)requestParams;
 - (BOOL)shouldBreakOnError:(NSError*)error;
 
+@property (nonatomic, copy) NSURL* rootURL;
+@property (nonatomic, copy) NSData* currentAnswer;
+@property (nonatomic, copy) NSHTTPURLResponse* curentResponse;
+@property (nonatomic, copy) NSDictionary* currentRequestParams;
+
 @end

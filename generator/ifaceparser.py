@@ -80,29 +80,35 @@ def buildMethodFromJSON( jsonItem, typeList, importedTypeList ):
 	if 'prefix' in jsonItem.keys():
 		prefix = jsonItem["prefix"]
 
-	prerequest = None
-	if "prerequest" in jsonItem.keys():
-		prerequest = jsonItem["prerequest"]
-
 	request = None
+	request_url = None
+	request_json = None
+	
 	if "request" in jsonItem.keys():
 		request = jsonItem["request"]
+
+		if "url" in request.keys():
+			request_url = request["url"]
+
+		if "json" in request.keys():
+			request_json = request["json"]
 
 	method = GenMethod( methodName, prefix )
 	typeDecoration = capitalizeFirstLetter( methodName )	
 
-	if request is not None:
-		for k in request.keys():
-			argument = request[k]
-			method.requestTypes[k] = typeFromJSON( typeDecoration, k, argument, typeList, importedTypeList )
+	if request_json is not None:
+		for k in request_json.keys():
+			argument = request_json[k]
+			method.requestJsonTypes[k] = typeFromJSON( typeDecoration, k, argument, typeList, importedTypeList )
 
-	if prerequest is not None:
-		for k in prerequest.keys():
-			argument = prerequest[k]
+	if request_url is not None:
+		for k in request_url.keys():
+			argument = request_url[k]
 			tp = typeFromJSON( typeDecoration, k, argument, typeList, importedTypeList )
 			if isinstance( tp, GenIntegralType ):
-				method.prerequestTypes[k] = tp
+				method.requestUrlTypes[k] = tp
 			else:
+				#TODO: think about flattening the types into string for passing within URLs
 				raise Exception("Only integral types allowed in pre-request arguments: %s, %s:%s" % k, methodName, tp.name )
 
 	# flatten return type if it is only one filed in dictionary

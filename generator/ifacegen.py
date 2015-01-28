@@ -117,7 +117,7 @@ def writeOBJCTypeDeclaration( fileOut, genType, writeConstructors, writeDump ):
 
 def writeOBJCMethodDeclaration( fileOut, method, implementation ):
 	argDecoration = " "
-	if len(method.prerequestTypes) + len(method.requestTypes) > 1:
+	if len(method.requestUrlTypes) + len(method.requestJsonTypes) > 1:
 		argDecoration = "\n\t\t"
 
 	if method.responseType is not None:
@@ -134,21 +134,21 @@ def writeOBJCMethodDeclaration( fileOut, method, implementation ):
 		fileOut.write( pref + "Prefix:(NSString*)prefix")
 		pref = argDecoration + "and"		
 
-	prerequestFormalType = method.formalPrerequestType();
-	requestFormalType = method.formalRequestType();
+	requestUrlFormalType = method.formalRequestUrlType();
+	requestJsonFormalType = method.formalRequestJsonType();
 
-	if prerequestFormalType is not None:
-		for argName in prerequestFormalType.fieldNames():
-			argType = prerequestFormalType.fieldType(argName)
-			argAlias = prerequestFormalType.fieldAlias(argName)
+	if requestUrlFormalType is not None:
+		for argName in requestUrlFormalType.fieldNames():
+			argType = requestUrlFormalType.fieldType(argName)
+			argAlias = requestUrlFormalType.fieldAlias(argName)
 			typeStr = assumeOBJCType( argType )
 			fileOut.write( pref + capitalizeFirstLetter( argAlias ) + ":(" + typeStr + argType.ptr + ")" + argAlias );
 			pref = argDecoration + "and"
 
-	if len(method.requestTypes) != 0:
-		for argName in requestFormalType.fieldNames():
-			argType = requestFormalType.fieldType(argName)
-			argAlias = requestFormalType.fieldAlias(argName)
+	if requestJsonFormalType is not None:
+		for argName in requestJsonFormalType.fieldNames():
+			argType = requestJsonFormalType.fieldType(argName)
+			argAlias = requestJsonFormalType.fieldAlias(argName)
 			typeStr = assumeOBJCType( argType )
 			fileOut.write( pref + capitalizeFirstLetter( argAlias ) + ":(" + typeStr + argType.ptr + ")" + argAlias )
 			pref = argDecoration + "and"
@@ -201,7 +201,7 @@ def unwindReturnedTypeToOBJC( fileOut, objcDictName, outType, outArgName, level,
 		if outArgName is not None and outArgName != 'self':
 			currentDictName = objcDictName + capitalizeFirstLetter( outArgName ) + str( newVariableCounter() )
 			fileOut.write('\t'*level + 'NSDictionary* ' + currentDictName + ' = [' + objcDictName + ' objectForKey:@"' + outArgName + '"];\n')
-			fileOut.write('\t'*level + 'if ( ' + currentDictName + ' != nil && ![' + currentDictName + ' isEqual:[NSNull null]]) {\n')
+			fileOut.write('\t'*level + 'if ( ' + currentDictName + ' != nil && ![' + currentDictName + ' isEqual:[NSNull null]] && [' + currentDictName + ' isKindOfClass:NSDictionary.class]) {\n')
 			level += 1
  			fileOut.write( '\t'*level + resName + ' = [' + objCResType + ' new];\n' )
  		elif outArgName != 'self':
@@ -239,7 +239,7 @@ def unwindReturnedTypeToOBJC( fileOut, objcDictName, outType, outArgName, level,
 
 		fileOut.write('\t'*level + 'NSMutableArray* ' + resName + ';\n')
 
-		fileOut.write('\t'*level + 'if ( ' + currentArrayName + ' != nil && ![' + currentArrayName + ' isEqual:[NSNull null]]) {\n')
+		fileOut.write('\t'*level + 'if ( ' + currentArrayName + ' != nil && ![' + currentArrayName + ' isEqual:[NSNull null]] && [' + currentArrayName + ' isKindOfClass:NSArray.class]) {\n')
 		level += 1
 
 		fileOut.write('\t'*level + resName + ' = [NSMutableArray arrayWithCapacity:[' + currentArrayName + ' count]];\n')
@@ -351,7 +351,7 @@ def writeOBJCTypeImplementation( fileOut, genType, writeConstructors, writeDump 
 		fileOut.write('\tif ( jsonData == nil ) return nil;\n')		
 		fileOut.write('\tif (self = [super init]) {\n')
 		fileOut.write('\t\tNSDictionary* dict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:error];\n');
-		fileOut.write('\t\tif ( *error != nil ) {\n\t\t\treturn nil;\n\t\t}\n')		
+		fileOut.write('\t\tif ( error && *error != nil ) {\n\t\t\treturn nil;\n\t\t}\n')		
 		fileOut.write('\t\t[self readDictionary:dict];\n')
 		fileOut.write('\t}\n\treturn self;\n}\n')
 
@@ -359,20 +359,21 @@ def writeOBJCTypeImplementation( fileOut, genType, writeConstructors, writeDump 
 						
 def writeOBJCMethodImplementation( fileOut, method ):
 	writeOBJCMethodDeclaration( fileOut, method, implementation = True )
+
 	fileOut.write(" {\n")
 
 	tmpVarName = "tmp"
 	fileOut.write('\tid ' + tmpVarName + ';\n')
 
-	prerequestFormalType = method.formalPrerequestType();
-	requestFormalType = method.formalRequestType();
+	requestUrlFormalType = method.formalRequestUrlType();
+	requestJsonFormalType = method.formalRequestJsonType();
 
 	pref = "\t\t"
-	if prerequestFormalType is not None:
+	if requestUrlFormalType is not None:
 		fileOut.write('\t[transport setRequestParams:@{\n')
-		for argName in prerequestFormalType.fieldNames():
-			arg = prerequestFormalType.fieldType(argName)
-			argAlias = prerequestFormalType.fieldAlias(argName)
+		for argName in requestUrlFormalType.fieldNames():
+			arg = requestUrlFormalType.fieldType(argName)
+			argAlias = requestUrlFormalType.fieldAlias(argName)
 			fileOut.write( pref + '@"' + argName + '" : ' + decorateOBJCInputType( argAlias, arg ) )
 			pref = ',\n\t\t'
 		fileOut.write('\n\t}];\n')
@@ -381,9 +382,9 @@ def writeOBJCMethodImplementation( fileOut, method ):
 	if method.prefix is not None:
 		methodPrefix = '@"' + method.prefix + '"'
 
-	if requestFormalType is not None:		
+	if requestJsonFormalType is not None:		
 		fileOut.write("\tNSDictionary* inputDict = ")
-		unwindInputTypeToOBJC( fileOut, method.formalRequestType(), None, 2 )
+		unwindInputTypeToOBJC( fileOut, requestJsonFormalType, None, 2 )
 		
 		fileOut.write(";\n")
 
@@ -406,13 +407,10 @@ def writeOBJCMethodImplementation( fileOut, method ):
 	fileOut.write('\t\treturn nil;\n\t}\n')
 
 	outputName = 'output'
-
-	outputStatement = 'NSDictionary* ' + outputName;
-	if isinstance( method.responseType, GenListType ):
-		outputStatement = 'NSArray* ' + outputName
+	outputStatement = 'id ' + outputName
 
 	fileOut.write('\t' + outputStatement + ' = [NSJSONSerialization JSONObjectWithData:outputData options:NSJSONReadingAllowFragments error:error];\n');
-	fileOut.write('\tif ( *error != nil ) {\n\t\treturn nil;\n\t}\n')
+	fileOut.write('\tif ( error && *error != nil ) {\n\t\treturn nil;\n\t}\n')
 
 	retVal = unwindReturnedTypeToOBJC( fileOut, outputName, method.responseType, method.responseArgName, 1, tmpVarName )
 
@@ -470,8 +468,8 @@ def processJSONIface( jsonFile, typeNamePrefix, outDir ):
 		genDir = os.path.abspath( outDir )
 
 	if typeNamePrefix is not None:
+		GenModule.namePrefix = typeNamePrefix
 		GenType.namePrefix = typeNamePrefix
-		GenMethod.namePrefix = typeNamePrefix
 
 	module = parseModule( jsonFile )
 	if module is None:

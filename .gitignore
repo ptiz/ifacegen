@@ -6,5 +6,5 @@ ifacegen.example/ifacegen.example/vkimport.h
 ifacegen.example/ifacegen.example/vkimport.m
 ifacegen.example/ifacegen.example.xcworkspace
 ifacegen.example/Pods
-ifacegen.test/ifacegen.test.test/test.h
-ifacegen.test/ifacegen.test.test/test.m
+ifacegen.test/ifacegen.test.test/OBCTest.h
+ifacegen.test/ifacegen.test.test/OBCTest.m

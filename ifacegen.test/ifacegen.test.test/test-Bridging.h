@@ -9,6 +9,9 @@
 #ifndef ifacegen_test_test_Bridging_h
 #define ifacegen_test_test_Bridging_h
 
-#import "test.h"
+#import "OBCTest.h"
+#import "IFTransport.h"
+#import "IFHTTPTransport.h"
+#import "IFHTTPTransport+Protected.h"
 
 #endif

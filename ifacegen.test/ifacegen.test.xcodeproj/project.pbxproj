@@ -7,17 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5B6352B21A791B3600C13DF0 /* OBCTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B6352B11A791B3600C13DF0 /* OBCTest.m */; };
+		5BC93E471A77A1C500A6C3F6 /* ifacegen_transport_test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BC93E461A77A1C500A6C3F6 /* ifacegen_transport_test.swift */; };
 		5BE09E7E1A2475BC00AEC506 /* ifacegen_test_test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BE09E7D1A2475BC00AEC506 /* ifacegen_test_test.swift */; };
-		5BE09E851A2476AD00AEC506 /* test.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BE09E841A2476AD00AEC506 /* test.m */; };
 		5BE09E8B1A24771A00AEC506 /* IFHTTPTransport.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BE09E881A24771A00AEC506 /* IFHTTPTransport.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5B6352B01A791B3600C13DF0 /* OBCTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OBCTest.h; sourceTree = "<group>"; };
+		5B6352B11A791B3600C13DF0 /* OBCTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OBCTest.m; sourceTree = "<group>"; };
+		5BC93E441A779E6D00A6C3F6 /* test.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = test.json; sourceTree = "<group>"; };
+		5BC93E461A77A1C500A6C3F6 /* ifacegen_transport_test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ifacegen_transport_test.swift; sourceTree = "<group>"; };
+		5BC93E481A77A22D00A6C3F6 /* test-Bridging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "test-Bridging.h"; sourceTree = "<group>"; };
 		5BE09E781A2475BC00AEC506 /* ifacegen.test.test.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ifacegen.test.test.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5BE09E7C1A2475BC00AEC506 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5BE09E7D1A2475BC00AEC506 /* ifacegen_test_test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ifacegen_test_test.swift; sourceTree = "<group>"; };
-		5BE09E831A2476AD00AEC506 /* test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = test.h; sourceTree = "<group>"; };
-		5BE09E841A2476AD00AEC506 /* test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = test.m; sourceTree = "<group>"; };
 		5BE09E871A24771A00AEC506 /* IFHTTPTransport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IFHTTPTransport.h; path = ../transport/IFHTTPTransport.h; sourceTree = "<group>"; };
 		5BE09E881A24771A00AEC506 /* IFHTTPTransport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IFHTTPTransport.m; path = ../transport/IFHTTPTransport.m; sourceTree = "<group>"; };
 		5BE09E891A24771A00AEC506 /* IFHTTPTransport+Protected.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IFHTTPTransport+Protected.h"; path = "../transport/IFHTTPTransport+Protected.h"; sourceTree = "<group>"; };
@@ -55,9 +59,12 @@
 		5BE09E7A1A2475BC00AEC506 /* ifacegen.test.test */ = {
 			isa = PBXGroup;
 			children = (
-				5BE09E831A2476AD00AEC506 /* test.h */,
-				5BE09E841A2476AD00AEC506 /* test.m */,
+				5B6352B01A791B3600C13DF0 /* OBCTest.h */,
+				5B6352B11A791B3600C13DF0 /* OBCTest.m */,
+				5BC93E481A77A22D00A6C3F6 /* test-Bridging.h */,
+				5BC93E441A779E6D00A6C3F6 /* test.json */,
 				5BE09E7D1A2475BC00AEC506 /* ifacegen_test_test.swift */,
+				5BC93E461A77A1C500A6C3F6 /* ifacegen_transport_test.swift */,
 				5BE09E7B1A2475BC00AEC506 /* Supporting Files */,
 			);
 			path = ifacegen.test.test;
@@ -164,9 +171,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5B6352B21A791B3600C13DF0 /* OBCTest.m in Sources */,
 				5BE09E8B1A24771A00AEC506 /* IFHTTPTransport.m in Sources */,
+				5BC93E471A77A1C500A6C3F6 /* ifacegen_transport_test.swift in Sources */,
 				5BE09E7E1A2475BC00AEC506 /* ifacegen_test_test.swift in Sources */,
-				5BE09E851A2476AD00AEC506 /* test.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -295,6 +303,7 @@
 				5BE09E801A2475BC00AEC506 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -23,6 +23,22 @@
 		"stuff":["Employee"],
 		"info": "raw"
 	}
+},
+
+{
+"procedure": "getEmployees",
+"prefix": "emplyees",
+"request": {
+	"url": {
+		"token": "string",
+		"timestamp": "int64"
+		},	
+	"json": {
+		"employer_id": "int64",
+		"filter": "string"
+		}
+	},
+    "response": {"response" : [ "Employee" ]}
 }
     
 ]}

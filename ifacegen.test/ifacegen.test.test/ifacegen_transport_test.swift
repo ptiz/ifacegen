@@ -56,13 +56,20 @@ class ifacegen_transport_test: XCTestCase {
             if let input = inputData {
                 if let json = NSJSONSerialization.JSONObjectWithData(input, options:.AllowFragments, error: nil) as? [String : AnyObject] {
                     XCTAssertTrue((json["employer_id"] as? NSNumber)?.longLongValue == 9876345, "Input wasn't made well")
-                    XCTAssertTrue(json["filter"] as? String == "filterstring", "Input wasn't made well")
+                    let filters: AnyObject? = json["filter"]
+                    if let filter2 = filters?[1] as? Dictionary<String, AnyObject> {
+                        XCTAssertTrue(filter2["payload"] as String == "filter2", "Input wasn't made well")
+                    } else {
+                        XCTAssert(false, "Input is nil")
+                    }
                 }
             }
         }
 
         let testService = OBCTest(transport: testTransport)
-        let response = testService.getEmployeesWithToken("qwerty", andTimestamp: 13452345, andEmployerId: 9876345, andFilter: "filterstring", andError: nil)
+        let filter1 = OBCGetEmployeesFilterItem(payload: "filter1")
+        let filter2 = OBCGetEmployeesFilterItem(payload: "filter2")
+        let response = testService.getEmployeesWithToken("qwerty", andTimestamp: 13452345, andEmployerId: 9876345, andFilter: [filter1, filter2], andError: nil)
         
         XCTAssertEqual(response.count, 1, "Response objects count is wrong")
         

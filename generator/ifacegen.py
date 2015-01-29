@@ -502,7 +502,7 @@ def writeWarning( fileOut, inputName ):
 
 #####################################
 
-def processJSONIface( jsonFile, typeNamePrefix, outDir ):
+def processJSONIface( jsonFile, typeNamePrefix, outDir, writeFullImplementation ):
 
 	if outDir is not None:
 		genDir = os.path.abspath( outDir )
@@ -531,7 +531,7 @@ def processJSONIface( jsonFile, typeNamePrefix, outDir ):
 	writeObjCImplHeader( objCImpl, module.name )			
 
 	for genTypeKey in module.typeList.keys():
-		writeAll = ( genTypeKey in module.structs )							
+		writeAll = writeFullImplementation or ( genTypeKey in module.structs )						
 		writeOBJCTypeDeclaration( objCIface, module.typeList[genTypeKey], writeDump=writeAll, writeConstructors=writeAll )
 		writeOBJCTypeImplementation( objCImpl, module.typeList[genTypeKey], writeDump=writeAll, writeConstructors=writeAll )
 
@@ -556,6 +556,7 @@ def main():
 	
 	parser.add_argument('rpcInput', metavar='I', type=unicode, nargs = '+', help = 'Input JSON RPC files')
 	parser.add_argument('--prefix', action='store', required=False, help='Class and methods prefix')
+	parser.add_argument('--writefull', action='store_true', required=False, help='Indicates that it is needed to write full set of initializers for all the structs found in IDL')
 	parser.add_argument('-o', '--outdir', action='store', default="gen-objc", required=False, help="Output directory name")
 
 	parsedArgs = parser.parse_args()
@@ -565,7 +566,7 @@ def main():
 
 	try:
 		for rpcInput in parsedArgs.rpcInput:
-			processJSONIface( rpcInput, parsedArgs.prefix, parsedArgs.outdir )
+			processJSONIface( rpcInput, parsedArgs.prefix, parsedArgs.outdir, parsedArgs.writefull )
 	except Exception as ex:
 		print( str(ex) )
 		sys.exit(1)

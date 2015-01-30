@@ -29,6 +29,8 @@ extern NSString* const IFHTTPTransportErrorDomain;
 @interface IFHTTPTransport : NSObject<IFTransport>
 
 - (id)initWithURL:(NSURL*)url;
+
+- (void)setUrlParams:(NSDictionary*)params;
 - (NSHTTPURLResponse*)currentResponse;
 
 @property (nonatomic) NSInteger retriesCount;

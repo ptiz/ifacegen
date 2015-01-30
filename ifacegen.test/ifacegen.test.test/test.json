@@ -29,16 +29,14 @@
 "procedure": "getEmployees",
 "prefix": "emplyees",
 "request": {
-	"url": {
-		"token": "string",
-		"timestamp": "int64"
-		},	
-	"json": {
 		"employer_id": "int64",
         "filter": [ {"payload":"string"} ]
-		}
-	},
-    "response": {"response" : [ "Employee" ]}
+        },
+"url_params": {
+		"token": "string",
+		"timestamp": "int64"
+		},
+"response": { "response" : [ "Employee" ] }
 }
     
 ]}

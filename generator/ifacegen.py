@@ -116,9 +116,18 @@ def writeOBJCTypeDeclaration( fileOut, genType, writeConstructors, writeDump ):
 			fileOut.write("@property (nonatomic) " + assumeOBJCType( fieldType ) + fieldType.ptr + " " + genType.fieldAlias(fieldName) + ";\n")
 	fileOut.write("@end;\n");
 
+def writeOBJCMethodDeclarationArguments( fileOut, formalType, argDecoration, prefix ):
+	for argName in formalType.fieldNames():
+		argType = formalType.fieldType(argName)
+		argAlias = formalType.fieldAlias(argName)
+		typeStr = assumeOBJCType( argType )
+		fileOut.write( prefix + capitalizeFirstLetter( argAlias ) + ":(" + typeStr + argType.ptr + ")" + argAlias );
+		prefix = argDecoration + "and"
+	return prefix
+
 def writeOBJCMethodDeclaration( fileOut, method, implementation ):
 	argDecoration = " "
-	if len(method.requestUrlTypes) + len(method.requestJsonTypes) > 1:
+	if len(method.customRequestTypes) + len(method.requestJsonType.fieldNames()) > 1:
 		argDecoration = "\n\t\t"
 
 	if method.responseType is not None:
@@ -135,24 +144,11 @@ def writeOBJCMethodDeclaration( fileOut, method, implementation ):
 		fileOut.write( pref + "Prefix:(NSString*)prefix")
 		pref = argDecoration + "and"		
 
-	requestUrlFormalType = method.formalRequestUrlType();
-	requestJsonFormalType = method.formalRequestJsonType();
+	for customRequestParamKey in method.customRequestTypes.keys():
+		pref = writeOBJCMethodDeclarationArguments( fileOut, method.customRequestTypes[customRequestParamKey], argDecoration, pref )
 
-	if requestUrlFormalType is not None:
-		for argName in requestUrlFormalType.fieldNames():
-			argType = requestUrlFormalType.fieldType(argName)
-			argAlias = requestUrlFormalType.fieldAlias(argName)
-			typeStr = assumeOBJCType( argType )
-			fileOut.write( pref + capitalizeFirstLetter( argAlias ) + ":(" + typeStr + argType.ptr + ")" + argAlias );
-			pref = argDecoration + "and"
-
-	if requestJsonFormalType is not None:
-		for argName in requestJsonFormalType.fieldNames():
-			argType = requestJsonFormalType.fieldType(argName)
-			argAlias = requestJsonFormalType.fieldAlias(argName)
-			typeStr = assumeOBJCType( argType )
-			fileOut.write( pref + capitalizeFirstLetter( argAlias ) + ":(" + typeStr + argType.ptr + ")" + argAlias )
-			pref = argDecoration + "and"
+	if method.requestJsonType is not None:
+		pref = writeOBJCMethodDeclarationArguments( fileOut, method.requestJsonType, argDecoration, pref )
 
 	fileOut.write( pref + "Error:(NSError* __autoreleasing*)error")
 
@@ -363,7 +359,14 @@ def writeOBJCTypeImplementation( fileOut, genType, writeConstructors, writeDump 
 """)
 
 	fileOut.write("@end\n")
-						
+			
+def writeOBJCMethodCustomRequestParam( fileOut, customRequestParamName, customRequestParam ):
+	paramSelectorName = makeAlias( 'set_' + customRequestParamName )
+	fileOut.write('\tif (![transport respondsToSelector:@selector(' + paramSelectorName + ':)]) {\n\t\tassert("Transport does not support selector ' + paramSelectorName + ':");\n\t}\n')
+	fileOut.write('\t[transport performSelector:@selector(' + paramSelectorName + ':) withObject:')
+	unwindInputTypeToOBJC( fileOut, customRequestParam, None, 2)
+	fileOut.write('\n\t];\n')
+
 def writeOBJCMethodImplementation( fileOut, method ):
 	writeOBJCMethodDeclaration( fileOut, method, implementation = True )
 
@@ -372,26 +375,16 @@ def writeOBJCMethodImplementation( fileOut, method ):
 	tmpVarName = "tmp"
 	fileOut.write('\tid ' + tmpVarName + ';\n')
 
-	requestUrlFormalType = method.formalRequestUrlType();
-	requestJsonFormalType = method.formalRequestJsonType();
-
-	pref = "\t\t"
-	if requestUrlFormalType is not None:
-		fileOut.write('\t[transport setRequestParams:@{\n')
-		for argName in requestUrlFormalType.fieldNames():
-			arg = requestUrlFormalType.fieldType(argName)
-			argAlias = requestUrlFormalType.fieldAlias(argName)
-			fileOut.write( pref + '@"' + argName + '" : ' + decorateOBJCInputType( argAlias, arg ) )
-			pref = ',\n\t\t'
-		fileOut.write('\n\t}];\n')
+	for customRequestParamKey in method.customRequestTypes.keys():
+		writeOBJCMethodCustomRequestParam( fileOut, customRequestParamKey, method.customRequestTypes[customRequestParamKey] )
 
 	methodPrefix = "prefix"
 	if method.prefix is not None:
 		methodPrefix = '@"' + method.prefix + '"'
 
-	if requestJsonFormalType is not None:		
+	if method.requestJsonType is not None:		
 		fileOut.write("\tNSDictionary* inputDict = ")
-		unwindInputTypeToOBJC( fileOut, requestJsonFormalType, None, 2 )
+		unwindInputTypeToOBJC( fileOut, method.requestJsonType, None, 2 )
 		
 		fileOut.write(";\n")
 
@@ -502,7 +495,7 @@ def writeWarning( fileOut, inputName ):
 
 #####################################
 
-def processJSONIface( jsonFile, typeNamePrefix, outDir, writeFullImplementation ):
+def processJSONIface( jsonFile, verbose, typeNamePrefix, outDir, writeFullImplementation ):
 
 	if outDir is not None:
 		genDir = os.path.abspath( outDir )
@@ -513,8 +506,14 @@ def processJSONIface( jsonFile, typeNamePrefix, outDir, writeFullImplementation 
 
 	module = parseModule( jsonFile )
 	if module is None:
-		print "Can't load module " + jsonFile;
+		print("Can't load module " + jsonFile)
 		return
+
+	if verbose:
+		for genTypeKey in module.typeList.keys():
+			print( str( module.typeList[genTypeKey] ) + '\n' )
+		for method in module.methods:
+			print( str( method ) + '\n' )
 
 	if not os.path.exists( genDir ):
 	    os.makedirs( genDir )
@@ -557,6 +556,7 @@ def main():
 	parser.add_argument('rpcInput', metavar='I', type=unicode, nargs = '+', help = 'Input JSON RPC files')
 	parser.add_argument('--prefix', action='store', required=False, help='Class and methods prefix')
 	parser.add_argument('--writefull', action='store_true', required=False, help='Indicates that it is needed to write full set of initializers for all the structs found in IDL')
+	parser.add_argument('--verbose', action='store_true', required=False, help='Verbose mode')
 	parser.add_argument('-o', '--outdir', action='store', default="gen-objc", required=False, help="Output directory name")
 
 	parsedArgs = parser.parse_args()
@@ -566,7 +566,7 @@ def main():
 
 	try:
 		for rpcInput in parsedArgs.rpcInput:
-			processJSONIface( rpcInput, parsedArgs.prefix, parsedArgs.outdir, parsedArgs.writefull )
+			processJSONIface( rpcInput, parsedArgs.verbose, parsedArgs.prefix, parsedArgs.outdir, parsedArgs.writefull )
 	except Exception as ex:
 		print( str(ex) )
 		sys.exit(1)

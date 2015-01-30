@@ -67,8 +67,8 @@ class ifacegen_transport_test: XCTestCase {
         }
 
         let testService = OBCTest(transport: testTransport)
-        let filter1 = OBCGetEmployeesFilterItem(payload: "filter1")
-        let filter2 = OBCGetEmployeesFilterItem(payload: "filter2")
+        let filter1 = OBCGetEmployeesJsonArgsFilterItem(payload: "filter1")
+        let filter2 = OBCGetEmployeesJsonArgsFilterItem(payload: "filter2")
         let response = testService.getEmployeesWithToken("qwerty", andTimestamp: 13452345, andEmployerId: 9876345, andFilter: [filter1, filter2], andError: nil)
         
         XCTAssertEqual(response.count, 1, "Response objects count is wrong")

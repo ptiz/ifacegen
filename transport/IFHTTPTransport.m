@@ -56,7 +56,7 @@ NSString* const IFHTTPTransportErrorDomain = @"com.ifree.ifacegen.transport.http
     return self;
 }
 
-- (void)setRequestParams:(NSDictionary*)params {
+- (void)setUrlParams:(NSDictionary*)params {
     self.currentRequestParams = params;
 }
 

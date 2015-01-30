@@ -172,31 +172,13 @@ class GenMethod:
 	def __init__( self, name, prefix ):
 		self.name = name
 		self.prefix = prefix
-		self.requestJsonTypes = OrderedDict() #probably change this to ComplexType instead of dict
-		self.requestUrlTypes = OrderedDict()
+		self.requestJsonType = None
+		self.customRequestTypes = OrderedDict()
 		self.responseType = None
 		self.responseArgName = None
 
-	def formalRequestJsonType( self ):
-		if len( self.requestJsonTypes ) == 0:
-			return None
-
-		tp = GenComplexType( "Json", self.name )
-		for k in self.requestJsonTypes.keys():
-			tp.addFieldType( k, self.requestJsonTypes[k] )
-		return tp
-
-	def formalRequestUrlType( self ):
-		if len( self.requestUrlTypes ) == 0:
-			return None
-
-		tp = GenComplexType( "Url", self.name )
-		for k in self.requestUrlTypes.keys():
-			tp.addFieldType( k, self.requestUrlTypes[k] )
-		return tp;
-
 	def __str__(self):
-		return "GenMethod " + self.name + ": ntREQ_JSON: " + strFromDictionary( self.requestJsonTypes ) + "ntREQ_URL: " + strFromDictionary(self.requestUrlTypes) + "ntRESP: " + str( self.responseType )
+		return "GenMethod " + self.name + ": JSON params: " + str( self.requestJsonType ) + ", Custom params: " + strFromDictionary(self.customRequestTypes) + ", Response type: " + str( self.responseType )
 
 class GenModule:
 	namePrefix = ""

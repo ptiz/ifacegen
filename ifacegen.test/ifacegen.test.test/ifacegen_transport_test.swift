@@ -13,6 +13,7 @@ class TestTransport: IFHTTPTransport {
     
     var checkURL: ((String?) -> ())?
     var checkInput: ((NSData?) -> ())?
+    var checkCustomInput: ((Dictionary<String, AnyObject>?) -> ())?
     
     override init!(URL url: NSURL!) {
         super.init(URL: url)
@@ -35,6 +36,10 @@ class TestTransport: IFHTTPTransport {
     override func readAll() -> NSData! {
         let response = "{\"response\":[{\"name\":\"John Doe\",\"id\":13,\"dimension\":13.1,\"passport\":{\"id\":12345,\"organization\":\"Org Inc.\" },\"children\":[{\"name\":\"John Doe J.\",\"birthdate\":8713452345}]}]}"
         return response.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true);
+    }
+    
+    func setCustomParams(params: Dictionary<String, AnyObject>) {
+        self.checkCustomInput?(params)
     }
 }
 
@@ -65,11 +70,20 @@ class ifacegen_transport_test: XCTestCase {
                 }
             }
         }
+        
+        testTransport.checkCustomInput = { (param) in
+            let complexParam = param?["complex_param"] as Dictionary<String, AnyObject>?
+            XCTAssertTrue(complexParam?["complexField"] as? NSString == "complex field", "Custom complex parameter is wrong")
+            let simpleParam = param?["simple_param"] as NSNumber?
+            XCTAssertTrue(simpleParam?.longLongValue == 13, "Custom simple parameter is wrong");
+        }
 
         let testService = OBCTest(transport: testTransport)
         let filter1 = OBCGetEmployeesJsonArgsFilterItem(payload: "filter1")
         let filter2 = OBCGetEmployeesJsonArgsFilterItem(payload: "filter2")
-        let response = testService.getEmployeesWithToken("qwerty", andTimestamp: 13452345, andEmployerId: 9876345, andFilter: [filter1, filter2], andError: nil)
+        let complexParam = OBCGetEmployeesCustomParamsArgsComplexParam(complexField: "complex field")
+        
+        let response = testService.getEmployeesWithToken("qwerty", andTimestamp: 13452345, andComplexParam: complexParam, andSimpleParam: 13, andEmployerId: 9876345, andFilter: [filter1, filter2], andError: nil)
         
         XCTAssertEqual(response.count, 1, "Response objects count is wrong")
         

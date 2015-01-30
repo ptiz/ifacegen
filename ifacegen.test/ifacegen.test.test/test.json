@@ -31,11 +31,17 @@
 "request": {
 		"employer_id": "int64",
         "filter": [ {"payload":"string"} ]
-        },
+    },
 "url_params": {
 		"token": "string",
 		"timestamp": "int64"
+	},
+"custom_params": {
+		"complex_param": {
+			"complex_field": "string"
 		},
+        "simple_param": "int32"
+	},
 "response": { "response" : [ "Employee" ] }
 }
     

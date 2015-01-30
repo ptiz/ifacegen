@@ -362,10 +362,10 @@ def writeOBJCTypeImplementation( fileOut, genType, writeConstructors, writeDump 
 			
 def writeOBJCMethodCustomRequestParam( fileOut, customRequestParamName, customRequestParam ):
 	paramSelectorName = makeAlias( 'set_' + customRequestParamName )
-	fileOut.write('\tif (![transport respondsToSelector:@selector(' + paramSelectorName + ':)]) {\n\t\tassert("Transport does not support selector ' + paramSelectorName + ':");\n\t}\n')
-	fileOut.write('\t[transport performSelector:@selector(' + paramSelectorName + ':) withObject:')
-	unwindInputTypeToOBJC( fileOut, customRequestParam, None, 2)
-	fileOut.write('\n\t];\n')
+	fileOut.write('\tif (![transport respondsToSelector:@selector(' + paramSelectorName + ':)]) {\n\t\tassert("Transport does not respond to selector ' + paramSelectorName + ':");\n\t} ')
+	fileOut.write('else {\n\t\t[transport performSelector:@selector(' + paramSelectorName + ':) withObject:')
+	unwindInputTypeToOBJC( fileOut, customRequestParam, None, 3)
+	fileOut.write('\n\t\t];\n\t}\n')
 
 def writeOBJCMethodImplementation( fileOut, method ):
 	writeOBJCMethodDeclaration( fileOut, method, implementation = True )
@@ -451,6 +451,7 @@ static const NSUInteger jsonFormatOption =
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused"
+#pragma clang diagnostic ignored "-Wundeclared-selector"
 
 """)
 	fileOut.write(declaration.substitute(inName=inputName))

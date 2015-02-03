@@ -127,7 +127,14 @@ def writeOBJCMethodDeclarationArguments( fileOut, formalType, argDecoration, pre
 
 def writeOBJCMethodDeclaration( fileOut, method, implementation ):
 	argDecoration = " "
-	if len(method.customRequestTypes) + len(method.requestJsonType.fieldNames()) > 1:
+
+	argCount = 0
+	if method.customRequestTypes is not None:
+		argCount += len(method.customRequestTypes)
+	if method.requestJsonType is not None:
+		argCount += len(method.requestJsonType.fieldNames())
+
+	if argCount > 1:
 		argDecoration = "\n\t\t"
 
 	if method.responseType is not None:
@@ -359,6 +366,19 @@ def writeOBJCTypeImplementation( fileOut, genType, writeConstructors, writeDump 
 """)
 
 	fileOut.write("@end\n")
+
+def getOBJCEmptyValueForType( emptyValueType ):
+	if emptyValueType is None:
+		return ''
+	if isinstance( emptyValueType, GenListType ) or isinstance( emptyValueType, GenComplexType ):
+		return 'nil'
+	if emptyValueType.sType == "bool":
+		return 'NO'
+	if emptyValueType.sType == "int32" or emptyValueType.sType == "int64":
+		return '0'
+	if emptyValueType.sType == "double":
+		return '0.0'
+	return 'nil'	
 			
 def writeOBJCMethodCustomRequestParam( fileOut, customRequestParamName, customRequestParam ):
 	paramSelectorName = makeAlias( 'set_' + customRequestParamName )
@@ -368,6 +388,9 @@ def writeOBJCMethodCustomRequestParam( fileOut, customRequestParamName, customRe
 	fileOut.write('\n\t\t];\n\t}\n')
 
 def writeOBJCMethodImplementation( fileOut, method ):
+
+	emptyReturnString = '\t\treturn %s;\n\t}\n' % getOBJCEmptyValueForType(method.responseType)
+
 	writeOBJCMethodDeclaration( fileOut, method, implementation = True )
 
 	fileOut.write(" {\n")
@@ -400,17 +423,16 @@ def writeOBJCMethodImplementation( fileOut, method ):
 		fileOut.write('}\n')
 		return
 	else:
-		fileOut.write('\t\treturn nil;\n\t}\n')
+		fileOut.write( emptyReturnString )
 
 	fileOut.write('\tNSData* outputData = [transport readAll];\n\tif ( outputData == nil ) {\n')
-	# fileOut.write('\t\tNSLog(@"' + method.name + ': empty answer");\n\t\treturn nil;\n\t}\n')
-	fileOut.write('\t\treturn nil;\n\t}\n')
+	fileOut.write( emptyReturnString )
 
 	outputName = 'output'
 	outputStatement = 'id ' + outputName
 
 	fileOut.write('\t' + outputStatement + ' = [NSJSONSerialization JSONObjectWithData:outputData options:NSJSONReadingAllowFragments error:error];\n');
-	fileOut.write('\tif ( error && *error != nil ) {\n\t\treturn nil;\n\t}\n')
+	fileOut.write('\tif ( error && *error != nil ) {\n' + emptyReturnString)
 
 	retVal = unwindReturnedTypeToOBJC( fileOut, outputName, method.responseType, method.responseArgName, 1, tmpVarName )
 

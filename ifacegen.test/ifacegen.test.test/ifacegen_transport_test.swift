@@ -73,7 +73,8 @@ class ifacegen_transport_test: XCTestCase {
         
         testTransport.checkCustomInput = { (param) in
             let complexParam = param?["complex_param"] as Dictionary<String, AnyObject>?
-            XCTAssertTrue(complexParam?["complexField"] as? NSString == "complex field", "Custom complex parameter is wrong")
+            XCTAssertTrue(complexParam?["complex_field"] as? NSString == "complex field", "Custom complex parameter is wrong")
+
             let simpleParam = param?["simple_param"] as NSNumber?
             XCTAssertTrue(simpleParam?.longLongValue == 13, "Custom simple parameter is wrong");
         }

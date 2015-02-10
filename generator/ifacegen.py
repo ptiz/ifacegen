@@ -196,11 +196,10 @@ def unwindReturnedTypeToOBJC( fileOut, objcDictName, outType, outArgName, level,
 		currentDictName = objcDictName
 
 		if not recursive:
-			level -= 1
 			if outArgName is not None and outArgName != 'self':
-				return ( '[[%s alloc] initWithDictionary:%s[@"%s"] error:&error]' % (objCResType, currentDictName, outArgName) )
+				return ( '[[%s alloc] initWithDictionary:%s[@"%s"] error:error]' % (objCResType, currentDictName, outArgName) )
 			else:
-				return ( '[[%s alloc] initWithDictionary:%s error:&error]' % (objCResType, currentDictName) )
+				return ( '[[%s alloc] initWithDictionary:%s error:error]' % (objCResType, currentDictName) )
 
 		resName = outType.name + str( newVariableCounter() )
 
@@ -291,7 +290,7 @@ def unwindInputTypeToOBJC( fileOut, inputType, inputArgName, level, recursive=Tr
 	
 		elif isinstance( inputType, GenComplexType ):
 			if not recursive:
-				fileOut.write( '[%s dictionaryWithError:nil]' % inputArgName )
+				fileOut.write( '[%s dictionaryWithError:error]' % inputArgName )
 				return
 
 			fileOut.write( "@{\n" )
@@ -353,8 +352,8 @@ def writeOBJCTypeImplementation( fileOut, genType ):
 		fileOut.write('\t\t_' + fieldAlias + ' = ' + fieldAlias + ';\n' )
 	fileOut.write('\t}\n\treturn self;\n}\n')
 
-	fileOut.write('- (void)readDictionary:(NSDictionary*)dict {\n')
-	fileOut.write('\tid tmp; NSError* error;\n')
+	fileOut.write('- (void)readDictionary:(NSDictionary*)dict withError:(NSError* __autoreleasing*)error {\n')
+	fileOut.write('\tid tmp;\n')
 	unwindReturnedTypeToOBJC( fileOut, 'dict', genType, 'self', level=1, tmpVarName='tmp' )
 	fileOut.write('}\n')
 
@@ -362,7 +361,8 @@ def writeOBJCTypeImplementation( fileOut, genType ):
 	fileOut.write(""" {
 	if ( dictionary == nil ) return nil;
 	if (self = [super init]) {
-		[self readDictionary:dictionary];
+		[self readDictionary:dictionary withError:error];
+		if ( error && *error != nil ) self = nil;
 	}
 	return self;
 }
@@ -374,7 +374,8 @@ def writeOBJCTypeImplementation( fileOut, genType ):
 	if (self = [super init]) {
 		NSDictionary* dict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:error];
 		if ( error && *error != nil ) return nil;
-		[self readDictionary:dict];
+		[self readDictionary:dict withError:error];
+		if ( error && *error != nil ) self = nil;
 	}
 	return self;
 }
@@ -547,11 +548,11 @@ def processJSONIface( jsonFile, verbose, typeNamePrefix, outDir ):
 		print("Can't load module " + jsonFile)
 		return
 
-	# if verbose:
-	# 	for genTypeKey in module.typeList.keys():
-	# 		print( str( module.typeList[genTypeKey] ) + '\n' )
-	# 	for method in module.methods:
-	# 		print( str( method ) + '\n' )
+	if verbose:
+		for genTypeKey in module.typeList.keys():
+			print( str( module.typeList[genTypeKey] ) + '\n' )
+		for method in module.methods:
+			print( str( method ) + '\n' )
 
 	if not os.path.exists( genDir ):
 	    os.makedirs( genDir )

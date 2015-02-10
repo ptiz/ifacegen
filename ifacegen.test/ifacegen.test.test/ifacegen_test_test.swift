@@ -76,4 +76,23 @@ class ifacegen_test_test: XCTestCase {
         
         XCTAssertEqual(desDepartment.departments.count, 1, "Data was not deserialized successfully")
     }
+    
+    func testErroneousSerialization() {
+        
+        let message = "{\"stuff\":[{\"wrong_value\":13}]}"
+        let messageData = message.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true);
+
+        var error:NSError?
+        let employer = OBCEmployer(JSONData: messageData, error: &error)
+        
+        XCTAssertEqual(employer.stuff.count, 1, "Data was not deserialized successfully")
+        XCTAssertTrue(employer.info == nil, "Employer info is wrong")
+        
+        let wrongMessage = "{\"stuff\":[{\"wrong_value\":13}"
+        let wrongMessageData = wrongMessage.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)
+        
+        let wrongEmployer = OBCEmployer(JSONData: wrongMessageData, error: &error)
+        
+        XCTAssertNil(wrongEmployer, "Struct was initialized with wrong data")
+    }
 }

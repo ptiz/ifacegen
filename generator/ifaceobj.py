@@ -157,8 +157,19 @@ class GenComplexType( GenType ):
 			return None				
 		return self.fieldAliases_[fieldName]
 
+	def traverse( self, f ):
+		typeNames = [self.name]
+		for key in self.fields_.keys():
+			field = self.fields_[key]
+			if isinstance( field ) and f( field, self.fieldAliases_[key] ):
+				field.traverse(f)
+			else:
+				f( field, self.fieldAliases_[key] )
+
 	def __str__( self ):
-		return "GenComplexType " + self.name + ": " + strFromDictionary( self.fields_ ) + ", aliases: " + strFromDictionary( self.fieldAliases_ )
+		return ''
+		# typeNames = 
+		# s = "GenComplexType " + self.name + ": " + strFromDictionary( self.fields_ ) + ", aliases: " + strFromDictionary( self.fieldAliases_ )
 
 class GenListType( GenType ):
 	def __init__( self, decoration, name ):

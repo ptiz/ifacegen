@@ -27,16 +27,36 @@ from collections import OrderedDict
 from ifaceobj import *
 
 def typeFromJSON( decoration, argName, value, typeList, importedTypeList ):
-	newType = None
+
+	try:
+		return GenIntegralType(value)
+	except Exception as ex:
+		pass
+
+	if type( value ) == types.UnicodeType:
+		decoratedTypeName = GenType( value ).name
+		if decoratedTypeName in importedTypeList:
+			return importedTypeList[ decoratedTypeName ]
+		if decoratedTypeName in typeList:
+			return typeList[ decoratedTypeName ]
+		raise Exception( 'Unknown type name found: ' + value )
 	
 	if type( value ) == types.DictType or type( value ) == OrderedDict:
-		newType = GenComplexType( decoration, argName )	
+		newType = GenComplexType( decoration, argName )
+
+		if newType.name in importedTypeList or newType.name in typeList:
+			raise Exception( 'Duplicated name in struct declaration: ' + newType.name )
+
+		typeList[newType.name] = newType
+
 		for k in value.keys():
 			field = value[k]
 			newType.addFieldType( k, typeFromJSON( newType.name, k, field, typeList, importedTypeList ) )
 		if len( newType.fieldNames() ) == 0:
 			return None
-		typeList[newType.name] = newType
+
+		typeList[newType.name] = typeList.pop(newType.name)
+
 		return newType
 
 	if type( value ) == types.ListType:
@@ -46,16 +66,7 @@ def typeFromJSON( decoration, argName, value, typeList, importedTypeList ):
 		typeList[newType.name] = newType
 		return newType
 
-	#apply decoration to name if needed: GenType(value).name already decorated
-	decoratedTypeName = GenType(value).name
-
-	if decoratedTypeName in importedTypeList:
-		return importedTypeList[ decoratedTypeName ]
-
-	if decoratedTypeName in typeList:
-		return typeList[ decoratedTypeName ]
-
-	return GenIntegralType( value )
+	return None
 
 def buildTypeFromStructJSON( jsonItem, typeList, importedTypeList ):
 	typeName = jsonItem["struct"]

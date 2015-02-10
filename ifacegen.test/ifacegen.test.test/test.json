@@ -26,6 +26,15 @@
 },
 
 {
+"struct": "Department",
+"typedef": {
+		"name": "string",
+		"emplyees": [ "Employee" ],
+		"departments": [ "Department" ]
+	}
+},
+
+{
 "procedure": "simpleCall",
 "prefix": "all",
 "response": { "code" : "int32" }

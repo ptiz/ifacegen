@@ -92,7 +92,7 @@ def writeOBJCTypeInitDataDeclaration( fileOut, implementation ):
 	if not implementation:
 		fileOut.write(';\n')
 
-def writeOBJCTypeDeclaration( fileOut, genType, writeConstructors, writeDump ):
+def writeOBJCTypeDeclaration( fileOut, genType ):
 	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
 		return
 	
@@ -101,12 +101,11 @@ def writeOBJCTypeDeclaration( fileOut, genType, writeConstructors, writeDump ):
 	else:
 		fileOut.write("\n@interface " + genType.name + ": NSObject\n")
 
-	if writeDump:
-		fileOut.write("- (NSData*)dumpWithError:(NSError* __autoreleasing*)error;\n")
-	if writeConstructors:
-		writeOBJCTypeInitDeclaration( fileOut, genType, implementation = False )
-		writeOBJCTypeInitDictDeclaration( fileOut, implementation = False )
-		writeOBJCTypeInitDataDeclaration( fileOut, implementation = False )	
+	fileOut.write("- (NSData*)dumpWithError:(NSError* __autoreleasing*)error;\n")
+
+	writeOBJCTypeInitDeclaration( fileOut, genType, implementation = False )
+	writeOBJCTypeInitDictDeclaration( fileOut, implementation = False )
+	writeOBJCTypeInitDataDeclaration( fileOut, implementation = False )	
 
 	for fieldName in genType.fieldNames():
 		fieldType = genType.fieldType(fieldName)
@@ -310,41 +309,39 @@ def unwindInputTypeToOBJC( fileOut, inputType, inputArgName, level  ):
 				unwindInputTypeToOBJC( fileOut, inputType.itemType, 'inObj', level+2 )
 				fileOut.write( '];\n' + '\t'*level + '\t}\n' + '\t'*level + '\treturn resArr; } ( ' + inputArgName + ' )' )
 
-def writeOBJCTypeImplementation( fileOut, genType, writeConstructors, writeDump ):
+def writeOBJCTypeImplementation( fileOut, genType ):
 	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
 		return		
 	fileOut.write("\n@implementation " + genType.name + "\n") 
+
+	fileOut.write("- (NSData*)dumpWithError:(NSError* __autoreleasing*)error {\n")
+	fileOut.write("\tNSDictionary* outDict = ")
+	unwindInputTypeToOBJC( fileOut, genType, 'self', 2 )
+	fileOut.write(";\n")
+	fileOut.write("\treturn [NSJSONSerialization dataWithJSONObject:outDict options:jsonFormatOption error:error];\n}\n")
+
+	writeOBJCTypeInitDeclaration( fileOut, genType, implementation = True )
+	fileOut.write('{\n')
+	if genType.baseType is not None:
+		fileOut.write('\tif (self = ')
+		writeOBJCTypeSuperInitDeclaration( fileOut, genType.baseType )
+		fileOut.write(') {\n')
+	else:
+		fileOut.write('\tif (self = [super init]) {\n')
 	
-	if writeDump:
-		fileOut.write("- (NSData*)dumpWithError:(NSError* __autoreleasing*)error {\n")
-		fileOut.write("\tNSDictionary* outDict = ")
-		unwindInputTypeToOBJC( fileOut, genType, 'self', 2 )
-		fileOut.write(";\n")
-		fileOut.write("\treturn [NSJSONSerialization dataWithJSONObject:outDict options:jsonFormatOption error:error];\n}\n")
+	for fieldName in genType.fieldNames():
+		field = genType.fieldType(fieldName)
+		fieldAlias = genType.fieldAlias(fieldName)
+		fileOut.write('\t\t_' + fieldAlias + ' = ' + fieldAlias + ';\n' )
+	fileOut.write('\t}\n\treturn self;\n}\n')
 
-	if writeConstructors:
-		writeOBJCTypeInitDeclaration( fileOut, genType, implementation = True )
-		fileOut.write('{\n')
-		if genType.baseType is not None:
-			fileOut.write('\tif (self = ')
-			writeOBJCTypeSuperInitDeclaration( fileOut, genType.baseType )
-			fileOut.write(') {\n')
-		else:
-			fileOut.write('\tif (self = [super init]) {\n')
-		
-		for fieldName in genType.fieldNames():
-			field = genType.fieldType(fieldName)
-			fieldAlias = genType.fieldAlias(fieldName)
-			fileOut.write('\t\t_' + fieldAlias + ' = ' + fieldAlias + ';\n' )
-		fileOut.write('\t}\n\treturn self;\n}\n')
+	fileOut.write('- (void)readDictionary:(NSDictionary*)dict {\n')
+	fileOut.write('\tid tmp; NSError* error;\n')
+	unwindReturnedTypeToOBJC( fileOut, 'dict', genType, 'self', level=1, tmpVarName='tmp' )
+	fileOut.write('}\n')
 
-		fileOut.write('- (void)readDictionary:(NSDictionary*)dict {\n')
-		fileOut.write('\tid tmp; NSError* error;\n')
-		unwindReturnedTypeToOBJC( fileOut, 'dict', genType, 'self', level=1, tmpVarName='tmp' )
-		fileOut.write('}\n')
-
-		writeOBJCTypeInitDictDeclaration( fileOut, implementation = True )
-		fileOut.write(""" {
+	writeOBJCTypeInitDictDeclaration( fileOut, implementation = True )
+	fileOut.write(""" {
 	if ( dictionary == nil ) return nil;
 	if (self = [super init]) {
 		[self readDictionary:dictionary];
@@ -352,9 +349,9 @@ def writeOBJCTypeImplementation( fileOut, genType, writeConstructors, writeDump 
 	return self;
 }
 """)
-
-		writeOBJCTypeInitDataDeclaration( fileOut, implementation = True )
-		fileOut.write(""" {
+	
+	writeOBJCTypeInitDataDeclaration( fileOut, implementation = True )
+	fileOut.write(""" {
 	if ( jsonData == nil ) return nil;
 	if (self = [super init]) {
 		NSDictionary* dict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:error];
@@ -518,7 +515,7 @@ def writeWarning( fileOut, inputName ):
 
 #####################################
 
-def processJSONIface( jsonFile, verbose, typeNamePrefix, outDir, writeFullImplementation ):
+def processJSONIface( jsonFile, verbose, typeNamePrefix, outDir ):
 
 	if outDir is not None:
 		genDir = os.path.abspath( outDir )
@@ -553,9 +550,8 @@ def processJSONIface( jsonFile, verbose, typeNamePrefix, outDir, writeFullImplem
 	writeObjCImplHeader( objCImpl, module.name )			
 
 	for genTypeKey in module.typeList.keys():
-		writeAll = writeFullImplementation or ( genTypeKey in module.structs )						
-		writeOBJCTypeDeclaration( objCIface, module.typeList[genTypeKey], writeDump=writeAll, writeConstructors=writeAll )
-		writeOBJCTypeImplementation( objCImpl, module.typeList[genTypeKey], writeDump=writeAll, writeConstructors=writeAll )
+		writeOBJCTypeDeclaration( objCIface, module.typeList[genTypeKey] )
+		writeOBJCTypeImplementation( objCImpl, module.typeList[genTypeKey] )
 
 	if len( module.methods ) != 0:
 		writeObjCIfaceDeclaration( objCIface, module.name )
@@ -578,7 +574,6 @@ def main():
 	
 	parser.add_argument('rpcInput', metavar='I', type=unicode, nargs = '+', help = 'Input JSON RPC files')
 	parser.add_argument('--prefix', action='store', required=False, help='Class and methods prefix')
-	parser.add_argument('--writefull', action='store_true', required=False, help='Indicates that it is needed to write full set of initializers for all the structs found in IDL')
 	parser.add_argument('--verbose', action='store_true', required=False, help='Verbose mode')
 	parser.add_argument('-o', '--outdir', action='store', default="gen-objc", required=False, help="Output directory name")
 
@@ -589,7 +584,7 @@ def main():
 
 	try:
 		for rpcInput in parsedArgs.rpcInput:
-			processJSONIface( rpcInput, parsedArgs.verbose, parsedArgs.prefix, parsedArgs.outdir, parsedArgs.writefull )
+			processJSONIface( rpcInput, parsedArgs.verbose, parsedArgs.prefix, parsedArgs.outdir )
 	except Exception as ex:
 		print( str(ex) )
 		sys.exit(1)

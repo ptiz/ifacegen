@@ -162,7 +162,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "python ../generator/ifacegen.py -o ifacegen.test.test/ --prefix OBC --writefull ifacegen.test.test/test.json";
+			shellScript = "python ../generator/ifacegen.py -o ifacegen.test.test/ --prefix OBC --verbose ifacegen.test.test/test.json";
 		};
 /* End PBXShellScriptBuildPhase section */
 

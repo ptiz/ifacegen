@@ -29,7 +29,7 @@
 "struct": "Department",
 "typedef": {
 		"name": "string",
-		"emplyees": [ "Employee" ],
+		"employees": [ "Employee" ],
 		"departments": [ "Department" ]
 	}
 },

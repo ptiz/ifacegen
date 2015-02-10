@@ -102,8 +102,6 @@ def buildMethodFromJSON( jsonItem, typeList, importedTypeList ):
 		else:
 			customRequests[methodKey] = jsonItem[methodKey]
 
-	print("Method: " + methodName)
-
 	if methodName is None:
 		raise Exception("No method name provided for method in IDL: %s" % jsonItem)
 

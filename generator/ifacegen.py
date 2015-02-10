@@ -182,7 +182,7 @@ def decorateOBJCReturnedType( levelTmpVar, objcRetTypeStr, retType ):
 		return formatRawNSDictionaryStr.format( levelTmpVar, objcRetTypeStr )
 	return "ERROR";
 
-def unwindReturnedTypeToOBJC( fileOut, objcDictName, outType, outArgName, level, tmpVarName ):
+def unwindReturnedTypeToOBJC( fileOut, objcDictName, outType, outArgName, level, tmpVarName, recursive=True ):
 
 	if isinstance( outType, GenIntegralType ): 	
 		if outArgName is None:
@@ -194,7 +194,15 @@ def unwindReturnedTypeToOBJC( fileOut, objcDictName, outType, outArgName, level,
 	if isinstance( outType, GenComplexType ):
 		objCResType = assumeOBJCType( outType )
 		currentDictName = objcDictName
-		resName = outType.name + str( newVariableCounter() )	
+
+		if not recursive:
+			level -= 1
+			if outArgName is not None and outArgName != 'self':
+				return ( '[[%s alloc] initWithDictionary:%s[@"%s"] error:&error]' % (objCResType, currentDictName, outArgName) )
+			else:
+				return ( '[[%s alloc] initWithDictionary:%s error:&error]' % (objCResType, currentDictName) )
+
+		resName = outType.name + str( newVariableCounter() )
 
 		if outArgName is None or outArgName != 'self':
 			fileOut.write('\t'*level + objCResType + outType.ptr + ' ' + resName + ';\n')
@@ -218,7 +226,7 @@ def unwindReturnedTypeToOBJC( fileOut, objcDictName, outType, outArgName, level,
 
 		for fieldKey in outType.allFieldNames():
 			outField = outType.fieldType(fieldKey)
-			value = unwindReturnedTypeToOBJC( fileOut, currentDictName, outField, fieldKey, level+1, tmpVarName )
+			value = unwindReturnedTypeToOBJC( fileOut, currentDictName, outField, fieldKey, level+1, tmpVarName, recursive=False )
 			fileOut.write('\t'*level + resName + '.' + outType.fieldAlias(fieldKey) + ' = ' + value + ';\n')
 
 		if outArgName is not None and outArgName != 'self':
@@ -248,7 +256,7 @@ def unwindReturnedTypeToOBJC( fileOut, objcDictName, outType, outArgName, level,
 		fileOut.write('\t'*level + resName + ' = [NSMutableArray arrayWithCapacity:[' + currentArrayName + ' count]];\n')
 
 		fileOut.write('\t'*level + 'for ( id item in ' + currentArrayName + ') {\n' )
-		item = unwindReturnedTypeToOBJC( fileOut, 'item', outType.itemType, None, level+1, tmpVarName )
+		item = unwindReturnedTypeToOBJC( fileOut, 'item', outType.itemType, None, level+1, tmpVarName, recursive=False )
 		fileOut.write( '\t'*(level+1) + '[' + resName + ' addObject:' + item + '];\n' )
 		fileOut.write('\t'*level + '}\n' )
 
@@ -277,11 +285,15 @@ def decorateOBJCInputType( objcInpTypeStr, inpType ):
 		suffix =  ' options:jsonFormatOption error:error] encoding:NSUTF8StringEncoding]'
 	return prefix + objcInpTypeStr + suffix
 
-def unwindInputTypeToOBJC( fileOut, inputType, inputArgName, level  ):
+def unwindInputTypeToOBJC( fileOut, inputType, inputArgName, level, recursive=True ):
 		if isinstance( inputType, GenIntegralType ):
 			fileOut.write( decorateOBJCInputType( inputArgName, inputType ) )
 	
 		elif isinstance( inputType, GenComplexType ):
+			if not recursive:
+				fileOut.write( '[%s dictionaryWithError:nil]' % inputArgName )
+				return
+
 			fileOut.write( "@{\n" )
 	
 			firstArgument = True
@@ -295,7 +307,7 @@ def unwindInputTypeToOBJC( fileOut, inputType, inputArgName, level  ):
 				objcStatement = inputType.fieldAlias(argName)
 				if inputArgName is not None:
 					objcStatement = inputArgName + '.' + inputType.fieldAlias(argName)
-				unwindInputTypeToOBJC( fileOut, fieldType, objcStatement, level+1 )
+				unwindInputTypeToOBJC( fileOut, fieldType, objcStatement, level+1, recursive=False )
 
 			fileOut.write("\n" + '\t'*level + "}")
 
@@ -306,7 +318,7 @@ def unwindInputTypeToOBJC( fileOut, inputType, inputArgName, level  ):
 				fileOut.write('^NSArray*(NSArray* inArr) {\n' + '\t'*level + 'NSMutableArray* resArr = [NSMutableArray arrayWithCapacity:[inArr count]];\n')
 				fileOut.write('\t'*level + '\tfor ( ' + assumeOBJCType(inputType.itemType) + inputType.itemType.ptr + ' inObj in inArr ) {\n' ) 
 				fileOut.write('\t'*level + '\t\t[resArr addObject:')
-				unwindInputTypeToOBJC( fileOut, inputType.itemType, 'inObj', level+2 )
+				unwindInputTypeToOBJC( fileOut, inputType.itemType, 'inObj', level+2, recursive=False )
 				fileOut.write( '];\n' + '\t'*level + '\t}\n' + '\t'*level + '\treturn resArr; } ( ' + inputArgName + ' )' )
 
 def writeOBJCTypeImplementation( fileOut, genType ):
@@ -314,11 +326,17 @@ def writeOBJCTypeImplementation( fileOut, genType ):
 		return		
 	fileOut.write("\n@implementation " + genType.name + "\n") 
 
-	fileOut.write("- (NSData*)dumpWithError:(NSError* __autoreleasing*)error {\n")
-	fileOut.write("\tNSDictionary* outDict = ")
+	fileOut.write('- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error {')
+	fileOut.write('\n\treturn ')
 	unwindInputTypeToOBJC( fileOut, genType, 'self', 2 )
-	fileOut.write(";\n")
-	fileOut.write("\treturn [NSJSONSerialization dataWithJSONObject:outDict options:jsonFormatOption error:error];\n}\n")
+	fileOut.write(';\n}\n')
+
+	fileOut.write("""- (NSData*)dumpWithError:(NSError* __autoreleasing*)error {
+	NSDictionary* dict = [self dictionaryWithError:error];
+	if (*error) return nil;
+	else return [NSJSONSerialization dataWithJSONObject:[self dictionaryWithError:error] options:jsonFormatOption error:error];
+}
+""")
 
 	writeOBJCTypeInitDeclaration( fileOut, genType, implementation = True )
 	fileOut.write('{\n')
@@ -529,11 +547,11 @@ def processJSONIface( jsonFile, verbose, typeNamePrefix, outDir ):
 		print("Can't load module " + jsonFile)
 		return
 
-	if verbose:
-		for genTypeKey in module.typeList.keys():
-			print( str( module.typeList[genTypeKey] ) + '\n' )
-		for method in module.methods:
-			print( str( method ) + '\n' )
+	# if verbose:
+	# 	for genTypeKey in module.typeList.keys():
+	# 		print( str( module.typeList[genTypeKey] ) + '\n' )
+	# 	for method in module.methods:
+	# 		print( str( method ) + '\n' )
 
 	if not os.path.exists( genDir ):
 	    os.makedirs( genDir )

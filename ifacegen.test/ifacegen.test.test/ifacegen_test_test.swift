@@ -16,6 +16,9 @@ class ifacegen_test_test: XCTestCase {
     var employee1:OBCEmployee!
     var employer:OBCEmployer!
     
+    var department:OBCDepartment!
+    var internalDepartment:OBCDepartment!
+    
     override func setUp() {
         super.setUp()
         
@@ -30,6 +33,9 @@ class ifacegen_test_test: XCTestCase {
         employee0 = OBCEmployee(name: "empl0", andTheId: 781341234, andDimension: 345.67, andPassport: self.pass, andChildren:[child])
         employee1 = OBCEmployee(name: "empl1", andTheId: 87245, andDimension: 623.76, andPassport: self.pass, andChildren:[child, child])
         employer = OBCEmployer(stuff: [self.employee0, self.employee1], andInfo: ["review":"passed"])
+        
+        internalDepartment = OBCDepartment(name: "Testers sub-dept.", andEmployees: [self.employee0], andDepartments: nil)
+        department = OBCDepartment(name: "Research dept.", andEmployees: [self.employee0, self.employee1], andDepartments: [internalDepartment])
     }
     
     override func tearDown() {
@@ -59,4 +65,15 @@ class ifacegen_test_test: XCTestCase {
         XCTAssertEqual(desChild.name, "Mary", "Child name is wrong")
     }
     
+    func testRecursiveTypes() {
+        
+        var error:NSError?
+        let data = self.department.dumpWithError(&error)
+        
+        XCTAssertNil(error, "Serialization was unsuccessful")
+        
+        let desDepartment = OBCDepartment(JSONData: data, error: &error)
+        
+        XCTAssertEqual(desDepartment.departments.count, 1, "Data was not deserialized successfully")
+    }
 }

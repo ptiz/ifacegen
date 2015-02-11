@@ -74,12 +74,13 @@ def buildTypeFromStructJSON( jsonItem, typeList, importedTypeList ):
 	if retType is not None and "extends" in jsonItem:
 		parentTypeName = jsonItem["extends"]
 		if (parentTypeName is not None):
-			if (parentTypeName in typeList):
-				retType.baseType = typeList[ parentTypeName ]
-			if (parentTypeName in importedTypeList):
-				retType.baseType = importedTypeList[ parentTypeName ]
-		else:
-			raise Exception("Unknown base type %s for type %s" % retType.name, parentTypeName )
+			decoratedParentTypeName = GenType( parentTypeName ).name
+			if (decoratedParentTypeName in typeList):
+				retType.baseType = typeList[ decoratedParentTypeName ]
+			elif (decoratedParentTypeName in importedTypeList):
+				retType.baseType = importedTypeList[ decoratedParentTypeName ]
+			else:
+				raise Exception("Unknown base type %s for type %s" % retType.name, parentTypeName )
 	return retType
 
 def buildMethodFromJSON( jsonItem, typeList, importedTypeList ):

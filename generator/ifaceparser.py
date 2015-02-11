@@ -131,6 +131,19 @@ def buildMethodFromJSON( jsonItem, typeList, importedTypeList ):
 	
 	return method
 
+class GenComplexTypeTraverser:
+	def __init__(self, structs):
+		self.structs = structs
+		self.typeNameSet = set(map(lambda x: x.name, structs))
+
+	def __call__(self, tType, tTypeParent):
+		if tType.name not in self.typeNameSet:
+			try:
+				self.structs.insert(self.structs.index(tTypeParent), tType)
+			except Exception:
+				self.structs.append(tType)
+			self.typeNameSet.add(tType.name)
+
 def parseModule( jsonFile ):
 	with open( jsonFile, "rt" ) as jFile:
 		jsonObj = json.load( jFile, object_pairs_hook=OrderedDict )
@@ -145,11 +158,16 @@ def parseModule( jsonFile ):
 				if "struct" in jsonItem:
 					structType = buildTypeFromStructJSON( jsonItem, module.typeList, module.importedTypeList )
 					if structType is not None:
-						module.structs.append( structType.name )
+						module.structs.append( structType )
 				elif "procedure" in jsonItem:
 					module.methods.append( buildMethodFromJSON( jsonItem, module.typeList, module.importedTypeList ) )
 				elif "import" in jsonItem:
 					importModule( os.path.join( baseDir, jsonItem["import"]), fromModule=module )
+
+			# here we find dependcies for declared structs
+			for genTypeKey in module.typeList.keys():
+				struct = module.typeList[genTypeKey]
+				struct.traverseComplexTypes(GenComplexTypeTraverser(module.structs))
 
 	return module
 

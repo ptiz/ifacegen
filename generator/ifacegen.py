@@ -568,9 +568,9 @@ def processJSONIface( jsonFile, verbose, typeNamePrefix, outDir ):
 
 	writeObjCImplHeader( objCImpl, module.name )			
 
-	for genTypeKey in module.typeList.keys():
-		writeOBJCTypeDeclaration( objCIface, module.typeList[genTypeKey] )
-		writeOBJCTypeImplementation( objCImpl, module.typeList[genTypeKey] )
+	for genType in module.structs:
+		writeOBJCTypeDeclaration( objCIface, genType )
+		writeOBJCTypeImplementation( objCImpl, genType )
 
 	if len( module.methods ) != 0:
 		writeObjCIfaceDeclaration( objCIface, module.name )

@@ -72,6 +72,21 @@ def strFromDictionary( d ):
 		comm = ", "
 	return s
 
+def traverseComplexType( tType, typeNameSet, callback ):
+	for key in tType.fields_.keys():
+		fieldType = tType.fields_[key]
+
+		if isinstance(fieldType, GenListType):
+			fieldType = fieldType.itemType
+
+		if isinstance( fieldType, GenComplexType ):
+			if fieldType.name in typeNameSet:
+				continue
+			else:
+				typeNameSet.add(fieldType.name)
+				callback(fieldType, tType)
+				traverseComplexType(fieldType, typeNameSet, callback)
+
 ##############
 
 genIntegralTypeList = [ "int32", "int64", "double", "string", "bool", "raw", "rawstr" ]
@@ -157,24 +172,28 @@ class GenComplexType( GenType ):
 			return None				
 		return self.fieldAliases_[fieldName]
 
-	def traverse( self, f ):
-		typeNames = [self.name]
-		for key in self.fields_.keys():
-			field = self.fields_[key]
-			if isinstance( field ) and f( field, self.fieldAliases_[key] ):
-				field.traverse(f)
-			else:
-				f( field, self.fieldAliases_[key] )
+	def traverseComplexTypes( self, callback ):
+		typeNameSet = set([self.name])
+		traverseComplexType( self, typeNameSet, callback )
 
 	def __str__( self ):
-		return ''
-		# typeNames = 
-		# s = "GenComplexType " + self.name + ": " + strFromDictionary( self.fields_ ) + ", aliases: " + strFromDictionary( self.fieldAliases_ )
+		fields = []
+		for name in self.allFieldNames():
+			fieldType = self.fieldType(name)
+			fieldAlias = self.fieldAlias(name)
+			fields.append('%s(%s):%s' % (fieldAlias, name, str(fieldType) if isinstance(fieldType, GenIntegralType) else fieldType.name))
+		if self.baseType is not None:
+			return 'GenComplexType %s, extends %s: [%s]' % (self.name, self.baseType.name, ", ".join(fields))
+		return 'GenComplexType %s: [%s]' % (self.name, ", ".join(fields))
 
 class GenListType( GenType ):
 	def __init__( self, decoration, name ):
 		GenType.__init__( self, decoration + capitalizeFirstLetter( makeAlias( name ) ) )
 		self.itemType = None
+
+	def traverseComplexTypes( self, callback ):
+		typeNameSet = set([self.itemType.name])
+		traverseComplexType( self.itemType, typeNameSet, callback )
 
 	def __str__( self ):
 		return "GenListType " + self.name + ", item: " + str( self.itemType )

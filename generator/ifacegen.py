@@ -101,6 +101,7 @@ def writeOBJCTypeDeclaration( fileOut, genType ):
 	else:
 		fileOut.write("\n@interface " + genType.name + ": NSObject\n")
 
+	fileOut.write('- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error;')
 	fileOut.write("- (NSData*)dumpWithError:(NSError* __autoreleasing*)error;\n")
 
 	writeOBJCTypeInitDeclaration( fileOut, genType, implementation = False )
@@ -568,9 +569,9 @@ def processJSONIface( jsonFile, verbose, typeNamePrefix, outDir ):
 
 	writeObjCImplHeader( objCImpl, module.name )			
 
-	for genType in module.structs:
-		writeOBJCTypeDeclaration( objCIface, genType )
-		writeOBJCTypeImplementation( objCImpl, genType )
+	for genTypeName in module.typeList.keys():
+		writeOBJCTypeDeclaration( objCIface, module.typeList[genTypeName] )
+		writeOBJCTypeImplementation( objCImpl, module.typeList[genTypeName] )
 
 	if len( module.methods ) != 0:
 		writeObjCIfaceDeclaration( objCIface, module.name )

@@ -8,3 +8,5 @@ ifacegen.example/ifacegen.example.xcworkspace
 ifacegen.example/Pods
 ifacegen.test/ifacegen.test.test/OBCTest.h
 ifacegen.test/ifacegen.test.test/OBCTest.m
+ifacegen.test/ifacegen.test.test/OBCTypes.h
+ifacegen.test/ifacegen.test.test/OBCTypes.m

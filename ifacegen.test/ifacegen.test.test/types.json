@@ -1,0 +1,15 @@
+{"iface":[
+    
+{
+"struct": "Human",
+"typedef": {
+        "name":"string",
+        "id":"int64",
+        "passport":{
+            "id": "int32",
+            "organization": "string"
+        }
+    }
+}
+
+]}

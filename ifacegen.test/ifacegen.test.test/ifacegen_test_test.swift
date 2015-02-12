@@ -11,7 +11,7 @@ import XCTest
 
 class ifacegen_test_test: XCTestCase {
 
-    var pass:OBCEmployeePassport!
+    var pass:OBCHumanPassport!
     var employee0:OBCEmployee!
     var employee1:OBCEmployee!
     var employer:OBCEmployer!
@@ -22,7 +22,7 @@ class ifacegen_test_test: XCTestCase {
     override func setUp() {
         super.setUp()
         
-        pass = OBCEmployeePassport()
+        pass = OBCHumanPassport()
         pass.theId = 786234
         pass.organization = "10 OM"
 
@@ -30,8 +30,8 @@ class ifacegen_test_test: XCTestCase {
         child.name = "Mary"
         child.birthdate = Int64(NSDate().timeIntervalSince1970)
         
-        employee0 = OBCEmployee(name: "empl0", andTheId: 781341234, andDimension: 345.67, andPassport: self.pass, andChildren:[child])
-        employee1 = OBCEmployee(name: "empl1", andTheId: 87245, andDimension: 623.76, andPassport: self.pass, andChildren:[child, child])
+        employee0 = OBCEmployee(name: "empl0", andTheId: 781341234, andPassport: self.pass, andDimension: 345.67, andChildren:[child])
+        employee1 = OBCEmployee(name: "empl1", andTheId: 87245, andPassport: self.pass, andDimension: 623.76, andChildren:[child, child])
         employer = OBCEmployer(stuff: [self.employee0, self.employee1], andInfo: ["review":"passed"])
         
         internalDepartment = OBCDepartment(name: "Testers sub-dept.", andEmployees: [self.employee0], andDepartments: nil)

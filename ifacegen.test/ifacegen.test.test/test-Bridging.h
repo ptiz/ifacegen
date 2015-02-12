@@ -10,6 +10,7 @@
 #define ifacegen_test_test_Bridging_h
 
 #import "OBCTest.h"
+#import "OBCTypes.h"
 #import "IFTransport.h"
 #import "IFHTTPTransport.h"
 #import "IFHTTPTransport+Protected.h"

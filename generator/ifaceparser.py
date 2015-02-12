@@ -112,11 +112,13 @@ def buildMethodFromJSON( jsonItem, typeList, importedTypeList ):
 	if request is not None:
 		requestTypeName = "%s_json_args" % methodName
 		method.requestJsonType = typeFromJSON( None, requestTypeName, request, typeList, importedTypeList )
+		del typeList[method.requestJsonType.name]
 
 	for customRequestKey in customRequests.keys():
 		customRequest = customRequests[customRequestKey]
 		customRequestTypeName = "%s_%s_args" % (methodName, customRequestKey)
 		method.customRequestTypes[customRequestKey] = typeFromJSON( None, customRequestTypeName, customRequest, typeList, importedTypeList )
+		del typeList[method.customRequestTypes[customRequestKey].name]	
 
 	# flatten return type if it is only one filed in dictionary
 	if len( response ) == 1:
@@ -132,19 +134,6 @@ def buildMethodFromJSON( jsonItem, typeList, importedTypeList ):
 	
 	return method
 
-class GenComplexTypeTraverser:
-	def __init__(self, structs):
-		self.structs = structs
-		self.typeNameSet = set(map(lambda x: x.name, structs))
-
-	def __call__(self, tType, tTypeParent):
-		if tType.name not in self.typeNameSet:
-			try:
-				self.structs.insert(self.structs.index(tTypeParent), tType)
-			except Exception:
-				self.structs.append(tType)
-			self.typeNameSet.add(tType.name)
-
 def parseModule( jsonFile ):
 	with open( jsonFile, "rt" ) as jFile:
 		jsonObj = json.load( jFile, object_pairs_hook=OrderedDict )
@@ -157,19 +146,11 @@ def parseModule( jsonFile ):
 
 			for jsonItem in jsonObj["iface"]:
 				if "struct" in jsonItem:
-					structType = buildTypeFromStructJSON( jsonItem, module.typeList, module.importedTypeList )
-					if structType is not None:
-						module.structs.append( structType )
+					buildTypeFromStructJSON( jsonItem, module.typeList, module.importedTypeList )
 				elif "procedure" in jsonItem:
 					module.methods.append( buildMethodFromJSON( jsonItem, module.typeList, module.importedTypeList ) )
 				elif "import" in jsonItem:
 					importModule( os.path.join( baseDir, jsonItem["import"]), fromModule=module )
-
-			# here we find dependcies for declared structs
-			for genTypeKey in module.typeList.keys():
-				struct = module.typeList[genTypeKey]
-				struct.traverseComplexTypes(GenComplexTypeTraverser(module.structs))
-
 	return module
 
 def importModule( jsonFile, fromModule ):

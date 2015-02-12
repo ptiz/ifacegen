@@ -1,22 +1,12 @@
 {"iface":[
     
-{
-"struct": "Human",
-"typedef": {
-        "name":"string",
-        "id":"int64"
-    }
-},
+{"import": "types.json"},
           
 {
 "struct": "Employee",
 "extends": "Human",
 "typedef": {
 		"dimension":"double",
-		"passport":{
-				"id": "int32",
-				"organization": "string"
-			},
 		"children":[{
 				"name":"string",
 				"birthdate":"int64"

@@ -215,7 +215,6 @@ class GenModule:
 	def __init__( self, name ):
 		self.typeList = OrderedDict()
 		self.methods = []
-		self.structs = []
 		if len(GenModule.namePrefix) and not name.startswith( GenModule.namePrefix ):
 			self.name = GenModule.namePrefix + capitalizeFirstLetter(name)
 		else:

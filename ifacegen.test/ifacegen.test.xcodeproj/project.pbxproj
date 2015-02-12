@@ -11,6 +11,8 @@
 		5BC93E471A77A1C500A6C3F6 /* ifacegen_transport_test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BC93E461A77A1C500A6C3F6 /* ifacegen_transport_test.swift */; };
 		5BE09E7E1A2475BC00AEC506 /* ifacegen_test_test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BE09E7D1A2475BC00AEC506 /* ifacegen_test_test.swift */; };
 		5BE09E8B1A24771A00AEC506 /* IFHTTPTransport.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BE09E881A24771A00AEC506 /* IFHTTPTransport.m */; };
+		5BE8D5631A8CA664007E4146 /* OBCTypes.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BE8D5611A8CA664007E4146 /* OBCTypes.m */; };
+		5BE8D5641A8CA664007E4146 /* types.json in Resources */ = {isa = PBXBuildFile; fileRef = 5BE8D5621A8CA664007E4146 /* types.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,9 @@
 		5BE09E881A24771A00AEC506 /* IFHTTPTransport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IFHTTPTransport.m; path = ../transport/IFHTTPTransport.m; sourceTree = "<group>"; };
 		5BE09E891A24771A00AEC506 /* IFHTTPTransport+Protected.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IFHTTPTransport+Protected.h"; path = "../transport/IFHTTPTransport+Protected.h"; sourceTree = "<group>"; };
 		5BE09E8A1A24771A00AEC506 /* IFTransport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IFTransport.h; path = ../transport/IFTransport.h; sourceTree = "<group>"; };
+		5BE8D5601A8CA664007E4146 /* OBCTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OBCTypes.h; sourceTree = "<group>"; };
+		5BE8D5611A8CA664007E4146 /* OBCTypes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OBCTypes.m; sourceTree = "<group>"; };
+		5BE8D5621A8CA664007E4146 /* types.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = types.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,9 +64,12 @@
 		5BE09E7A1A2475BC00AEC506 /* ifacegen.test.test */ = {
 			isa = PBXGroup;
 			children = (
+				5BE8D5601A8CA664007E4146 /* OBCTypes.h */,
+				5BE8D5611A8CA664007E4146 /* OBCTypes.m */,
 				5B6352B01A791B3600C13DF0 /* OBCTest.h */,
 				5B6352B11A791B3600C13DF0 /* OBCTest.m */,
 				5BC93E481A77A22D00A6C3F6 /* test-Bridging.h */,
+				5BE8D5621A8CA664007E4146 /* types.json */,
 				5BC93E441A779E6D00A6C3F6 /* test.json */,
 				5BE09E7D1A2475BC00AEC506 /* ifacegen_test_test.swift */,
 				5BC93E461A77A1C500A6C3F6 /* ifacegen_transport_test.swift */,
@@ -145,6 +153,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5BE8D5641A8CA664007E4146 /* types.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -162,7 +171,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "python ../generator/ifacegen.py -o ifacegen.test.test/ --prefix OBC --verbose ifacegen.test.test/test.json";
+			shellScript = "python ../generator/ifacegen.py -o ifacegen.test.test/ --prefix OBC --verbose ifacegen.test.test/test.json ifacegen.test.test/types.json";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -175,6 +184,7 @@
 				5BE09E8B1A24771A00AEC506 /* IFHTTPTransport.m in Sources */,
 				5BC93E471A77A1C500A6C3F6 /* ifacegen_transport_test.swift in Sources */,
 				5BE09E7E1A2475BC00AEC506 /* ifacegen_test_test.swift in Sources */,
+				5BE8D5631A8CA664007E4146 /* OBCTypes.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

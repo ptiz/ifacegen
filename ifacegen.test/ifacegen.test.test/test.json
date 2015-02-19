@@ -39,7 +39,7 @@
 
 {
 "procedure": "getEmployees",
-"prefix": "emplyees",
+"prefix": "employees",
 "request": {
 		"employer_id": "int64",
         "filter": [ {"payload":"string"} ]

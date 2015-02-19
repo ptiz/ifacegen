@@ -92,8 +92,8 @@ def writeOBJCTypeDeclaration( fileOut, genType ):
 	else:
 		fileOut.write("\n@interface " + genType.name + ": NSObject\n")
 
-	fileOut.write('- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error;')
-	fileOut.write("- (NSData*)dumpWithError:(NSError* __autoreleasing*)error;\n")
+	fileOut.write('- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error;\n')
+	fileOut.write('- (NSData*)dumpWithError:(NSError* __autoreleasing*)error;\n')
 
 	writeOBJCTypeInitDeclaration( fileOut, genType, implementation = False )
 	writeOBJCTypeInitDictDeclaration( fileOut, implementation = False )
@@ -538,16 +538,24 @@ def writeWarning( fileOut, inputName ):
 """
 	fileOut.write(declaration)
 
-def writeObjCImplementation( genDir, module ):
-	
+def writeObjCImplementation( genDir, category, module ):
+
 	if not os.path.exists( genDir ):
 	    os.makedirs( genDir )
 
 	objCIface = open( os.path.join( genDir, module.name + ".h" ), "wt" )
 	objCImpl = open( os.path.join( genDir, module.name + ".m" ), "wt" )
+	
+	if category is not None:
+		objCIfaceCategory = open( os.path.join( genDir, '%s+%s.h' % (module.name, category) ), "wt" )
+		objCImplCategory = open( os.path.join( genDir, '%s+%s.m' % (module.name, category) ), "wt" )
 
 	writeWarning( objCIface, None )
 	writeWarning( objCImpl, None )
+
+	if category is not None:
+		writeWarning( objCIfaceCategory, None )
+		writeWarning( objCImplCategory, None )
 
 	writeObjCIfaceHeader( objCIface, module.name )
 	writeObjCIfaceImports( objCIface, module.importedModuleNames )

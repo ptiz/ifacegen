@@ -83,7 +83,21 @@ def writeOBJCTypeInitDataDeclaration( fileOut, implementation ):
 	if not implementation:
 		fileOut.write(';\n')
 
-def writeOBJCTypeDeclaration( fileOut, genType ):
+def writeOBJCTypeDeclarationCategory( fileOut, genType, category ):
+	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
+		return
+	
+	fileOut.write("\n@interface " + genType.name + " (" + category + ")\n")
+
+	fileOut.write('- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error;\n')
+	fileOut.write('- (NSData*)dumpWithError:(NSError* __autoreleasing*)error;\n')
+
+	writeOBJCTypeInitDictDeclaration( fileOut, implementation = False )
+	writeOBJCTypeInitDataDeclaration( fileOut, implementation = False )	
+
+	fileOut.write("@end;\n");
+
+def writeOBJCTypeDeclaration( fileOut, genType, baseOnly ):
 	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
 		return
 	
@@ -92,12 +106,15 @@ def writeOBJCTypeDeclaration( fileOut, genType ):
 	else:
 		fileOut.write("\n@interface " + genType.name + ": NSObject\n")
 
-	fileOut.write('- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error;\n')
-	fileOut.write('- (NSData*)dumpWithError:(NSError* __autoreleasing*)error;\n')
+	if not baseOnly:
+		fileOut.write('- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error;\n')
+		fileOut.write('- (NSData*)dumpWithError:(NSError* __autoreleasing*)error;\n')
 
 	writeOBJCTypeInitDeclaration( fileOut, genType, implementation = False )
-	writeOBJCTypeInitDictDeclaration( fileOut, implementation = False )
-	writeOBJCTypeInitDataDeclaration( fileOut, implementation = False )	
+
+	if not baseOnly:	
+		writeOBJCTypeInitDictDeclaration( fileOut, implementation = False )
+		writeOBJCTypeInitDataDeclaration( fileOut, implementation = False )	
 
 	for fieldName in genType.fieldNames():
 		fieldType = genType.fieldType(fieldName)
@@ -326,10 +343,7 @@ def unwindInputTypeToOBJC( fileOut, inputType, inputArgName, level, recursive=Tr
 				unwindInputTypeToOBJC( fileOut, inputType.itemType, 'inObj', level+2, recursive=False )
 				fileOut.write( '];\n' + '\t'*level + '\t}\n' + '\t'*level + '\treturn resArr; } ( ' + inputArgName + ' )' )
 
-def writeOBJCTypeImplementation( fileOut, genType ):
-	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
-		return		
-	fileOut.write("\n@implementation " + genType.name + "\n") 
+def writeOBJCTypeImplementationMethods( fileOut, genType ):
 
 	fileOut.write('- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error {')
 	fileOut.write('\n\treturn ')
@@ -342,21 +356,6 @@ def writeOBJCTypeImplementation( fileOut, genType ):
 	else return [NSJSONSerialization dataWithJSONObject:[self dictionaryWithError:error] options:jsonFormatOption error:error];
 }
 """)
-
-	writeOBJCTypeInitDeclaration( fileOut, genType, implementation = True )
-	fileOut.write('{\n')
-	if genType.baseType is not None:
-		fileOut.write('\tif (self = ')
-		writeOBJCTypeSuperInitDeclaration( fileOut, genType.baseType )
-		fileOut.write(') {\n')
-	else:
-		fileOut.write('\tif (self = [super init]) {\n')
-	
-	for fieldName in genType.fieldNames():
-		field = genType.fieldType(fieldName)
-		fieldAlias = genType.fieldAlias(fieldName)
-		fileOut.write('\t\t_' + fieldAlias + ' = ' + fieldAlias + ';\n' )
-	fileOut.write('\t}\n\treturn self;\n}\n')
 
 	fileOut.write('- (void)readDictionary:(NSDictionary*)dict withError:(NSError* __autoreleasing*)error {\n')
 	fileOut.write('\tid tmp;\n')
@@ -387,6 +386,37 @@ def writeOBJCTypeImplementation( fileOut, genType ):
 }
 """)
 
+def writeOBJCTypeImplementation( fileOut, genType, baseOnly ):
+	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
+		return
+
+	fileOut.write('\n@implementation %s\n' % genType.name)
+
+	writeOBJCTypeInitDeclaration( fileOut, genType, implementation = True )
+	fileOut.write('{\n')
+	if genType.baseType is not None:
+		fileOut.write('\tif (self = ')
+		writeOBJCTypeSuperInitDeclaration( fileOut, genType.baseType )
+		fileOut.write(') {\n')
+	else:
+		fileOut.write('\tif (self = [super init]) {\n')
+	
+	for fieldName in genType.fieldNames():
+		field = genType.fieldType(fieldName)
+		fieldAlias = genType.fieldAlias(fieldName)
+		fileOut.write('\t\t_' + fieldAlias + ' = ' + fieldAlias + ';\n' )
+	fileOut.write('\t}\n\treturn self;\n}\n')
+
+	if not baseOnly:
+		writeOBJCTypeImplementationMethods( fileOut, genType )
+
+	fileOut.write("@end\n")
+
+def writeOBJCTypeImplementationCategory( fileOut, genType, category ):
+	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
+		return
+	fileOut.write('\n@implementation %s(%s)\n' % ( genType.name, category ))
+	writeOBJCTypeImplementationMethods( fileOut, genType )
 	fileOut.write("@end\n")
 
 def getOBJCEmptyValueForType( emptyValueType ):
@@ -468,23 +498,37 @@ def writeObjCIfaceHeader( fileOut, inputName ):
 """
 	fileOut.write(declaration)
 
+def writeObjCIfaceHeaderCategory( fileOut, inputName ):
+	declaration = Template("""
+#import "$inName.h"
+""")
+	fileOut.write(declaration.substitute(inName=inputName))
+
 def writeObjCIfaceImports( fileOut, importNames ):
 	for name in importNames:
 		fileOut.write('#import "%s.h"\n' % name)
 
-def writeObjCIfaceDeclaration( fileOut, inputName ):
-	declaration = Template("""
-@interface $inName: NSObject
-- (instancetype)initWithTransport:(id<IFTransport>)transport NS_DESIGNATED_INITIALIZER;
-""")
-	fileOut.write(declaration.substitute(inName=inputName))
+def writeObjCIfaceDeclaration( fileOut, inputName, baseOnly ):
+	fileOut.write( '\n@interface %s: NSObject\n' % inputName )
+	if not baseOnly:
+		fileOut.write('- (instancetype)initWithTransport:(id<IFTransport>)transport NS_DESIGNATED_INITIALIZER;\n')
+
+def writeObjCIfaceDeclarationCategory( fileOut, inputName, category ):
+	fileOut.write( '\n@interface %s (%s)\n' % (inputName, category) )
 
 def writeObjCIfaceFooter( fileOut, inputName ):
 	fileOut.write("\n@end")
 
-def writeObjCImplHeader( fileOut, inputName ):
-	declaration = Template("""\
-#import "$inName.h"
+def writeObjCImplHeader( fileOut, inputName, baseOnly ):
+	fileOut.write( '#import "%s.h"\n\n' % inputName )
+	if baseOnly: 
+		return
+
+	declaration = """\
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused"
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+
 #define NULLABLE( s ) (s == nil ? [NSNull null] : s)
 static const NSUInteger jsonFormatOption = 
 #ifdef DEBUG
@@ -493,12 +537,8 @@ static const NSUInteger jsonFormatOption =
 	0;
 #endif
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused"
-#pragma clang diagnostic ignored "-Wundeclared-selector"
-
-""")
-	fileOut.write(declaration.substitute(inName=inputName))
+"""
+	fileOut.write( declaration )
 
 def writeObjCImplDeclaration( fileOut, inputName ):
 	declaration = Template("""
@@ -571,8 +611,11 @@ def writeObjCImplementation( genDir, category, module ):
 
 	writeObjCIfaceHeader( objCIface, module.name )
 	writeObjCIfaceImports( objCIface, module.importedModuleNames )
+	writeObjCImplHeader( objCImpl, module.name, baseOnly = (category is not None) )
 
-	writeObjCImplHeader( objCImpl, module.name )			
+	if category is not None:
+		writeObjCIfaceHeaderCategory( objCIfaceCategory, module.name )
+		writeObjCImplHeader( objCImplCategory, '%s+%s' % (module.name, category), baseOnly = False )
 
 	alreadyDeclaredTypes = set( module.importedTypeList.keys() )
 	for genTypeName in module.typeList.keys():
@@ -580,20 +623,28 @@ def writeObjCImplementation( genDir, category, module ):
 		currentType = module.typeList[genTypeName]
 		for forwardingType in findDependenciesUnresolved( alreadyDeclaredTypes, currentType):
 			writeObjCForwardingDeclaration( objCIface, forwardingType )
-		writeOBJCTypeDeclaration( objCIface, currentType )
-		writeOBJCTypeImplementation( objCImpl, currentType )
+		writeOBJCTypeDeclaration( objCIface, currentType, baseOnly = (category is not None) )
+		writeOBJCTypeImplementation( objCImpl, currentType, baseOnly = (category is not None) )		
+		if category is not None:
+			writeOBJCTypeDeclarationCategory( objCIfaceCategory, currentType, category )
+			writeOBJCTypeImplementationCategory( objCImplCategory, currentType, category )
 
-	if len( module.methods ) != 0:
-		writeObjCIfaceDeclaration( objCIface, module.name )
+	if len( module.methods ) == 0:
+		writeObjCFooter( objCImpl )
+		return
+
+	writeObjCIfaceDeclaration( objCIface, module.name, baseOnly = (category is not None) )
+	if category is not None:
+		writeObjCIfaceDeclarationCategory( objCIfaceCategory, module.name, category )
+	else:
 		writeObjCImplDeclaration( objCImpl, module.name )
 
 	for method in module.methods:
 		writeOBJCMethodDeclaration( objCIface, method, implementation = False )
 		writeOBJCMethodImplementation( objCImpl, method )
 
-	if len( module.methods ) != 0:
-		writeObjCIfaceFooter( objCIface, module.name )
-		writeObjCImplFooter( objCImpl, module.name )
+	writeObjCIfaceFooter( objCIface, module.name )
+	writeObjCImplFooter( objCImpl, module.name )
 
 	writeObjCFooter( objCImpl )
 

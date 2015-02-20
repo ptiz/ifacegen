@@ -12,3 +12,5 @@ ifacegen.test/ifacegen.test.test/OBCTypes.h
 ifacegen.test/ifacegen.test.test/OBCTypes.m
 ifacegen.test/ifacegen.test.test/OBCCategory.h
 ifacegen.test/ifacegen.test.test/OBCCategory.m
+ifacegen.test/ifacegen.test.test/OBCCategory+RPC.h
+ifacegen.test/ifacegen.test.test/OBCCategory+RPC.m

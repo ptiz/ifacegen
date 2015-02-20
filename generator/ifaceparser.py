@@ -137,20 +137,23 @@ def buildMethodFromJSON( jsonItem, typeList, importedTypeList ):
 def parseModule( jsonFile ):
 	with open( jsonFile, "rt" ) as jFile:
 		jsonObj = json.load( jFile, object_pairs_hook=OrderedDict )
-		if jsonObj["iface"] is not None:
 
-			baseDir = os.path.dirname( jsonFile )
+		if jsonObj["iface"] is None:
+			raise Exception('Module ' + jsonFile + ' is not a valid ifacegen IDL file. "iface" section was not found.')
 
-			inputNameParts = os.path.basename( jsonFile ).split('.')		
-			module = GenModule( inputNameParts[0] )
+		baseDir = os.path.dirname( jsonFile )
 
-			for jsonItem in jsonObj["iface"]:
-				if "struct" in jsonItem:
-					buildTypeFromStructJSON( jsonItem, module.typeList, module.importedTypeList )
-				elif "procedure" in jsonItem:
-					module.methods.append( buildMethodFromJSON( jsonItem, module.typeList, module.importedTypeList ) )
-				elif "import" in jsonItem:
-					importModule( os.path.join( baseDir, jsonItem["import"]), fromModule=module )
+		inputNameParts = os.path.basename( jsonFile ).split('.')
+		module = GenModule( inputNameParts[0] )
+
+		for jsonItem in jsonObj["iface"]:
+			if "struct" in jsonItem:
+				buildTypeFromStructJSON( jsonItem, module.typeList, module.importedTypeList )
+			elif "procedure" in jsonItem:
+				module.methods.append( buildMethodFromJSON( jsonItem, module.typeList, module.importedTypeList ) )
+			elif "import" in jsonItem:
+				importModule( os.path.join( baseDir, jsonItem["import"]), fromModule=module )
+
 	return module
 
 def importModule( jsonFile, fromModule ):

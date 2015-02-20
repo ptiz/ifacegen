@@ -538,6 +538,18 @@ def writeWarning( fileOut, inputName ):
 """
 	fileOut.write(declaration)
 
+def findDependenciesUnresolved( typeSet, typeToCheck ):
+	unresolved = []
+	if isinstance( typeToCheck, GenComplexType ):
+		for fieldName in typeToCheck.allFieldNames():
+			fieldType = typeToCheck.fieldType(fieldName)
+			if isinstance( fieldType, GenComplexType ) and ( fieldType.name not in typeSet ):
+				unresolved.append( fieldType )
+	return unresolved
+
+def writeObjCForwardingDeclaration( fileOut, forwardingType ):
+	fileOut.write('\n@class ' + forwardingType.name + ';\n')
+
 def writeObjCImplementation( genDir, category, module ):
 
 	if not os.path.exists( genDir ):
@@ -562,15 +574,18 @@ def writeObjCImplementation( genDir, category, module ):
 
 	writeObjCImplHeader( objCImpl, module.name )			
 
+	alreadyDeclaredTypes = set( module.importedTypeList.keys() )
 	for genTypeName in module.typeList.keys():
-		writeOBJCTypeDeclaration( objCIface, module.typeList[genTypeName] )
-		writeOBJCTypeImplementation( objCImpl, module.typeList[genTypeName] )
+		alreadyDeclaredTypes.add( genTypeName )
+		currentType = module.typeList[genTypeName]
+		for forwardingType in findDependenciesUnresolved( alreadyDeclaredTypes, currentType):
+			writeObjCForwardingDeclaration( objCIface, forwardingType )
+		writeOBJCTypeDeclaration( objCIface, currentType )
+		writeOBJCTypeImplementation( objCImpl, currentType )
 
 	if len( module.methods ) != 0:
 		writeObjCIfaceDeclaration( objCIface, module.name )
 		writeObjCImplDeclaration( objCImpl, module.name )
-		objCIface.write("\n/* methods */\n\n")
-		objCImpl.write("\n/* implementation */\n\n")	
 
 	for method in module.methods:
 		writeOBJCMethodDeclaration( objCIface, method, implementation = False )

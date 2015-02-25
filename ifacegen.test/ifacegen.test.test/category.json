@@ -11,7 +11,7 @@
 
 {
 "procedure": "Run",
-"response": "int32"
+"response": "string"
 }
            
 ]}

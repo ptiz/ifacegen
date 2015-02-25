@@ -20,7 +20,7 @@
 # THE SOFTWARE.
 
 from ifaceparser import *
-from ifaceobjcgen import *
+from ifaceobjcgennew import *
 import argparse
 import sys
 import types

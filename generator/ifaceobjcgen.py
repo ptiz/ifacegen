@@ -434,8 +434,8 @@ def getOBJCEmptyValueForType( emptyValueType ):
 			
 def writeOBJCMethodCustomRequestParam( fileOut, customRequestParamName, customRequestParam ):
 	paramSelectorName = makeAlias( 'set_' + customRequestParamName )
-	fileOut.write('\tif (![transport respondsToSelector:@selector(' + paramSelectorName + ':)]) {\n\t\tassert("Transport does not respond to selector ' + paramSelectorName + ':");\n\t} ')
-	fileOut.write('else {\n\t\t[transport performSelector:@selector(' + paramSelectorName + ':) withObject:')
+	fileOut.write('\tif (![self.transport respondsToSelector:@selector(' + paramSelectorName + ':)]) {\n\t\tassert("Transport does not respond to selector ' + paramSelectorName + ':");\n\t} ')
+	fileOut.write('else {\n\t\t[self.transport performSelector:@selector(' + paramSelectorName + ':) withObject:')
 	unwindInputTypeToOBJC( fileOut, customRequestParam, None, 3)
 	fileOut.write('\n\t\t];\n\t}\n')
 
@@ -464,9 +464,9 @@ def writeOBJCMethodImplementation( fileOut, method ):
 		fileOut.write(";\n")
 
 		fileOut.write("\tNSData* inputData = [NSJSONSerialization dataWithJSONObject:inputDict options:jsonFormatOption error:error];\n")
-		fileOut.write('\tif ( ![transport writeAll:inputData prefix:' + methodPrefix + ' error:error] ) {\n')
+		fileOut.write('\tif ( ![self.transport writeAll:inputData prefix:' + methodPrefix + ' error:error] ) {\n')
 	else:
-		fileOut.write('\tif ( ![transport writeAll:nil prefix:' + methodPrefix + ' error:error] ) {\n')
+		fileOut.write('\tif ( ![self.transport writeAll:nil prefix:' + methodPrefix + ' error:error] ) {\n')
 
 	# fileOut.write('\t\tNSLog(@"' + method.name + ': server call failed, %@", *error);\n')
 
@@ -477,7 +477,7 @@ def writeOBJCMethodImplementation( fileOut, method ):
 	else:
 		fileOut.write( emptyReturnString )
 
-	fileOut.write('\tNSData* outputData = [transport readAll];\n\tif ( outputData == nil ) {\n')
+	fileOut.write('\tNSData* outputData = [self.transport readAll];\n\tif ( outputData == nil ) {\n')
 	fileOut.write( emptyReturnString )
 
 	outputName = 'output'
@@ -495,11 +495,13 @@ def writeObjCIfaceHeader( fileOut, inputName ):
 	declaration = """
 #import <Foundation/Foundation.h>
 #import "IFTransport.h"
+#import "IFServiceClient.h"
 """
 	fileOut.write(declaration)
 
 def writeObjCIfaceHeaderCategory( fileOut, inputName ):
 	declaration = Template("""
+#import "IFServiceClient.h"		
 #import "$inName.h"
 """)
 	fileOut.write(declaration.substitute(inName=inputName))
@@ -509,9 +511,7 @@ def writeObjCIfaceImports( fileOut, importNames ):
 		fileOut.write('#import "%s.h"\n' % name)
 
 def writeObjCIfaceDeclaration( fileOut, inputName, baseOnly ):
-	fileOut.write( '\n@interface %s: NSObject\n' % inputName )
-	if not baseOnly:
-		fileOut.write('- (instancetype)initWithTransport:(id<IFTransport>)transport NS_DESIGNATED_INITIALIZER;\n')
+	fileOut.write( '\n@interface %s: IFServiceClient\n' % inputName )
 
 def writeObjCIfaceDeclarationCategory( fileOut, inputName, category ):
 	fileOut.write( '\n@interface %s (%s)\n' % (inputName, category) )
@@ -540,25 +540,18 @@ static const NSUInteger jsonFormatOption =
 """
 	fileOut.write( declaration )
 
-def writeObjCImplDeclaration( fileOut, inputName ):
+def writeObjCImplDeclaration( fileOut, inputName, category=None ):
 	declaration = Template("""
-@interface $inName() {
-	id<IFTransport> transport;
-}
+@interface $inName()
+@property (nonatomic) id<IFTransport> transport;
 @end
 
-@implementation $inName
-- (instancetype)initWithTransport:(id<IFTransport>)trans {
-	if ( self = [super init] ) {
-		transport = trans;
-	}
-	return self;
-}
-- (NSError*)errorWithMessage:(NSString*)msg {
-	return [NSError errorWithDomain:NSStringFromClass([self class]) code:0 userInfo:@{NSLocalizedDescriptionKey: msg}];
-}
 """)
-	fileOut.write(declaration.substitute(inName=inputName))
+	fileOut.write(declaration.substitute(inName=inputName))	
+	if category is not None:
+		fileOut.write('\n@implementation %s(%s)\n' % (inputName, category))
+	else:
+		fileOut.write('\n@implementation %s\n' % inputName)
 
 def writeObjCImplFooter( fileOut, inputName ):
 	fileOut.write("\n@end")	
@@ -589,6 +582,33 @@ def findDependenciesUnresolved( typeSet, typeToCheck ):
 
 def writeObjCForwardingDeclaration( fileOut, forwardingType ):
 	fileOut.write('\n@class ' + forwardingType.name + ';\n')
+
+def writeObjCHeader( fileOut, module, baseOnly ):
+	writeWarning( fileOut, None )
+
+	fileOut.write("""
+#import <Foundation/Foundation.h>
+#import "IFTransport.h"
+#import "IFServiceClient.h"
+
+""")
+	for name in module.importNames:
+		fileOut.write('#import "%s.h"\n' % name)
+		
+	alreadyDeclaredTypes = set( module.importedTypeList.keys() )
+	for genTypeName in module.typeList.keys():
+		alreadyDeclaredTypes.add( genTypeName )
+		currentType = module.typeList[genTypeName]
+		for forwardingType in findDependenciesUnresolved( alreadyDeclaredTypes, currentType):
+			writeObjCForwardingDeclaration( fileOut, forwardingType )
+		writeOBJCTypeDeclaration( fileOut, currentType, baseOnly )
+
+	writeObjCIfaceDeclaration( fileOut, module.name, baseOnly )
+
+	for method in module.methods:
+		writeOBJCMethodDeclaration( fileOut, method, implementation = False )
+		
+	writeObjCIfaceFooter( fileOut, module.name )		
 
 def writeObjCImplementation( genDir, category, module ):
 
@@ -634,17 +654,25 @@ def writeObjCImplementation( genDir, category, module ):
 		return
 
 	writeObjCIfaceDeclaration( objCIface, module.name, baseOnly = (category is not None) )
+
 	if category is not None:
+		writeObjCImplDeclaration( objCImpl, module.name )
+		writeObjCImplFooter( objCImpl, module.name )
+
 		writeObjCIfaceDeclarationCategory( objCIfaceCategory, module.name, category )
+		writeObjCImplDeclaration( objCImplCategory, module.name, category )
+		for method in module.methods:
+			writeOBJCMethodDeclaration( objCIfaceCategory, method, implementation = False )
+			writeOBJCMethodImplementation( objCImplCategory, method )
+		writeObjCIfaceFooter( objCIfaceCategory, module.name )
+		writeObjCIfaceFooter( objCIface, module.name )			
+		writeObjCImplFooter( objCImplCategory, module.name )
 	else:
 		writeObjCImplDeclaration( objCImpl, module.name )
-
-	for method in module.methods:
-		writeOBJCMethodDeclaration( objCIface, method, implementation = False )
-		writeOBJCMethodImplementation( objCImpl, method )
-
-	writeObjCIfaceFooter( objCIface, module.name )
-	writeObjCImplFooter( objCImpl, module.name )
-
-	writeObjCFooter( objCImpl )
+		for method in module.methods:
+			writeOBJCMethodDeclaration( objCIface, method, implementation = False )
+			writeOBJCMethodImplementation( objCImpl, method )
+		writeObjCImplFooter( objCImpl, module.name )
+		writeObjCIfaceFooter( objCIface, module.name )		
+		writeObjCFooter( objCImpl )
 

@@ -6,7 +6,9 @@
 "struct": "Employee",
 "extends": "Human",
 "typedef": {
-		"dimension":"double",
+		"age":"double",
+        "employment_rec": [ [ { "begin": "int64", "end": "int64" } ] ],
+        "employment_data": "raw",
 		"children":[{
 				"name":"string",
 				"birthdate":"int64"

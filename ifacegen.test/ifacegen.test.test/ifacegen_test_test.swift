@@ -30,8 +30,10 @@ class ifacegen_test_test: XCTestCase {
         child.name = "Mary"
         child.birthdate = Int64(NSDate().timeIntervalSince1970)
         
-        employee0 = OBCEmployee(name: "empl0", andTheId: 781341234, andPassport: self.pass, andDimension: 345.67, andChildren:[child])
-        employee1 = OBCEmployee(name: "empl1", andTheId: 87245, andPassport: self.pass, andDimension: 623.76, andChildren:[child, child])
+        employee0 = OBCEmployee(name: "empl0", andTheId: 781341234, andMarried: true, andPassport: self.pass, andAge: 345.67, andEmploymentRec: [ [OBCEmployeeEmploymentRecItemItem(begin: 1, andEnd: 2)], [OBCEmployeeEmploymentRecItemItem(begin: 3, andEnd: 4), OBCEmployeeEmploymentRecItemItem(begin: 5, andEnd: 6)] ], andEmploymentData: ["data":"any"], andChildren: [child])
+
+        employee1 = OBCEmployee(name: "empl1", andTheId: 87245, andMarried:false, andPassport: self.pass, andAge: 623.76, andEmploymentRec:[], andEmploymentData:["any":"data"], andChildren:[child, child])
+        
         employer = OBCEmployer(stuff: [self.employee0, self.employee1], andInfo: ["review":"passed"])
         
         internalDepartment = OBCDepartment(name: "Testers sub-dept.", andEmployees: [self.employee0], andDepartments: nil)
@@ -60,9 +62,17 @@ class ifacegen_test_test: XCTestCase {
         XCTAssertTrue(desEmployee0.passport.theId == 786234, "Employee pass is wrong")
         XCTAssertTrue(desEmployee0.children.count == 1, "Children0 array is wrong" )
         XCTAssertTrue(desEmployee1.children.count == 2, "Children1 array is wrong")
+        XCTAssertTrue(desEmployee0.employmentRec.count == 2, "Employment record is wrong for Employee0")
+        
+        let array = desEmployee0.employmentRec[1] as [AnyObject]
+        let itemItem = array[1] as OBCEmployeeEmploymentRecItemItem
+        XCTAssertTrue( itemItem.begin == 5, "Employee0.employmentRec[1][1].begin is wrong")
         
         let desChild = desEmployee1.children[1] as OBCEmployeeChildrenItem
         XCTAssertEqual(desChild.name, "Mary", "Child name is wrong")
+        
+        let employmentDataValue = desEmployee0.employmentData["data"] as String
+        XCTAssertEqual(employmentDataValue, "any", "employmentData is wrong for Employee0")
     }
     
     func testRecursiveTypes() {

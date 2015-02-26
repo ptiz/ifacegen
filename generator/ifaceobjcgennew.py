@@ -38,6 +38,28 @@ def OBJCDecorateTypeForDict( objcTypeStr, genType ):
 		template = Template('[[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:$objcTypeStr options:jsonFormatOption error:error] encoding:NSUTF8StringEncoding]')
 	return template.substitute( objcTypeStr=objcTypeStr )
 
+def OBJCDecorateTypeFromJSON( retType, varValue ):
+	templateNSNumberStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? $emptyVal : ((NSNumber*)tmp).$selector )')
+	templateNSStringStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? nil : (NSString*)tmp )')
+	templateNSDictionaryStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? nil : (NSDictionary*)tmp )')
+	templateRawNSDictionaryStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? nil : [NSJSONSerialization JSONObjectWithData:[(NSString*)tmp dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:&error] )')
+	if retType.sType == "bool":
+		return templateNSNumberStr.substitute( tmpVarValue=varValue, emptyVal='NO', selector='boolValue' )
+	if retType.sType == "int32":
+		return templateNSNumberStr.substitute( tmpVarValue=varValue, emptyVal='0', selector='intValue' )
+	if retType.sType == "int64":
+		return templateNSNumberStr.substitute( tmpVarValue=varValue, emptyVal='0L', selector='longLongValue' )
+	if retType.sType == "double":
+		return templateNSNumberStr.substitute( tmpVarValue=varValue, emptyVal='0.0', selector='doubleValue' )
+	if retType.sType == "string":
+		return templateNSStringStr.substitute( tmpVarValue=varValue )
+	if retType.sType == "raw":
+		return templateNSDictionaryStr.substitute( tmpVarValue=varValue )
+	if retType.sType == "rawstr":
+		return templateRawNSDictionaryStr.substitute( tmpVarValue=varValue )
+	return "ERROR";
+
+
 def OBJCAppendIfNotEmpty( list, strItem ):
 	if strItem is not None and len(strItem) > 0:
 		list.append( strItem )
@@ -217,15 +239,42 @@ def OBJCUnwindTypeToDict( genType, objcArgName, level, recursive=True ):
 			arrayTemplate = Template("""\
 ^NSArray*(NSArray* inArr) {
 ${tabLevel}NSMutableArray* resArr = [NSMutableArray arrayWithCapacity:[inArr count]];
-${tabLevel}for($objcType$objcTypePtr inObj in inArr) {
-${tabLevel}\t[resArr addObject:$argValue];
-${tabLevel}}
-${tabLevel}return resArr; } ($objcArgName)
-""")
+${tabLevel}for($objcType$objcTypePtr inObj in inArr) { [resArr addObject:$argValue]; }
+${tabLevel}return resArr; } ($objcArgName)""")
 			return arrayTemplate.substitute( tabLevel='\t'*level, objcType=assumeOBJCType(genType.itemType), objcTypePtr=genType.itemType.ptr, argValue=OBJCUnwindTypeToDict( genType.itemType, 'inObj', level+2, recursive=False ), objcArgName=objcArgName )
 
-def OBJCUnwindTypeFromDict( genType ):
-	return 'int i = 0'
+def OBJCListTypeFromDictionary( genType, objcDataGetter, level ):
+	listTypeTemplate = Template("""\
+^NSArray*(id inObj) {
+${tabLevel}\tNSMutableArray* items;
+${tabLevel}\tif ( inObj == nil ||  [inObj isEqual:[NSNull null]] || ![inObj isKindOfClass:NSArray.class]) return nil;
+${tabLevel}\tNSArray* inArr = (NSArray*)inObj;
+${tabLevel}\titems = [NSMutableArray arrayWithCapacity:inArr.count];
+${tabLevel}\tfor ( id item in inArr ) { id tmp; [items addObject:$itemObj]; }
+${tabLevel}\treturn items;
+${tabLevel}}( $objcDataGetter )""")
+	return listTypeTemplate.substitute( tabLevel='\t'*level, itemObj=OBJCTypeFromDictionary(genType.itemType, "item", level+1 ), objcDataGetter=objcDataGetter )
+
+def OBJCTypeFromDictionary( genType, objcDataGetter, level ):
+	complexTypeTemplate = Template('[[$typeName alloc] initWithDictionary:$objcDataGetter error:error]')
+	if isinstance( genType, GenIntegralType ):
+		return OBJCDecorateTypeFromJSON( genType, objcDataGetter )
+	if isinstance( genType, GenComplexType ):
+		return complexTypeTemplate.substitute( typeName=genType.name, objcDataGetter=objcDataGetter )
+	if isinstance( genType, GenListType ):
+		if isinstance(genType.itemType, GenIntegralType):
+			return objcDataGetter
+		else:
+			return OBJCListTypeFromDictionary( genType, objcDataGetter, level+1 )
+
+def OBJCComplexTypeFieldListFromDictionary( genType, objcDictArgName ):
+	template = Template('\tself.$argName = $value')
+	fieldList = []
+	for fieldName in genType.allFieldNames():
+		fieldType = genType.fieldType(fieldName)
+		objcDataGetter = '%s[@"%s"]' % ( objcDictArgName, fieldName )
+		fieldList.append( template.substitute( argName=genType.fieldAlias(fieldName), value=OBJCTypeFromDictionary( fieldType, objcDataGetter, 1 ) ) )
+	return ';\n'.join( fieldList )
 
 def OBJCTypeSerializationImplList( genType ):
 	template = Template("""
@@ -241,9 +290,9 @@ def OBJCTypeSerializationImplList( genType ):
 
 - (void)readDictionary:(NSDictionary*)dict withError:(NSError* __autoreleasing*)error {
 	id tmp;
-	$typeFromDictionary;
+$complexTypeFieldsFromDictionary;
 }
-
+//TODO: check here the super-type proper init with dictionary
 - (instancetype)initWithDictionary:(NSDictionary*)dictionary error:(NSError* __autoreleasing*)error {
 	if ( dictionary == nil ) return nil;
 	if (self = [super init]) {
@@ -265,7 +314,7 @@ def OBJCTypeSerializationImplList( genType ):
 }
 """)
 	
-	return template.substitute( typeDictionary=OBJCUnwindTypeToDict( genType, 'self', 2 ), typeFromDictionary=OBJCUnwindTypeFromDict( genType ) )
+	return template.substitute( typeDictionary=OBJCUnwindTypeToDict( genType, 'self', 2 ), complexTypeFieldsFromDictionary=OBJCComplexTypeFieldListFromDictionary( genType,'dict' ) )
 	
 def OBJCTypeImplementation( genType ):
 	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):

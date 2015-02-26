@@ -147,6 +147,47 @@ def OBJCTypeDeclarationList( module, serializersListGenerator ):
 		OBJCAppendIfNotEmpty( declList, OBJCTypeDeclaration( currentType, serializersListGenerator ) )
 	return '\n'.join( declList )
 
+#TODO: make a column if there are more than 2 args in the declaration
+def OBJCRPCMethodDeclaration( method ):
+	template = Template('- ($responseType)$methodName$withStr$argList')
+	argList = []
+
+	if method.prefix is None:
+		argList.append('Prefix:(NSString*)prefix')
+	if method.requestJsonType is not None:
+		argList.append( OBJCArgList( method.requestJsonType ) )
+	for customRequestType in method.customRequestTypes.values():
+		argList.append( OBJCArgList( customRequestType ) )
+
+	argListStr = '\n\tand'.join(argList)
+
+	responseType = 'void'
+	if method.responseType is not None:
+		responseType = "%s%s" % ( assumeOBJCType(method.responseType), method.responseType.ptr )
+
+	withStr = ''
+	if len(argList) > 0:
+		withStr = 'With'
+
+	return template.substitute( responseType=responseType, methodName=method.name, withStr=withStr, argList=argListStr )
+
+def OBJCRPCMethodList( module ):
+	methodList = []
+	for method in module.methods:
+		methodList.append( OBJCRPCMethodDeclaration( method ) )
+	return ';\n'.join(methodList)
+
+def OBCRPCDeclaration( module ):
+	if len(module.methods) == 0:
+		return ''
+		
+	template = Template("""\
+@interface $rpcClientName: IFServiceClient
+$methods;
+@end
+""")
+	return template.substitute( rpcClientName=module.name, methods=OBJCRPCMethodList( module ) )
+
 OBJCGeneratedWarning = """\
 /**
  * @generated
@@ -155,21 +196,25 @@ OBJCGeneratedWarning = """\
  *
  */"""
 
+OBJCHeaderIFImports = """\
+#import "IFTransport.h"
+#import "IFServiceClient.h"
+"""
+
 OBJCHeaderTemplate = Template("""\
 $generatedWarning
 
 #import <Foundation/Foundation.h>
-#import "IFTransport.h"
-#import "IFServiceClient.h"
-$importList
+$IFImportList$importList
 $typeDeclarationList
+$rpcDeclaration
 """)
 
 def OBJCHeader( module ):
-	return OBJCHeaderTemplate.substitute( generatedWarning=OBJCGeneratedWarning, importList=OBJCImportList( module ), typeDeclarationList=OBJCTypeDeclarationList( module, OBJCTypeSerializersDeclarationList ) )
+	return OBJCHeaderTemplate.substitute( generatedWarning=OBJCGeneratedWarning, IFImportList=OBJCHeaderIFImports, importList=OBJCImportList( module ), typeDeclarationList=OBJCTypeDeclarationList( module, OBJCTypeSerializersDeclarationList ), rpcDeclaration=OBCRPCDeclaration( module ) )
 
 def OBJCHeaderForCategory( module ):
-	return OBJCHeaderTemplate.substitute( generatedWarning=OBJCGeneratedWarning, importList=OBJCImportList( module ), typeDeclarationList=OBJCTypeDeclarationList( module, lambda genType: '' ) )
+	return OBJCHeaderTemplate.substitute( generatedWarning=OBJCGeneratedWarning, IFImportList='', importList=OBJCImportList( module ), typeDeclarationList=OBJCTypeDeclarationList( module, lambda genType: '' ),  rpcDeclaration='' )
 
 ############################
 # Implementation module
@@ -270,6 +315,7 @@ def OBJCTypeFromDictionary( genType, objcDataGetter, level ):
 def OBJCComplexTypeFieldListFromDictionary( genType, objcDictArgName ):
 	template = Template('\tself.$argName = $value')
 	fieldList = []
+	#here we init all the fields available, including ancestor's ones instead of calling non-public "[super readDictionary]" method
 	for fieldName in genType.allFieldNames():
 		fieldType = genType.fieldType(fieldName)
 		objcDataGetter = '%s[@"%s"]' % ( objcDictArgName, fieldName )
@@ -292,7 +338,7 @@ def OBJCTypeSerializationImplList( genType ):
 	id tmp;
 $complexTypeFieldsFromDictionary;
 }
-//TODO: check here the super-type proper init with dictionary
+
 - (instancetype)initWithDictionary:(NSDictionary*)dictionary error:(NSError* __autoreleasing*)error {
 	if ( dictionary == nil ) return nil;
 	if (self = [super init]) {
@@ -310,7 +356,7 @@ $complexTypeFieldsFromDictionary;
 		[self readDictionary:dict withError:error];
 		if ( error && *error != nil ) self = nil;
 	}
-	return self;	
+	return self;
 }
 """)
 	

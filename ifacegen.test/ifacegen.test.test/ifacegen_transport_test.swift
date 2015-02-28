@@ -96,8 +96,11 @@ class ifacegen_transport_test: XCTestCase {
         XCTAssertEqual(response.count, 2, "Response objects count is wrong")
         
         let employee1 = response[0] as OBCEmployee
-        XCTAssertEqual(employee1.name, "John Doe", "Employee name is wrong in response")
+        XCTAssertEqual(employee1.name, "John Doe", "Employee1 name is wrong in response")
+        XCTAssertEqual(employee1.passport.periods.count, 5, "Periods count is wrong for Employee1 passport")
+        
         let employee2 = response[1] as OBCEmployee
-        XCTAssertEqual(employee2.name, "Mary Doe", "Employee name is wrong in response")
+        XCTAssertEqual(employee2.name, "Mary Doe", "Employee2 name is wrong in response")
+        XCTAssertTrue(employee2.passport.periods == nil, "Periods count is wrong for Employee2 passport")
     }
 }

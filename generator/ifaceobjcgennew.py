@@ -6,8 +6,7 @@ import os
 from collections import OrderedDict
 from string import Template
 
-#TODO: rename to OBJCAssumeType
-def assumeOBJCType( genType ):
+def OBJCAssumeType( genType ):
 	if isinstance( genType, GenIntegralType ):
 		t = genType.sType
 		integralTypeMap = { "string": "NSString", "bool": "BOOL", "int32": "int32_t", "int64": "int64_t", "double": "double_t", "raw": "NSDictionary", "rawstr": "NSDictionary" }
@@ -27,24 +26,29 @@ def OBJCDecorateTypeForDict( objcTypeStr, genType ):
 		template = Template('[[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:$objcTypeStr options:jsonFormatOption error:error] encoding:NSUTF8StringEncoding]')
 	return template.substitute( objcTypeStr=objcTypeStr )
 
-def OBJCDecorateTypeFromJSON( retType, varValue ):
+def OBJCDecorateTypeFromJSON( genType, varValue ):
 	templateNSNumberStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? $emptyVal : ((NSNumber*)tmp).$selector )')
 	templateNSStringStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? nil : (NSString*)tmp )')
 	templateNSDictionaryStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? nil : (NSDictionary*)tmp )')
+	templateNSArrayStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? nil : (NSArray*)tmp )')
 	templateRawNSDictionaryStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? nil : [NSJSONSerialization JSONObjectWithData:[(NSString*)tmp dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:&error] )')
-	if retType.sType == "bool":
+	if isinstance( genType, GenListType ):
+		return templateNSArrayStr.substitute( tmpVarValue=varValue )
+	if not isinstance( genType, GenIntegralType ):
+		return "ERROR"
+	if genType.sType == "bool":
 		return templateNSNumberStr.substitute( tmpVarValue=varValue, emptyVal='NO', selector='boolValue' )
-	if retType.sType == "int32":
+	if genType.sType == "int32":
 		return templateNSNumberStr.substitute( tmpVarValue=varValue, emptyVal='0', selector='intValue' )
-	if retType.sType == "int64":
+	if genType.sType == "int64":
 		return templateNSNumberStr.substitute( tmpVarValue=varValue, emptyVal='0L', selector='longLongValue' )
-	if retType.sType == "double":
+	if genType.sType == "double":
 		return templateNSNumberStr.substitute( tmpVarValue=varValue, emptyVal='0.0', selector='doubleValue' )
-	if retType.sType == "string":
+	if genType.sType == "string":
 		return templateNSStringStr.substitute( tmpVarValue=varValue )
-	if retType.sType == "raw":
+	if genType.sType == "raw":
 		return templateNSDictionaryStr.substitute( tmpVarValue=varValue )
-	if retType.sType == "rawstr":
+	if genType.sType == "rawstr":
 		return templateRawNSDictionaryStr.substitute( tmpVarValue=varValue )
 	return "ERROR";
 
@@ -69,7 +73,7 @@ def OBJCArgList( genType ):
 	for fieldName in genType.allFieldNames():
 		fieldType = genType.fieldType(fieldName)
 		fieldAlias = genType.fieldAlias(fieldName)
-		argList.append( template.substitute( arg=capitalizeFirstLetter(fieldAlias), argType=assumeOBJCType(fieldType), argTypePtr=fieldType.ptr, argAlias=fieldAlias ) )
+		argList.append( template.substitute( arg=capitalizeFirstLetter(fieldAlias), argType=OBJCAssumeType(fieldType), argTypePtr=fieldType.ptr, argAlias=fieldAlias ) )
 	return '\n\tand'.join(argList)
 
 def OBJCTypeInitDeclaration( genType ):
@@ -89,9 +93,9 @@ def OBJCTypePropertyList( genType ):
 	for fieldName in genType.fieldNames():
 		fieldType = genType.fieldType(fieldName)
 		if isinstance( fieldType, GenListType ):
-			propList.append( listTemplate.substitute(propType=assumeOBJCType( fieldType ), propTypePtr=fieldType.ptr, itemType=assumeOBJCType( fieldType.itemType ), propAlias=genType.fieldAlias( fieldName )) )
+			propList.append( listTemplate.substitute(propType=OBJCAssumeType( fieldType ), propTypePtr=fieldType.ptr, itemType=OBJCAssumeType( fieldType.itemType ), propAlias=genType.fieldAlias( fieldName )) )
 		else:
-			propList.append( template.substitute(propType=assumeOBJCType( fieldType ), propTypePtr=fieldType.ptr, propAlias=genType.fieldAlias( fieldName )) )
+			propList.append( template.substitute(propType=OBJCAssumeType( fieldType ), propTypePtr=fieldType.ptr, propAlias=genType.fieldAlias( fieldName )) )
 	return '\n'.join(propList)
 
 def OBJCTypeDeclaration( genType, serializersListGenerator ):
@@ -160,7 +164,7 @@ def OBJCRPCMethodDeclaration( method ):
 
 	responseType = 'void'
 	if method.responseType is not None:
-		responseType = "%s%s" % ( assumeOBJCType(method.responseType), method.responseType.ptr )
+		responseType = "%s%s" % ( OBJCAssumeType(method.responseType), method.responseType.ptr )
 
 	return template.substitute( responseType=responseType, methodName=method.name, argList=argListStr )
 
@@ -279,7 +283,7 @@ def OBJCUnwindTypeToDict( genType, objcArgName, level, recursive=True ):
 ${tabLevel}NSMutableArray* resArr = [NSMutableArray arrayWithCapacity:[inArr count]];
 ${tabLevel}for($objcType$objcTypePtr inObj in inArr) { [resArr addObject:$argValue]; }
 ${tabLevel}return resArr; } ($objcArgName)""")
-			return arrayTemplate.substitute( tabLevel='\t'*level, objcType=assumeOBJCType(genType.itemType), objcTypePtr=genType.itemType.ptr, argValue=OBJCUnwindTypeToDict( genType.itemType, 'inObj', level+2, recursive=False ), objcArgName=objcArgName )
+			return arrayTemplate.substitute( tabLevel='\t'*level, objcType=OBJCAssumeType(genType.itemType), objcTypePtr=genType.itemType.ptr, argValue=OBJCUnwindTypeToDict( genType.itemType, 'inObj', level+2, recursive=False ), objcArgName=objcArgName )
 
 def OBJCListTypeFromDictionary( genType, objcDataGetter, level ):
 	listTypeTemplate = Template("""\
@@ -301,7 +305,7 @@ def OBJCTypeFromDictionary( genType, objcDataGetter, level ):
 		return complexTypeTemplate.substitute( typeName=genType.name, objcDataGetter=objcDataGetter )
 	if isinstance( genType, GenListType ):
 		if isinstance(genType.itemType, GenIntegralType):
-			return objcDataGetter
+			return OBJCDecorateTypeFromJSON( genType, objcDataGetter )
 		else:
 			return OBJCListTypeFromDictionary( genType, objcDataGetter, level+1 )
 

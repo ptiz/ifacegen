@@ -9,7 +9,7 @@
 #import "IFServiceClient.h"
 
 @interface IFServiceClient()
-@property (nonatomic) id<IFTransport> transport;
+@property (nonatomic, readwrite) id<IFTransport> transport;
 @end
 
 @implementation IFServiceClient
@@ -19,9 +19,6 @@
         _transport = trans;
     }
     return self;
-}
-- (NSError*)errorWithMessage:(NSString*)msg {
-    return [NSError errorWithDomain:NSStringFromClass([self class]) code:0 userInfo:@{NSLocalizedDescriptionKey: msg}];
 }
 
 @end

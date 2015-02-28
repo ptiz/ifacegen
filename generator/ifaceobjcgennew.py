@@ -10,20 +10,9 @@ from string import Template
 def assumeOBJCType( genType ):
 	if isinstance( genType, GenIntegralType ):
 		t = genType.sType
-		if t == "string":
-			return "NSString"
-		if t == 'bool':
-			return "BOOL";
-		if t == "int32":
-			return "int32_t";
-		if t == "int64":
-			return "int64_t";
-		if t == "double":
-			return "double_t";
-		if t == "raw":
-			return "NSDictionary";
-		if t == "rawstr":
-			return "NSDictionary";
+		integralTypeMap = { "string": "NSString", "bool": "BOOL", "int32": "int32_t", "int64": "int64_t", "double": "double_t", "raw": "NSDictionary", "rawstr": "NSDictionary" }
+		if t in integralTypeMap:
+			return integralTypeMap[t]
 	if isinstance( genType, GenComplexType ):
 		return genType.name
 	if isinstance( genType, GenListType ):
@@ -59,6 +48,12 @@ def OBJCDecorateTypeFromJSON( retType, varValue ):
 		return templateRawNSDictionaryStr.substitute( tmpVarValue=varValue )
 	return "ERROR";
 
+def OBJCEmptyValForType( genType ):
+	if isinstance( genType, GenIntegralType ) and genType.sType == "bool":
+		return 'NO'
+	if len(genType.ptr) == 0:
+		return '0'
+	return 'nil'
 
 def OBJCAppendIfNotEmpty( list, strItem ):
 	if strItem is not None and len(strItem) > 0:
@@ -149,15 +144,17 @@ def OBJCTypeDeclarationList( module, serializersListGenerator ):
 
 #TODO: make a column if there are more than 2 args in the declaration
 def OBJCRPCMethodDeclaration( method ):
-	template = Template('- ($responseType)$methodName$withStr$argList')
+	template = Template('- ($responseType)${methodName}With$argList')
 	argList = []
 
 	if method.prefix is None:
 		argList.append('Prefix:(NSString*)prefix')
-	if method.requestJsonType is not None:
-		argList.append( OBJCArgList( method.requestJsonType ) )
 	for customRequestType in method.customRequestTypes.values():
 		argList.append( OBJCArgList( customRequestType ) )
+	if method.requestJsonType is not None:
+		argList.append( OBJCArgList( method.requestJsonType ) )
+
+	argList.append('Error:(NSError* __autoreleasing*)error')
 
 	argListStr = '\n\tand'.join(argList)
 
@@ -165,11 +162,7 @@ def OBJCRPCMethodDeclaration( method ):
 	if method.responseType is not None:
 		responseType = "%s%s" % ( assumeOBJCType(method.responseType), method.responseType.ptr )
 
-	withStr = ''
-	if len(argList) > 0:
-		withStr = 'With'
-
-	return template.substitute( responseType=responseType, methodName=method.name, withStr=withStr, argList=argListStr )
+	return template.substitute( responseType=responseType, methodName=method.name, argList=argListStr )
 
 def OBJCRPCMethodList( module ):
 	methodList = []
@@ -180,7 +173,7 @@ def OBJCRPCMethodList( module ):
 def OBCRPCDeclaration( module ):
 	if len(module.methods) == 0:
 		return ''
-		
+
 	template = Template("""\
 @interface $rpcClientName: IFServiceClient
 $methods;
@@ -390,11 +383,80 @@ def OBJCTypeImplementationList( module, implGenerator ):
 		OBJCAppendIfNotEmpty( implList, implGenerator( currentType ) )
 	return '\n'.join( implList )
 
+def OBJCRPCMethodImplementation( method ):
+	jsonArgsTemplate = Template('[NSJSONSerialization dataWithJSONObject:$jsonArgDict options:jsonFormatOption error:error]')
+	customArgsTemplate = Template("""\
+	if (![self.transport respondsToSelector:@selector($customArgSectionName:)]) {
+		assert("Transport does not respond to selector $customArgSectionName:.");
+	} else {
+		[self.transport performSelector:@selector($customArgSectionName:) withObject:$customArgDict];
+	}
+""")
+	returnTemplate = Template('return $response;')
+
+	template = Template("""\
+$declaration {
+	id tmp;
+$setCustomArgs
+	NSData* jsonData = $jsonData;
+	if ( ![self.transport writeAll:jsonData prefix:$prefix error:error] ) {
+		return$emptyVal;
+	}
+	NSData* outputData = [self.transport readAll];
+	if ( outputData == nil ) {
+		return$emptyVal;
+	}
+	id output = [NSJSONSerialization JSONObjectWithData:outputData options:NSJSONReadingAllowFragments error:error];
+	if ( error && *error != nil ) {
+		return$emptyVal;
+	}
+	$returnStr
+}""")
+
+	customArgsList = []
+	for customRequestTypeKey in method.customRequestTypes.keys():
+		customRequestType = method.customRequestTypes[customRequestTypeKey]
+		customArgsList.append( customArgsTemplate.substitute( customArgSectionName=makeAlias('set_' + customRequestTypeKey), customArgDict=OBJCUnwindTypeToDict( customRequestType, None, 3 ) ) )
+	setCustomArgs = '\n'.join(customArgsList)
+
+	jsonData='nil'
+	if method.requestJsonType is not None:
+		jsonData = jsonArgsTemplate.substitute( jsonArgDict=OBJCUnwindTypeToDict( method.requestJsonType, None, level=2 ) )	
+
+	prefix = 'prefix'
+	if method.prefix is not None:
+		prefix = '@"%s"' % (method.prefix)
+
+	returnStr = ''
+	emptyVal = ''
+	if method.responseType is not None:
+		returnStr = returnTemplate.substitute( response=OBJCTypeFromDictionary( method.responseType, 'output', level=2 ) )
+		emptyVal = ' ' + OBJCEmptyValForType( method.responseType )
+
+	return template.substitute( declaration=OBJCRPCMethodDeclaration( method ), setCustomArgs=setCustomArgs, jsonData=jsonData, prefix=prefix, returnStr=returnStr, emptyVal=emptyVal )
+
+def OBJCRPCImplementation( module ):
+	if len(module.methods) == 0:
+		return ''
+
+	template = Template("""\
+@implementation $moduleName
+$rpcMethodImplementationsList
+@end
+""")
+
+	methodList = []
+	for method in module.methods:
+		methodList.append( OBJCRPCMethodImplementation( method ) )
+
+	return template.substitute( moduleName=module.name, rpcMethodImplementationsList='\n'.join( methodList ) )
+
 def OBJCModule( module ):
 	template = Template("""\
 $generatedWarning
 
 #import "$modHeader.h"
+#import "IFServiceClient+Protected.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused"
@@ -410,9 +472,11 @@ static const NSUInteger jsonFormatOption =
 
 $typeImplementationList
 
+$rpcImplementation
 #pragma clang diagnostic pop
 """)
-	return template.substitute(generatedWarning=OBJCGeneratedWarning, modHeader=module.name, typeImplementationList=OBJCTypeImplementationList( module, OBJCTypeImplementation ))
+
+	return template.substitute(generatedWarning=OBJCGeneratedWarning, modHeader=module.name, typeImplementationList=OBJCTypeImplementationList( module, OBJCTypeImplementation ), rpcImplementation=OBJCRPCImplementation( module ))
 
 def OBJCModuleForCategory( module ):
 	template = Template("""

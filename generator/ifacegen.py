@@ -72,6 +72,9 @@ def main():
 	except Exception as ex:
 		print( str(ex) )
 		sys.exit(1)
+	except:
+		print( "Unexpected error:" + sys.exc_info()[0] )
+		sys.exit(1)		
 
 	return 0
 

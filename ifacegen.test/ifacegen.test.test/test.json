@@ -57,6 +57,10 @@
         "simple_param": "int32"
 	},
 "response": { "response" : [ "Employee" ] }
+},
+
+{
+"procedure": "procedureCall"
 }
 
 ]}

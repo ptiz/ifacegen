@@ -15,8 +15,13 @@ class TestTransport: IFHTTPTransport {
     var checkInput: ((NSData?) -> ())?
     var checkCustomInput: ((Dictionary<String, AnyObject>?) -> ())?
     
-    override init!(URL url: NSURL!) {
-        super.init(URL: url)
+    let responseFileName: String?
+    
+    init!(Response responseFileName: String?) {
+        super.init(URL: NSURL(fileURLWithPath: ""))
+        if let resFileName = responseFileName {
+            self.responseFileName = resFileName
+        }
     }
     
     override func writeAll(data: NSData!, prefix: String!, error: NSErrorPointer) -> Bool {
@@ -34,8 +39,10 @@ class TestTransport: IFHTTPTransport {
     }
     
     override func readAll() -> NSData! {
-        let response = "{\"response\":[{\"name\":\"John Doe\",\"id\":13,\"dimension\":13.1,\"passport\":{\"id\":12345,\"organization\":\"Org Inc.\" },\"children\":[{\"name\":\"John Doe J.\",\"birthdate\":8713452345}]}]}"
-        return response.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true);
+        if let responseFileName = self.responseFileName {
+            return NSData(contentsOfFile: NSBundle(forClass:self.classForCoder).pathForResource(responseFileName, ofType: "json")!)
+        }
+        return NSData()
     }
     
     func setCustomParams(params: Dictionary<String, AnyObject>) {
@@ -47,7 +54,7 @@ class ifacegen_transport_test: XCTestCase {
     
     func testCall() {
         
-        let testTransport = TestTransport(URL: NSURL(fileURLWithPath: "") )
+        let testTransport = TestTransport(Response: "test_transport_response")
         
         testTransport.checkURL = { (urlString) in
             if let url = urlString {
@@ -79,17 +86,18 @@ class ifacegen_transport_test: XCTestCase {
             XCTAssertTrue(simpleParam?.longLongValue == 13, "Custom simple parameter is wrong");
         }
 
-//TODO: uncomment when ready
-//        let testService = OBCTest(transport: testTransport)
-//        let filter1 = OBCGetEmployeesJsonArgsFilterItem(payload: "filter1")
-//        let filter2 = OBCGetEmployeesJsonArgsFilterItem(payload: "filter2")
-//        let complexParam = OBCGetEmployeesCustomParamsArgsComplexParam(complexField: "complex field")
-//        
-//        let response = testService.getEmployeesWithToken("qwerty", andTimestamp: 13452345, andComplexParam: complexParam, andSimpleParam: 13, andEmployerId: 9876345, andFilter: [filter1, filter2], andError: nil)
-//        
-//        XCTAssertEqual(response.count, 1, "Response objects count is wrong")
-//        
-//        let employee = response[0] as OBCEmployee
-//        XCTAssertEqual(employee.name, "John Doe", "Employee name is wrong in response")
+        let testService = OBCTest(transport: testTransport)
+        let filter1 = OBCGetEmployeesJsonArgsFilterItem(payload: "filter1")
+        let filter2 = OBCGetEmployeesJsonArgsFilterItem(payload: "filter2")
+        let complexParam = OBCGetEmployeesCustomParamsArgsComplexParam(complexField: "complex field")
+        
+        let response = testService.getEmployeesWithToken("qwerty", andTimestamp: 13452345, andComplexParam: complexParam, andSimpleParam: 13, andEmployerId: 9876345, andFilter: [filter1, filter2], andError: nil)
+        
+        XCTAssertEqual(response.count, 2, "Response objects count is wrong")
+        
+        let employee1 = response[0] as OBCEmployee
+        XCTAssertEqual(employee1.name, "John Doe", "Employee name is wrong in response")
+        let employee2 = response[1] as OBCEmployee
+        XCTAssertEqual(employee2.name, "Mary Doe", "Employee name is wrong in response")
     }
 }

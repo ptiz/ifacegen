@@ -20,6 +20,7 @@
 		C1C20A291A9B6C9E00A4D192 /* IFServiceClient.m in Sources */ = {isa = PBXBuildFile; fileRef = C1C20A281A9B6C9E00A4D192 /* IFServiceClient.m */; };
 		C1C75DAB1AA0983600BCBDBF /* IFServiceClient+Protected.m in Sources */ = {isa = PBXBuildFile; fileRef = C1C75DAA1AA0983600BCBDBF /* IFServiceClient+Protected.m */; };
 		C1C75DAD1AA1F7C700BCBDBF /* test_transport_response.json in Resources */ = {isa = PBXBuildFile; fileRef = C1C75DAC1AA1F7C700BCBDBF /* test_transport_response.json */; };
+		C1C75DAF1AA3D1EC00BCBDBF /* test_category_data.json in Resources */ = {isa = PBXBuildFile; fileRef = C1C75DAE1AA3D1EC00BCBDBF /* test_category_data.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -49,6 +50,7 @@
 		C1C75DA91AA0983600BCBDBF /* IFServiceClient+Protected.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IFServiceClient+Protected.h"; path = "../transport/IFServiceClient+Protected.h"; sourceTree = "<group>"; };
 		C1C75DAA1AA0983600BCBDBF /* IFServiceClient+Protected.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "IFServiceClient+Protected.m"; path = "../transport/IFServiceClient+Protected.m"; sourceTree = "<group>"; };
 		C1C75DAC1AA1F7C700BCBDBF /* test_transport_response.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = test_transport_response.json; sourceTree = "<group>"; };
+		C1C75DAE1AA3D1EC00BCBDBF /* test_category_data.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = test_category_data.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +97,7 @@
 				5BC93E441A779E6D00A6C3F6 /* test.json */,
 				5B85E1AA1A963B290037F82D /* category.json */,
 				C1C75DAC1AA1F7C700BCBDBF /* test_transport_response.json */,
+				C1C75DAE1AA3D1EC00BCBDBF /* test_category_data.json */,
 				5BE09E7D1A2475BC00AEC506 /* ifacegen_test_test.swift */,
 				5BC93E461A77A1C500A6C3F6 /* ifacegen_transport_test.swift */,
 				5BA77FFB1A97671500192FD9 /* ifacegen_category_test.swift */,
@@ -183,6 +186,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C1C75DAD1AA1F7C700BCBDBF /* test_transport_response.json in Resources */,
+				C1C75DAF1AA3D1EC00BCBDBF /* test_category_data.json in Resources */,
 				5BE8D5641A8CA664007E4146 /* types.json in Resources */,
 				5B85E1AB1A963B290037F82D /* category.json in Resources */,
 			);

@@ -116,6 +116,17 @@ $properties
 
 	return template.substitute(typeName=genType.name, baseTypeName=baseTypeName, init=OBJCTypeInitDeclaration( genType ), serializers=serializersListGenerator( genType ), properties=OBJCTypePropertyList( genType ))
 
+def OBJCCategoryTypeDeclaration( genType, category ):
+	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
+		return ''
+
+	template = Template("""\
+@interface $typeName($category)
+$serializers
+@end
+""")
+	return template.substitute( typeName=genType.name, category=category, serializers=OBJCTypeSerializersDeclarationList( genType ) )
+
 def OBJCTypeForwardingDeclaration( genType ):
 	return '@class %s;\n' % genType.name;
 
@@ -144,6 +155,13 @@ def OBJCTypeDeclarationList( module, serializersListGenerator ):
 		for forwardingType in OBJCFindDependenciesUnresolved( alreadyDeclaredTypes, currentType ):
 			declList.append( OBJCTypeForwardingDeclaration( forwardingType ) )
 		OBJCAppendIfNotEmpty( declList, OBJCTypeDeclaration( currentType, serializersListGenerator ) )
+	return '\n'.join( declList )
+
+def OBJCCategoryTypeDeclarationList( module, category ):
+	declList = []
+	for genTypeName in module.typeList.keys():
+		currentType = module.typeList[genTypeName]
+		OBJCAppendIfNotEmpty( declList, OBJCCategoryTypeDeclaration( currentType, category ) )
 	return '\n'.join( declList )
 
 #TODO: make a column if there are more than 2 args in the declaration
@@ -212,6 +230,16 @@ def OBJCHeader( module ):
 
 def OBJCHeaderForCategory( module ):
 	return OBJCHeaderTemplate.substitute( generatedWarning=OBJCGeneratedWarning, IFImportList='', importList=OBJCImportList( module ), typeDeclarationList=OBJCTypeDeclarationList( module, lambda genType: '' ),  rpcDeclaration='' )
+
+def OBJCCategoryHeader( module, category ):
+	template = Template("""\
+$generatedWarning
+
+#import "$moduleName.h"
+
+$typeDeclarationList
+""")
+	return template.substitute( generatedWarning=OBJCGeneratedWarning, moduleName=module.name, typeDeclarationList=OBJCCategoryTypeDeclarationList( module, category ) )
 
 ############################
 # Implementation module
@@ -380,6 +408,16 @@ $initImplList
 """)
 	return template.substitute( typeName=genType.name, initImplList=OBJCTypeInitImplList(genType) )
 
+def OBJCCategoryTypeImplementation( genType, category ):
+	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
+		return ''
+	template = Template("""\
+@implementation $typeName($category)
+$serializationImplList
+@end
+""")
+	return template.substitute( typeName=genType.name, category=category, serializationImplList=OBJCTypeSerializationImplList(genType) )	
+
 def OBJCTypeImplementationList( module, implGenerator ):
 	implList = []
 	for genTypeName in module.typeList.keys():
@@ -455,13 +493,7 @@ $rpcMethodImplementationsList
 
 	return template.substitute( moduleName=module.name, rpcMethodImplementationsList='\n'.join( methodList ) )
 
-def OBJCModule( module ):
-	template = Template("""\
-$generatedWarning
-
-#import "$modHeader.h"
-#import "IFServiceClient+Protected.h"
-
+OBJCImplementationPreamble = """\
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused"
 #pragma clang diagnostic ignored "-Wundeclared-selector"
@@ -472,15 +504,29 @@ static const NSUInteger jsonFormatOption =
 	NSJSONWritingPrettyPrinted;
 #else
 	0;
-#endif
+#endif"""
+
+OBJCImplementationConclusion = """\
+#pragma clang diagnostic pop
+"""
+
+def OBJCModule( module ):
+	template = Template("""\
+$generatedWarning
+
+#import "$modHeader.h"
+#import "IFServiceClient+Protected.h"
+
+$preamble
 
 $typeImplementationList
 
 $rpcImplementation
-#pragma clang diagnostic pop
+
+$conclusion
 """)
 
-	return template.substitute(generatedWarning=OBJCGeneratedWarning, modHeader=module.name, typeImplementationList=OBJCTypeImplementationList( module, OBJCTypeImplementation ), rpcImplementation=OBJCRPCImplementation( module ))
+	return template.substitute(generatedWarning=OBJCGeneratedWarning, modHeader=module.name, preamble=OBJCImplementationPreamble, typeImplementationList=OBJCTypeImplementationList( module, OBJCTypeImplementation ), rpcImplementation=OBJCRPCImplementation( module ), conclusion=OBJCImplementationConclusion)
 
 def OBJCModuleForCategory( module ):
 	template = Template("""
@@ -491,6 +537,20 @@ $generatedWarning
 $typeImplementationList
 """)
 	return template.substitute(generatedWarning=OBJCGeneratedWarning, modHeader=module.name, typeImplementationList=OBJCTypeImplementationList( module, OBJCTypeImplementationForCategory ))
+
+def OBJCategory( module, category ):
+	template = Template("""\
+$generatedWarning
+
+#import "$moduleName+$category.h"
+
+$preamble
+
+$typeImplementationList
+
+$conclusion
+""")
+	return template.substitute(generatedWarning=OBJCGeneratedWarning, moduleName=module.name, category=category, preamble=OBJCImplementationPreamble, typeImplementationList=OBJCTypeImplementationList( module, lambda genType: OBJCCategoryTypeImplementation( genType, category ) ), conclusion=OBJCImplementationConclusion)
 
 ############################
 # Entry point
@@ -511,6 +571,8 @@ def writeObjCImplementationCategory( genDir, category, module ):
 
 	objCIface.write( OBJCHeaderForCategory( module ) )
 	objCImpl.write( OBJCModuleForCategory( module ) )
+	objCIfaceCategory.write( OBJCCategoryHeader( module, category ) )
+	objCImplCategory.write( OBJCategory( module, category ) )
 
 def writeObjCImplementation( genDir, category, module ):
 

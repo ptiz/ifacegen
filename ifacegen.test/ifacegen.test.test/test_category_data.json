@@ -1,0 +1,14 @@
+{
+    "name": "BusMod",
+    "revisions": [ 
+    	{
+    		"version": "13",
+    		"model" : 
+    			{
+    				"name": "Nested BusMod",
+    				"description": "nested"
+    			} 
+    	} 
+    ],
+    "description": "string"
+}

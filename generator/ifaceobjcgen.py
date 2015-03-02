@@ -1,5 +1,5 @@
-# Created by Evgeny Kamyshanov on March, 2014
-# Copyright (c) 2013-2014 BEFREE Ltd. 
+# Created by Evgeny Kamyshanov on Feb-Mar, 2015
+# Copyright (c) 2014-2015 Evgeny Kamyshanov
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -27,344 +27,365 @@ import os
 from collections import OrderedDict
 from string import Template
 
-def assumeOBJCType( genType ):
+def OBJCAssumeType( genType ):
 	if isinstance( genType, GenIntegralType ):
 		t = genType.sType
-		if t == "string":
-			return "NSString"
-		if t == 'bool':
-			return "BOOL";
-		if t == "int32":
-			return "int32_t";
-		if t == "int64":
-			return "int64_t";
-		if t == "double":
-			return "double_t";
-		if t == "raw":
-			return "NSDictionary";
-		if t == "rawstr":
-			return "NSDictionary";
+		integralTypeMap = { "string": "NSString", "bool": "BOOL", "int32": "int32_t", "int64": "int64_t", "double": "double_t", "raw": "NSDictionary", "rawstr": "NSDictionary" }
+		if t in integralTypeMap:
+			return integralTypeMap[t]
 	if isinstance( genType, GenComplexType ):
 		return genType.name
 	if isinstance( genType, GenListType ):
 		return 'NSArray';
 	return "_ERROR_"
 
-def writeOBJCTypeSuperInitDeclaration( fileOut, superType ):
-	fileOut.write('[super init')
-	prefx = "With"
-	for fieldName in superType.allFieldNames():
-		fieldType = superType.fieldType( fieldName )
-		fieldAlias = superType.fieldAlias( fieldName )
-		fileOut.write( prefx + capitalizeFirstLetter( fieldAlias ) + ':' + fieldAlias )
-		if prefx == "With":
-			prefx = '\n' + '\t'*6 + 'and'
-	fileOut.write(']')	
+def OBJCDecorateTypeForDict( objcTypeStr, genType ):
+	template = Template('NULLABLE($objcTypeStr)')
+	if genType.sType == 'bool' or genType.sType == 'int32' or genType.sType == 'int64' or genType.sType == 'double':
+		template = Template('@($objcTypeStr)')
+	if genType.sType == 'rawstr':
+		template = Template('[[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:$objcTypeStr options:jsonFormatOption error:error] encoding:NSUTF8StringEncoding]')
+	return template.substitute( objcTypeStr=objcTypeStr )
 
-def writeOBJCTypeInitDeclaration( fileOut, genType, implementation ):
-	fileOut.write('- (instancetype)init')
-	prefx = "With"
+def OBJCDecorateTypeFromJSON( genType, varValue ):
+	templateNSNumberStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? $emptyVal : ((NSNumber*)tmp).$selector )')
+	templateNSStringStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? nil : (NSString*)tmp )')
+	templateNSDictionaryStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? nil : (NSDictionary*)tmp )')
+	templateNSArrayStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? nil : (NSArray*)tmp )')
+	templateRawNSDictionaryStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? nil : [NSJSONSerialization JSONObjectWithData:[(NSString*)tmp dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:&error] )')
+	if isinstance( genType, GenListType ):
+		return templateNSArrayStr.substitute( tmpVarValue=varValue )
+	if not isinstance( genType, GenIntegralType ):
+		return "ERROR"
+	if genType.sType == "bool":
+		return templateNSNumberStr.substitute( tmpVarValue=varValue, emptyVal='NO', selector='boolValue' )
+	if genType.sType == "int32":
+		return templateNSNumberStr.substitute( tmpVarValue=varValue, emptyVal='0', selector='intValue' )
+	if genType.sType == "int64":
+		return templateNSNumberStr.substitute( tmpVarValue=varValue, emptyVal='0L', selector='longLongValue' )
+	if genType.sType == "double":
+		return templateNSNumberStr.substitute( tmpVarValue=varValue, emptyVal='0.0', selector='doubleValue' )
+	if genType.sType == "string":
+		return templateNSStringStr.substitute( tmpVarValue=varValue )
+	if genType.sType == "raw":
+		return templateNSDictionaryStr.substitute( tmpVarValue=varValue )
+	if genType.sType == "rawstr":
+		return templateRawNSDictionaryStr.substitute( tmpVarValue=varValue )
+	return "ERROR";
+
+def OBJCEmptyValForType( genType ):
+	if isinstance( genType, GenIntegralType ) and genType.sType == "bool":
+		return 'NO'
+	if len(genType.ptr) == 0:
+		return '0'
+	return 'nil'
+
+def OBJCAppendIfNotEmpty( list, strItem ):
+	if strItem is not None and len(strItem) > 0:
+		list.append( strItem )
+
+############################
+# Header declaration
+############################
+
+def OBJCArgList( genType ):
+	template = Template('$arg:($argType$argTypePtr)$argAlias')
+	argList = []
 	for fieldName in genType.allFieldNames():
 		fieldType = genType.fieldType(fieldName)
 		fieldAlias = genType.fieldAlias(fieldName)
-		fileOut.write( prefx + capitalizeFirstLetter(fieldAlias) + ':(' + assumeOBJCType(fieldType) + fieldType.ptr + ')' + fieldAlias )
-		if prefx == "With":
-			prefx = '\n\tand'
-	if not implementation:
-		fileOut.write(';\n')
+		argList.append( template.substitute( arg=capitalizeFirstLetter(fieldAlias), argType=OBJCAssumeType(fieldType), argTypePtr=fieldType.ptr, argAlias=fieldAlias ) )
+	return '\n\tand'.join(argList)
 
-def writeOBJCTypeInitDictDeclaration( fileOut, implementation ):
-	fileOut.write('- (instancetype)initWithDictionary:(NSDictionary*)dictionary error:(NSError* __autoreleasing*)error')
-	if not implementation:
-		fileOut.write(';\n')
+def OBJCTypeInitDeclaration( genType ):
+	return Template('- (instancetype)initWith$argList').substitute( argList=OBJCArgList( genType ) )
 
-def writeOBJCTypeInitDataDeclaration( fileOut, implementation ):
-	fileOut.write('- (instancetype)initWithJSONData:(NSData*)jsonData error:(NSError* __autoreleasing*)error')
-	if not implementation:
-		fileOut.write(';\n')
+def OBJCTypeSerializersDeclarationList( genType ):
+	return """\
+- (instancetype)initWithDictionary:(NSDictionary*)dictionary error:(NSError* __autoreleasing*)error;
+- (instancetype)initWithJSONData:(NSData*)jsonData error:(NSError* __autoreleasing*)error;
+- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error;
+- (NSData*)dumpWithError:(NSError* __autoreleasing*)error;"""
 
-def writeOBJCTypeDeclaration( fileOut, genType ):
-	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
-		return
-	
-	if genType.baseType is not None:
-		fileOut.write("\n@interface " + genType.name + ": " + genType.baseType.name + "\n")
-	else:
-		fileOut.write("\n@interface " + genType.name + ": NSObject\n")
-
-	fileOut.write('- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error;')
-	fileOut.write("- (NSData*)dumpWithError:(NSError* __autoreleasing*)error;\n")
-
-	writeOBJCTypeInitDeclaration( fileOut, genType, implementation = False )
-	writeOBJCTypeInitDictDeclaration( fileOut, implementation = False )
-	writeOBJCTypeInitDataDeclaration( fileOut, implementation = False )	
-
+def OBJCTypePropertyList( genType ):
+	template = Template('@property (nonatomic) $propType$propTypePtr $propAlias;')
+	listTemplate = Template('@property (nonatomic) $propType$propTypePtr/*$itemType*/ $propAlias;')
+	propList = []
 	for fieldName in genType.fieldNames():
 		fieldType = genType.fieldType(fieldName)
 		if isinstance( fieldType, GenListType ):
-			fileOut.write("@property (nonatomic) " + assumeOBJCType( fieldType ) + fieldType.ptr + '/*' + assumeOBJCType( fieldType.itemType ) + '*/' + " " + genType.fieldAlias( fieldName ) + ";\n")
+			propList.append( listTemplate.substitute(propType=OBJCAssumeType( fieldType ), propTypePtr=fieldType.ptr, itemType=OBJCAssumeType( fieldType.itemType ), propAlias=genType.fieldAlias( fieldName )) )
 		else:
-			fileOut.write("@property (nonatomic) " + assumeOBJCType( fieldType ) + fieldType.ptr + " " + genType.fieldAlias(fieldName) + ";\n")
-	fileOut.write("@end;\n");
+			propList.append( template.substitute(propType=OBJCAssumeType( fieldType ), propTypePtr=fieldType.ptr, propAlias=genType.fieldAlias( fieldName )) )
+	return '\n'.join(propList)
 
-def writeOBJCMethodDeclarationArguments( fileOut, formalType, argDecoration, prefix ):
-	for argName in formalType.fieldNames():
-		argType = formalType.fieldType(argName)
-		argAlias = formalType.fieldAlias(argName)
-		typeStr = assumeOBJCType( argType )
-		fileOut.write( prefix + capitalizeFirstLetter( argAlias ) + ":(" + typeStr + argType.ptr + ")" + argAlias );
-		prefix = argDecoration + "and"
-	return prefix
-
-def writeOBJCMethodDeclaration( fileOut, method, implementation ):
-	argDecoration = " "
-
-	argCount = 0
-	if method.customRequestTypes is not None:
-		argCount += len(method.customRequestTypes)
-	if method.requestJsonType is not None:
-		argCount += len(method.requestJsonType.fieldNames())
-
-	if argCount > 1:
-		argDecoration = "\n\t\t"
-
-	if method.responseType is not None:
-		if isinstance( method.responseType, GenListType ):
-			fileOut.write("- (" + assumeOBJCType( method.responseType ) + method.responseType.ptr + '/*' + assumeOBJCType( method.responseType.itemType ) + '*/' + ")" + method.name )			
-		else:		
-			fileOut.write("- (" + assumeOBJCType( method.responseType ) + method.responseType.ptr + ")" + method.name )
-	else:
-		fileOut.write("- (void)" + method.name )
+def OBJCTypeDeclaration( genType, serializersListGenerator ):
+	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
+		return ''
 	
-	pref = "With"
+	baseTypeName = 'NSObject'
+	if genType.baseType is not None:
+		baseTypeName = genType.baseType.name
+
+	template = Template("""\
+@interface $typeName: $baseTypeName
+$init;
+$serializers
+$properties
+@end
+""")
+
+	return template.substitute(typeName=genType.name, baseTypeName=baseTypeName, init=OBJCTypeInitDeclaration( genType ), serializers=serializersListGenerator( genType ), properties=OBJCTypePropertyList( genType ))
+
+def OBJCCategoryTypeDeclaration( genType, category ):
+	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
+		return ''
+
+	template = Template("""\
+@interface $typeName($category)
+$serializers
+@end
+""")
+	return template.substitute( typeName=genType.name, category=category, serializers=OBJCTypeSerializersDeclarationList( genType ) )
+
+def OBJCTypeForwardingDeclaration( genType ):
+	return '@class %s;\n' % genType.name;
+
+def OBJCImportList( module ):
+	template = Template('#import "$modImport.h"\n')
+	importList = ''
+	for name in module.importedModuleNames:
+		importList += template.substitute(modImport=name)
+	return importList
+
+def OBJCFindDependenciesUnresolved( typeSet, typeToCheck ):
+	unresolved = []
+	if isinstance( typeToCheck, GenComplexType ):
+		for fieldName in typeToCheck.allFieldNames():
+			fieldType = typeToCheck.fieldType(fieldName)
+			if isinstance( fieldType, GenComplexType ) and ( fieldType.name not in typeSet ):
+				unresolved.append( fieldType )
+	return unresolved
+
+def OBJCTypeDeclarationList( module, serializersListGenerator ):
+	declList = []
+	alreadyDeclaredTypes = set( module.importedTypeList.keys() )
+	for genTypeName in module.typeList.keys():
+		currentType = module.typeList[genTypeName]
+		alreadyDeclaredTypes.add( genTypeName )
+		for forwardingType in OBJCFindDependenciesUnresolved( alreadyDeclaredTypes, currentType ):
+			declList.append( OBJCTypeForwardingDeclaration( forwardingType ) )
+		OBJCAppendIfNotEmpty( declList, OBJCTypeDeclaration( currentType, serializersListGenerator ) )
+	return '\n'.join( declList )
+
+def OBJCCategoryTypeDeclarationList( module, category ):
+	declList = []
+	for genTypeName in module.typeList.keys():
+		currentType = module.typeList[genTypeName]
+		OBJCAppendIfNotEmpty( declList, OBJCCategoryTypeDeclaration( currentType, category ) )
+	return '\n'.join( declList )
+
+#TODO: make a column if there are more than 2 args in the declaration
+def OBJCRPCMethodDeclaration( method ):
+	template = Template('- ($responseType)${methodName}With$argList')
+	argList = []
 
 	if method.prefix is None:
-		fileOut.write( pref + "Prefix:(NSString*)prefix")
-		pref = argDecoration + "and"		
-
-	for customRequestParamKey in method.customRequestTypes.keys():
-		pref = writeOBJCMethodDeclarationArguments( fileOut, method.customRequestTypes[customRequestParamKey], argDecoration, pref )
-
+		argList.append('Prefix:(NSString*)prefix')
+	for customRequestType in method.customRequestTypes.values():
+		argList.append( OBJCArgList( customRequestType ) )
 	if method.requestJsonType is not None:
-		pref = writeOBJCMethodDeclarationArguments( fileOut, method.requestJsonType, argDecoration, pref )
+		argList.append( OBJCArgList( method.requestJsonType ) )
 
-	fileOut.write( pref + "Error:(NSError* __autoreleasing*)error")
+	argList.append('Error:(NSError* __autoreleasing*)error')
 
-	if not implementation:
-		fileOut.write(";\n\n");
+	argListStr = '\n\tand'.join(argList)
 
-def decorateOBJCReturnedType( levelTmpVar, objcRetTypeStr, retType ):
-	formatNSNumberStr = '( {0} = {1}, [{0} isEqual:[NSNull null]] ? {2} : (({3}){0}).{4} )'
-	formatNSStringStr = '( {0} = {1}, [{0} isEqual:[NSNull null]] ? nil : (NSString*){0} )'
-	formatNSDictionaryStr = '( {0} = {1}, [{0} isEqual:[NSNull null]] ? nil : (NSDictionary*){0} )'
-	formatRawNSDictionaryStr = '( {0} = {1}, [{0} isEqual:[NSNull null]] ? nil : [NSJSONSerialization JSONObjectWithData:[(NSString*){0} dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:&error] )'		
-	if retType.sType == "bool":
-		return formatNSNumberStr.format( levelTmpVar, objcRetTypeStr, 'NO', 'NSNumber*', 'boolValue' )
-	if retType.sType == "int32":
-		return formatNSNumberStr.format( levelTmpVar, objcRetTypeStr, '0', 'NSNumber*', 'intValue' )
-	if retType.sType == "int64":
-		return formatNSNumberStr.format( levelTmpVar, objcRetTypeStr, '0L', 'NSNumber*', 'longLongValue' )
-	if retType.sType == "double":
-		return formatNSNumberStr.format( levelTmpVar, objcRetTypeStr, '0.0', 'NSNumber*', 'doubleValue' )
-	if retType.sType == "string":
-		return formatNSStringStr.format( levelTmpVar, objcRetTypeStr )
-	if retType.sType == "raw":
-		return formatNSDictionaryStr.format( levelTmpVar, objcRetTypeStr )
-	if retType.sType == "rawstr":
-		return formatRawNSDictionaryStr.format( levelTmpVar, objcRetTypeStr )
-	return "ERROR";
+	responseType = 'void'
+	if method.responseType is not None:
+		responseType = "%s%s" % ( OBJCAssumeType(method.responseType), method.responseType.ptr )
 
-class ReturnedOBJCTypeContext:
-	def __init__( self, fileOut, level, varCounter ):
-		self.fileOut = fileOut
-		self.level = level
-		self.varCounter = varCounter
+	return template.substitute( responseType=responseType, methodName=method.name, argList=argListStr )
 
-def unwindReturnedTypeToOBJC( objcDictName, outType, outArgName, tmpVarName, ctx, recursive=True ):
+def OBJCRPCMethodList( module ):
+	methodList = []
+	for method in module.methods:
+		methodList.append( OBJCRPCMethodDeclaration( method ) )
+	return ';\n'.join(methodList)
 
-	if isinstance( outType, GenIntegralType ):
-		if outArgName is None:
-			#return ( decorateOBJCReturnedType( tmpVarName, objcDictName, outType ) ) #TODO: fix this strange 'objcDictName' behavior in case of lists unwind
-			return objcDictName;
-		else:
-			return ( decorateOBJCReturnedType( tmpVarName, '[' + objcDictName +  ' objectForKey:@"' + outArgName + '"]', outType ) )
+def OBCRPCDeclaration( module ):
+	if len(module.methods) == 0:
+		return ''
 
-	if isinstance( outType, GenComplexType ):
-		objCResType = assumeOBJCType( outType )
-		currentDictName = objcDictName
+	template = Template("""\
+@interface $rpcClientName: IFServiceClient
+$methods;
+@end
+""")
+	return template.substitute( rpcClientName=module.name, methods=OBJCRPCMethodList( module ) )
 
+OBJCGeneratedWarning = """\
+/**
+ * @generated
+ *
+ * AUTOGENERATED. DO NOT EDIT! 
+ *
+ */"""
+
+OBJCHeaderIFImports = """\
+#import "IFTransport.h"
+#import "IFServiceClient.h"
+"""
+
+OBJCHeaderTemplate = Template("""\
+$generatedWarning
+
+#import <Foundation/Foundation.h>
+$IFImportList$importList
+$typeDeclarationList
+$rpcDeclaration
+""")
+
+def OBJCHeader( module ):
+	return OBJCHeaderTemplate.substitute( generatedWarning=OBJCGeneratedWarning, IFImportList=OBJCHeaderIFImports, importList=OBJCImportList( module ), typeDeclarationList=OBJCTypeDeclarationList( module, OBJCTypeSerializersDeclarationList ), rpcDeclaration=OBCRPCDeclaration( module ) )
+
+def OBJCHeaderForCategory( module ):
+	return OBJCHeaderTemplate.substitute( generatedWarning=OBJCGeneratedWarning, IFImportList='', importList=OBJCImportList( module ), typeDeclarationList=OBJCTypeDeclarationList( module, lambda genType: '' ),  rpcDeclaration='' )
+
+def OBJCCategoryHeader( module, category ):
+	template = Template("""\
+$generatedWarning
+
+#import "$moduleName.h"
+
+$typeDeclarationList
+""")
+	return template.substitute( generatedWarning=OBJCGeneratedWarning, moduleName=module.name, typeDeclarationList=OBJCCategoryTypeDeclarationList( module, category ) )
+
+############################
+# Implementation module
+############################
+
+def OBJCTypeFieldInitList( genType ):
+	template = Template('\t\t_$fieldAlias = $fieldAlias;')
+	fieldList = []
+	for fieldName in genType.fieldNames():
+		field = genType.fieldType(fieldName)
+		fieldAlias = genType.fieldAlias(fieldName)
+		fieldList.append( template.substitute( fieldAlias=fieldAlias ) )
+	return '\n'.join( fieldList )
+
+def OBJCTypeMethodActualArgList( genType ):
+	argList = []
+	for fieldName in genType.allFieldNames():
+		fieldType = genType.fieldType( fieldName )
+		fieldAlias = genType.fieldAlias( fieldName )
+		argList.append( '%s:%s' % ( capitalizeFirstLetter( fieldAlias ), fieldAlias ) )
+	return '\n\t\t\t\t\t\tand'.join( argList )
+
+def OBJCTypeInitImplList( genType ):
+	baseTemplate = Template("""
+$declaration {
+	if (self=[super init]) {
+$fieldInitList
+	}
+	return self;
+}""")
+
+	superTemplate = Template("""
+$declaration {
+	if (self = [super initWith$actualArgList]) {
+$fieldInitList
+	}
+	return self;
+}""")
+	if genType.baseType is not None:
+		return superTemplate.substitute( declaration=OBJCTypeInitDeclaration( genType ), actualArgList=OBJCTypeMethodActualArgList( genType.baseType ), fieldInitList=OBJCTypeFieldInitList( genType ) )
+	return baseTemplate.substitute( declaration=OBJCTypeInitDeclaration( genType ), fieldInitList=OBJCTypeFieldInitList( genType ) )
+
+def OBJCUnwindTypeToDict( genType, objcArgName, level, recursive=True ):
+	if isinstance( genType, GenIntegralType ):
+		return OBJCDecorateTypeForDict( objcArgName, genType )
+
+	elif isinstance( genType, GenComplexType ):
 		if not recursive:
-			if outArgName is not None and outArgName != 'self':
-				return ( '[[%s alloc] initWithDictionary:%s[@"%s"] error:error]' % (objCResType, currentDictName, outArgName) )
-			else:
-				return ( '[[%s alloc] initWithDictionary:%s error:error]' % (objCResType, currentDictName) )
+			return '[%s dictionaryWithError:error]' % objcArgName
 
-		resName = '%s%d' % (outType.name, ctx.varCounter)
-		ctx.varCounter += 1
+		fieldTemplate = Template('$tabLevel@"$argName":$argValue')
+		fieldList = []
 
-		if outArgName is None or outArgName != 'self':
-			ctx.fileOut.write('\t'*ctx.level + objCResType + outType.ptr + ' ' + resName + ';\n')
-		else:		
-			resName = 'self'
+		for argName in genType.allFieldNames():
+			fieldType = genType.fieldType(argName)
+			objcStatement = genType.fieldAlias(argName)
+			if objcArgName is not None:
+				objcStatement = '%s.%s' % ( objcArgName, genType.fieldAlias(argName) )
+			fieldList.append( fieldTemplate.substitute( tabLevel='\t'*level, argName=argName, argValue=OBJCUnwindTypeToDict( fieldType, objcStatement, level+1, recursive=False ) ) )
 
-		if outArgName is not None and outArgName != 'self':
-			currentDictName = '%s%s%d' % (objcDictName, capitalizeFirstLetter( outArgName ), ctx.varCounter)
-			ctx.varCounter += 1
-			ctx.fileOut.write('\t'*ctx.level + 'NSDictionary* ' + currentDictName + ' = [' + objcDictName + ' objectForKey:@"' + outArgName + '"];\n')
-			ctx.fileOut.write('\t'*ctx.level + 'if ( ' + currentDictName + ' != nil && ![' + currentDictName + ' isEqual:[NSNull null]] && [' + currentDictName + ' isKindOfClass:NSDictionary.class]) {\n')
-			ctx.level += 1
- 			ctx.fileOut.write( '\t'*ctx.level + resName + ' = [' + objCResType + ' new];\n' )
- 		elif outArgName != 'self':
- 			ctx.fileOut.write( '\t'*ctx.level + resName + ' = [' + objCResType + ' new];\n' )
+		return Template('@{\n$fieldList\n$tabLevel}').substitute( fieldList=',\n'.join(fieldList), tabLevel='\t'*(level-1) )
 
-#TODO: uncomment after optional arguments appear
-#			errMsg = '@"Can`t parse answer from server in ' + outArgName + '"'
-#			fileOut.write('\tif ( ' + currentDictName + ' != nil ) {\n\t\tNSLog(' + errMsg +  ');\n')
-#			fileOut.write('\t\t*error = [self errorWithMessage:' + errMsg + '];\n')
-#			fileOut.write('\t\treturn nil;\n\t}\n')
-
-		for fieldKey in outType.allFieldNames():
-			outField = outType.fieldType(fieldKey)
-			
-			ctx.level += 1			
-			value = unwindReturnedTypeToOBJC( currentDictName, outField, fieldKey, tmpVarName, ctx, recursive=False )
-			ctx.fileOut.write('\t'*ctx.level + resName + '.' + outType.fieldAlias(fieldKey) + ' = ' + value + ';\n')
-			ctx.level -= 1			
-
-		if outArgName is not None and outArgName != 'self':
-			ctx.fileOut.write('\t'*ctx.level + '}\n')
-
-		return resName
-
-	if isinstance( outType, GenListType ):
-		if outArgName is None:
-			currentArrayName = objcDictName
+	elif isinstance( genType, GenListType ):
+		if isinstance( genType.itemType, GenIntegralType ):
+			return 'NULLABLE(%s)' % (objcArgName)
 		else:
-			currentArrayName = '%s%s%d' % (objcDictName, capitalizeFirstLetter( outArgName ), ctx.varCounter )
-			ctx.varCounter += 1
-			ctx.fileOut.write('\t'*ctx.level + 'NSArray* ' + currentArrayName + ' = [' + objcDictName + ' objectForKey:@"' + outArgName + '"];\n')
+			arrayTemplate = Template("""\
+^NSArray*(NSArray* inArr) {
+${tabLevel}NSMutableArray* resArr = [NSMutableArray arrayWithCapacity:[inArr count]];
+${tabLevel}for($objcType$objcTypePtr inObj in inArr) { [resArr addObject:$argValue]; }
+${tabLevel}return resArr; } ($objcArgName)""")
+			return arrayTemplate.substitute( tabLevel='\t'*level, objcType=OBJCAssumeType(genType.itemType), objcTypePtr=genType.itemType.ptr, argValue=OBJCUnwindTypeToDict( genType.itemType, 'inObj', level+2, recursive=False ), objcArgName=objcArgName )
 
-		objCResType = assumeOBJCType( outType )
-		if outArgName is not None:
-			resName = '%s%d' % ( outArgName, ctx.varCounter )
+def OBJCListTypeFromDictionary( genType, objcDataGetter, level ):
+	listTypeTemplate = Template("""\
+^NSArray*(id inObj) {
+${tabLevel}\tNSMutableArray* items;
+${tabLevel}\tif ( inObj == nil ||  [inObj isEqual:[NSNull null]] || ![inObj isKindOfClass:NSArray.class]) return nil;
+${tabLevel}\tNSArray* inArr = (NSArray*)inObj;
+${tabLevel}\titems = [NSMutableArray arrayWithCapacity:inArr.count];
+${tabLevel}\tfor ( id item in inArr ) { id tmp; [items addObject:$itemObj]; }
+${tabLevel}\treturn items;
+${tabLevel}}( $objcDataGetter )""")
+	return listTypeTemplate.substitute( tabLevel='\t'*level, itemObj=OBJCTypeFromDictionary(genType.itemType, "item", level+1 ), objcDataGetter=objcDataGetter )
+
+def OBJCTypeFromDictionary( genType, objcDataGetter, level ):
+	complexTypeTemplate = Template('[[$typeName alloc] initWithDictionary:$objcDataGetter error:error]')
+	if isinstance( genType, GenIntegralType ):
+		return OBJCDecorateTypeFromJSON( genType, objcDataGetter )
+	if isinstance( genType, GenComplexType ):
+		return complexTypeTemplate.substitute( typeName=genType.name, objcDataGetter=objcDataGetter )
+	if isinstance( genType, GenListType ):
+		if isinstance(genType.itemType, GenIntegralType):
+			return OBJCDecorateTypeFromJSON( genType, objcDataGetter )
 		else:
-			resName = 'array%d' % ctx.varCounter
-		ctx.varCounter += 1
+			return OBJCListTypeFromDictionary( genType, objcDataGetter, level+1 )
 
-		ctx.fileOut.write('\t'*ctx.level + 'NSMutableArray* ' + resName + ';\n')
+def OBJCComplexTypeFieldListFromDictionary( genType, objcDictArgName ):
+	template = Template('\tself.$argName = $value')
+	fieldList = []
+	#here we init all the fields available, including ancestor's ones instead of calling non-public "[super readDictionary]" method
+	for fieldName in genType.allFieldNames():
+		fieldType = genType.fieldType(fieldName)
+		objcDataGetter = '%s[@"%s"]' % ( objcDictArgName, fieldName )
+		fieldList.append( template.substitute( argName=genType.fieldAlias(fieldName), value=OBJCTypeFromDictionary( fieldType, objcDataGetter, 1 ) ) )
+	return ';\n'.join( fieldList )
 
-		ctx.fileOut.write('\t'*ctx.level + 'if ( ' + currentArrayName + ' != nil && ![' + currentArrayName + ' isEqual:[NSNull null]] && [' + currentArrayName + ' isKindOfClass:NSArray.class]) {\n')
-		ctx.level += 1
+def OBJCTypeSerializationImplList( genType ):
+	template = Template("""
+- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error {
+	return $typeDictionary;
+}
 
-		ctx.fileOut.write('\t'*ctx.level + resName + ' = [NSMutableArray arrayWithCapacity:[' + currentArrayName + ' count]];\n')
-		ctx.fileOut.write('\t'*ctx.level + 'for ( id item in ' + currentArrayName + ') {\n' )
-		
-		ctx.level += 1
-		item = unwindReturnedTypeToOBJC( 'item', outType.itemType, None, tmpVarName, ctx, recursive=False )
-		ctx.fileOut.write( '\t'*(ctx.level+1) + '[' + resName + ' addObject:' + item + '];\n' )
-		ctx.fileOut.write('\t'*ctx.level + '}\n' )
-		ctx.level -= 1
-
-		ctx.fileOut.write('\t'*ctx.level + '}\n')
-		ctx.level -= 1		
-
-		return resName
-					
-def decorateOBJCInputType( objcInpTypeStr, inpType ):
-	prefix = "NULLABLE("
-	suffix = ")"
-	if inpType.sType == 'bool':
-		prefix = '[NSNumber numberWithBool:'
-		suffix = "]"
-	if inpType.sType == 'int32':
-		prefix = '[NSNumber numberWithInt:'
-		suffix = ']'
-	if inpType.sType == 'int64':
-		prefix = '[NSNumber numberWithLongLong:'
-		suffix = ']'
-	if inpType.sType == 'double':
-		prefix = '[NSNumber numberWithDouble:'
-		suffix = ']'
-	if inpType.sType == 'rawstr':
-		prefix = '[[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:'
-		suffix =  ' options:jsonFormatOption error:error] encoding:NSUTF8StringEncoding]'
-	return prefix + objcInpTypeStr + suffix
-
-def unwindInputTypeToOBJC( fileOut, inputType, inputArgName, level, recursive=True ):
-		if isinstance( inputType, GenIntegralType ):
-			fileOut.write( decorateOBJCInputType( inputArgName, inputType ) )
-	
-		elif isinstance( inputType, GenComplexType ):
-			if not recursive:
-				fileOut.write( '[%s dictionaryWithError:error]' % inputArgName )
-				return
-
-			fileOut.write( "@{\n" )
-	
-			firstArgument = True
-			for argName in inputType.allFieldNames():
-				if not firstArgument:
-					fileOut.write(",\n")
-				firstArgument = False
-
-				fileOut.write( '\t'*level + '@"' + argName + '" : ')
-				fieldType = inputType.fieldType(argName)
-				objcStatement = inputType.fieldAlias(argName)
-				if inputArgName is not None:
-					objcStatement = inputArgName + '.' + inputType.fieldAlias(argName)
-				unwindInputTypeToOBJC( fileOut, fieldType, objcStatement, level+1, recursive=False )
-
-			fileOut.write("\n" + '\t'*level + "}")
-
-		elif isinstance( inputType, GenListType ):
-			if isinstance( inputType.itemType, GenIntegralType ):
-				fileOut.write( 'NULLABLE(' + inputArgName + ')' )
-			else:
-				fileOut.write('^NSArray*(NSArray* inArr) {\n' + '\t'*level + 'NSMutableArray* resArr = [NSMutableArray arrayWithCapacity:[inArr count]];\n')
-				fileOut.write('\t'*level + '\tfor ( ' + assumeOBJCType(inputType.itemType) + inputType.itemType.ptr + ' inObj in inArr ) {\n' ) 
-				fileOut.write('\t'*level + '\t\t[resArr addObject:')
-				unwindInputTypeToOBJC( fileOut, inputType.itemType, 'inObj', level+2, recursive=False )
-				fileOut.write( '];\n' + '\t'*level + '\t}\n' + '\t'*level + '\treturn resArr; } ( ' + inputArgName + ' )' )
-
-def writeOBJCTypeImplementation( fileOut, genType ):
-	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
-		return		
-	fileOut.write("\n@implementation " + genType.name + "\n") 
-
-	fileOut.write('- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error {')
-	fileOut.write('\n\treturn ')
-	unwindInputTypeToOBJC( fileOut, genType, 'self', 2 )
-	fileOut.write(';\n}\n')
-
-	fileOut.write("""- (NSData*)dumpWithError:(NSError* __autoreleasing*)error {
+- (NSData*)dumpWithError:(NSError* __autoreleasing*)error {
 	NSDictionary* dict = [self dictionaryWithError:error];
 	if (*error) return nil;
 	else return [NSJSONSerialization dataWithJSONObject:[self dictionaryWithError:error] options:jsonFormatOption error:error];
 }
-""")
 
-	writeOBJCTypeInitDeclaration( fileOut, genType, implementation = True )
-	fileOut.write('{\n')
-	if genType.baseType is not None:
-		fileOut.write('\tif (self = ')
-		writeOBJCTypeSuperInitDeclaration( fileOut, genType.baseType )
-		fileOut.write(') {\n')
-	else:
-		fileOut.write('\tif (self = [super init]) {\n')
-	
-	for fieldName in genType.fieldNames():
-		field = genType.fieldType(fieldName)
-		fieldAlias = genType.fieldAlias(fieldName)
-		fileOut.write('\t\t_' + fieldAlias + ' = ' + fieldAlias + ';\n' )
-	fileOut.write('\t}\n\treturn self;\n}\n')
+- (void)readDictionary:(NSDictionary*)dict withError:(NSError* __autoreleasing*)error {
+	id tmp;
+$complexTypeFieldsFromDictionary;
+}
 
-	fileOut.write('- (void)readDictionary:(NSDictionary*)dict withError:(NSError* __autoreleasing*)error {\n')
-	fileOut.write('\tid tmp;\n')
-	unwindReturnedTypeToOBJC( 'dict', genType, 'self', tmpVarName='tmp', ctx=ReturnedOBJCTypeContext( fileOut, level=0, varCounter=1) )
-	fileOut.write('}\n')
-
-	writeOBJCTypeInitDictDeclaration( fileOut, implementation = True )
-	fileOut.write(""" {
+- (instancetype)initWithDictionary:(NSDictionary*)dictionary error:(NSError* __autoreleasing*)error {
 	if ( dictionary == nil ) return nil;
 	if (self = [super init]) {
 		[self readDictionary:dictionary withError:error];
@@ -372,10 +393,8 @@ def writeOBJCTypeImplementation( fileOut, genType ):
 	}
 	return self;
 }
-""")
-	
-	writeOBJCTypeInitDataDeclaration( fileOut, implementation = True )
-	fileOut.write(""" {
+
+- (instancetype)initWithJSONData:(NSData*)jsonData error:(NSError* __autoreleasing*)error {
 	if ( jsonData == nil ) return nil;
 	if (self = [super init]) {
 		NSDictionary* dict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:error];
@@ -386,191 +405,204 @@ def writeOBJCTypeImplementation( fileOut, genType ):
 	return self;
 }
 """)
-
-	fileOut.write("@end\n")
-
-def getOBJCEmptyValueForType( emptyValueType ):
-	if emptyValueType is None:
+	
+	return template.substitute( typeDictionary=OBJCUnwindTypeToDict( genType, 'self', 2 ), complexTypeFieldsFromDictionary=OBJCComplexTypeFieldListFromDictionary( genType,'dict' ) )
+	
+def OBJCTypeImplementation( genType ):
+	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
 		return ''
-	if isinstance( emptyValueType, GenListType ) or isinstance( emptyValueType, GenComplexType ):
-		return 'nil'
-	if emptyValueType.sType == "bool":
-		return 'NO'
-	if emptyValueType.sType == "int32" or emptyValueType.sType == "int64":
-		return '0'
-	if emptyValueType.sType == "double":
-		return '0.0'
-	return 'nil'	
-			
-def writeOBJCMethodCustomRequestParam( fileOut, customRequestParamName, customRequestParam ):
-	paramSelectorName = makeAlias( 'set_' + customRequestParamName )
-	fileOut.write('\tif (![transport respondsToSelector:@selector(' + paramSelectorName + ':)]) {\n\t\tassert("Transport does not respond to selector ' + paramSelectorName + ':");\n\t} ')
-	fileOut.write('else {\n\t\t[transport performSelector:@selector(' + paramSelectorName + ':) withObject:')
-	unwindInputTypeToOBJC( fileOut, customRequestParam, None, 3)
-	fileOut.write('\n\t\t];\n\t}\n')
-
-def writeOBJCMethodImplementation( fileOut, method ):
-
-	emptyReturnString = '\t\treturn %s;\n\t}\n' % getOBJCEmptyValueForType(method.responseType)
-
-	writeOBJCMethodDeclaration( fileOut, method, implementation = True )
-
-	fileOut.write(" {\n")
-
-	tmpVarName = "tmp"
-	fileOut.write('\tid ' + tmpVarName + ';\n')
-
-	for customRequestParamKey in method.customRequestTypes.keys():
-		writeOBJCMethodCustomRequestParam( fileOut, customRequestParamKey, method.customRequestTypes[customRequestParamKey] )
-
-	methodPrefix = "prefix"
-	if method.prefix is not None:
-		methodPrefix = '@"' + method.prefix + '"'
-
-	if method.requestJsonType is not None:		
-		fileOut.write("\tNSDictionary* inputDict = ")
-		unwindInputTypeToOBJC( fileOut, method.requestJsonType, None, 2 )
-		
-		fileOut.write(";\n")
-
-		fileOut.write("\tNSData* inputData = [NSJSONSerialization dataWithJSONObject:inputDict options:jsonFormatOption error:error];\n")
-		fileOut.write('\tif ( ![transport writeAll:inputData prefix:' + methodPrefix + ' error:error] ) {\n')
-	else:
-		fileOut.write('\tif ( ![transport writeAll:nil prefix:' + methodPrefix + ' error:error] ) {\n')
-
-	# fileOut.write('\t\tNSLog(@"' + method.name + ': server call failed, %@", *error);\n')
-
-	if method.responseType is None:
-		fileOut.write('\t\treturn;\n\t}\n')		
-		fileOut.write('}\n')
-		return
-	else:
-		fileOut.write( emptyReturnString )
-
-	fileOut.write('\tNSData* outputData = [transport readAll];\n\tif ( outputData == nil ) {\n')
-	fileOut.write( emptyReturnString )
-
-	outputName = 'output'
-	outputStatement = 'id ' + outputName
-
-	fileOut.write('\t' + outputStatement + ' = [NSJSONSerialization JSONObjectWithData:outputData options:NSJSONReadingAllowFragments error:error];\n');
-	fileOut.write('\tif ( error && *error != nil ) {\n' + emptyReturnString)
-
-	retVal = unwindReturnedTypeToOBJC( outputName, method.responseType, method.responseArgName, tmpVarName, ReturnedOBJCTypeContext( fileOut, level=1, varCounter=1) )
-
-	fileOut.write('\treturn ' + retVal + ';\n')	
-	fileOut.write("}\n\n")
-
-def writeObjCIfaceHeader( fileOut, inputName ):
-	declaration = """
-#import <Foundation/Foundation.h>
-#import "IFTransport.h"
-"""
-	fileOut.write(declaration)
-
-def writeObjCIfaceImports( fileOut, importNames ):
-	for name in importNames:
-		fileOut.write('#import "%s.h"\n' % name)
-
-def writeObjCIfaceDeclaration( fileOut, inputName ):
-	declaration = Template("""
-@interface $inName: NSObject
-- (instancetype)initWithTransport:(id<IFTransport>)transport NS_DESIGNATED_INITIALIZER;
+	template = Template("""\
+@implementation $typeName
+$initImplList
+$serializationImplList
+@end
 """)
-	fileOut.write(declaration.substitute(inName=inputName))
+	return template.substitute( typeName=genType.name, initImplList=OBJCTypeInitImplList(genType), serializationImplList=OBJCTypeSerializationImplList(genType) )
 
-def writeObjCIfaceFooter( fileOut, inputName ):
-	fileOut.write("\n@end")
+def OBJCTypeImplementationForCategory( genType ):
+	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
+		return ''
+	template = Template("""\
+@implementation $typeName
+$initImplList
+@end
+""")
+	return template.substitute( typeName=genType.name, initImplList=OBJCTypeInitImplList(genType) )
 
-def writeObjCImplHeader( fileOut, inputName ):
-	declaration = Template("""\
-#import "$inName.h"
+def OBJCCategoryTypeImplementation( genType, category ):
+	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
+		return ''
+	template = Template("""\
+@implementation $typeName($category)
+$serializationImplList
+@end
+""")
+	return template.substitute( typeName=genType.name, category=category, serializationImplList=OBJCTypeSerializationImplList(genType) )	
+
+def OBJCTypeImplementationList( module, implGenerator ):
+	implList = []
+	for genTypeName in module.typeList.keys():
+		currentType = module.typeList[genTypeName]
+		OBJCAppendIfNotEmpty( implList, implGenerator( currentType ) )
+	return '\n'.join( implList )
+
+def OBJCRPCMethodImplementation( method ):
+	jsonArgsTemplate = Template('[NSJSONSerialization dataWithJSONObject:$jsonArgDict options:jsonFormatOption error:error]')
+	customArgsTemplate = Template("""\
+	if (![self.transport respondsToSelector:@selector($customArgSectionName:)]) {
+		assert("Transport does not respond to selector $customArgSectionName:.");
+	} else {
+		[self.transport performSelector:@selector($customArgSectionName:) withObject:$customArgDict];
+	}
+""")
+	returnTemplate = Template('return $response;')
+
+	template = Template("""\
+$declaration {
+	id tmp;
+$setCustomArgs
+	NSData* jsonData = $jsonData;
+	if ( ![self.transport writeAll:jsonData prefix:$prefix error:error] ) {
+		return$emptyVal;
+	}
+	NSData* outputData = [self.transport readAll];
+	if ( outputData == nil ) {
+		return$emptyVal;
+	}
+	id output = [NSJSONSerialization JSONObjectWithData:outputData options:NSJSONReadingAllowFragments error:error];
+	if ( error && *error != nil ) {
+		return$emptyVal;
+	}
+	$returnStr
+}""")
+
+	customArgsList = []
+	for customRequestTypeKey in method.customRequestTypes.keys():
+		customRequestType = method.customRequestTypes[customRequestTypeKey]
+		customArgsList.append( customArgsTemplate.substitute( customArgSectionName=makeAlias('set_' + customRequestTypeKey), customArgDict=OBJCUnwindTypeToDict( customRequestType, None, 3 ) ) )
+	setCustomArgs = '\n'.join(customArgsList)
+
+	jsonData='nil'
+	if method.requestJsonType is not None:
+		jsonData = jsonArgsTemplate.substitute( jsonArgDict=OBJCUnwindTypeToDict( method.requestJsonType, None, level=2 ) )	
+
+	prefix = 'prefix'
+	if method.prefix is not None:
+		prefix = '@"%s"' % (method.prefix)
+
+	returnStr = ''
+	emptyVal = ''
+	if method.responseType is not None:
+		returnStr = returnTemplate.substitute( response=OBJCTypeFromDictionary( method.responseType, 'output', level=2 ) )
+		emptyVal = ' ' + OBJCEmptyValForType( method.responseType )
+
+	return template.substitute( declaration=OBJCRPCMethodDeclaration( method ), setCustomArgs=setCustomArgs, jsonData=jsonData, prefix=prefix, returnStr=returnStr, emptyVal=emptyVal )
+
+def OBJCRPCImplementation( module ):
+	if len(module.methods) == 0:
+		return ''
+
+	template = Template("""\
+@implementation $moduleName
+$rpcMethodImplementationsList
+@end
+""")
+
+	methodList = []
+	for method in module.methods:
+		methodList.append( OBJCRPCMethodImplementation( method ) )
+
+	return template.substitute( moduleName=module.name, rpcMethodImplementationsList='\n'.join( methodList ) )
+
+OBJCImplementationPreamble = """\
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused"
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+
 #define NULLABLE( s ) (s == nil ? [NSNull null] : s)
 static const NSUInteger jsonFormatOption = 
 #ifdef DEBUG
 	NSJSONWritingPrettyPrinted;
 #else
 	0;
-#endif
+#endif"""
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused"
-#pragma clang diagnostic ignored "-Wundeclared-selector"
-
-""")
-	fileOut.write(declaration.substitute(inName=inputName))
-
-def writeObjCImplDeclaration( fileOut, inputName ):
-	declaration = Template("""
-@interface $inName() {
-	id<IFTransport> transport;
-}
-@end
-
-@implementation $inName
-- (instancetype)initWithTransport:(id<IFTransport>)trans {
-	if ( self = [super init] ) {
-		transport = trans;
-	}
-	return self;
-}
-- (NSError*)errorWithMessage:(NSString*)msg {
-	return [NSError errorWithDomain:NSStringFromClass([self class]) code:0 userInfo:@{NSLocalizedDescriptionKey: msg}];
-}
-""")
-	fileOut.write(declaration.substitute(inName=inputName))
-
-def writeObjCImplFooter( fileOut, inputName ):
-	fileOut.write("\n@end")	
-
-def writeObjCFooter( fileOut ):
-	fileOut.write('\n#pragma clang diagnostic pop\n')
-
-def writeWarning( fileOut, inputName ):
-	declaration = """\
-/**
- * @generated
- *
- * AUTOGENERATED. DO NOT EDIT! 
- *
- */
-
+OBJCImplementationConclusion = """\
+#pragma clang diagnostic pop
 """
-	fileOut.write(declaration)
 
-def writeObjCImplementation( genDir, module ):
-	
-	if not os.path.exists( genDir ):
-	    os.makedirs( genDir )
+def OBJCModule( module ):
+	template = Template("""\
+$generatedWarning
 
+#import "$modHeader.h"
+#import "IFServiceClient+Protected.h"
+
+$preamble
+
+$typeImplementationList
+
+$rpcImplementation
+
+$conclusion
+""")
+
+	return template.substitute(generatedWarning=OBJCGeneratedWarning, modHeader=module.name, preamble=OBJCImplementationPreamble, typeImplementationList=OBJCTypeImplementationList( module, OBJCTypeImplementation ), rpcImplementation=OBJCRPCImplementation( module ), conclusion=OBJCImplementationConclusion)
+
+def OBJCModuleForCategory( module ):
+	template = Template("""
+$generatedWarning
+
+#import "$modHeader.h"
+
+$typeImplementationList
+""")
+	return template.substitute(generatedWarning=OBJCGeneratedWarning, modHeader=module.name, typeImplementationList=OBJCTypeImplementationList( module, OBJCTypeImplementationForCategory ))
+
+def OBJCategory( module, category ):
+	template = Template("""\
+$generatedWarning
+
+#import "$moduleName+$category.h"
+
+$preamble
+
+$typeImplementationList
+
+$conclusion
+""")
+	return template.substitute(generatedWarning=OBJCGeneratedWarning, moduleName=module.name, category=category, preamble=OBJCImplementationPreamble, typeImplementationList=OBJCTypeImplementationList( module, lambda genType: OBJCCategoryTypeImplementation( genType, category ) ), conclusion=OBJCImplementationConclusion)
+
+############################
+# Entry point
+############################
+
+def writeObjCImplementationMonolith( genDir, module ):
 	objCIface = open( os.path.join( genDir, module.name + ".h" ), "wt" )
 	objCImpl = open( os.path.join( genDir, module.name + ".m" ), "wt" )
 
-	writeWarning( objCIface, None )
-	writeWarning( objCImpl, None )
+	objCIface.write( OBJCHeader( module ) )
+	objCImpl.write( OBJCModule( module ) )
 
-	writeObjCIfaceHeader( objCIface, module.name )
-	writeObjCIfaceImports( objCIface, module.importedModuleNames )
+def writeObjCImplementationCategory( genDir, category, module ):
+	objCIface = open( os.path.join( genDir, module.name + ".h" ), "wt" )
+	objCImpl = open( os.path.join( genDir, module.name + ".m" ), "wt" )
+	objCIfaceCategory = open( os.path.join( genDir, module.name + "+" + category + ".h" ), "wt" )
+	objCImplCategory = open( os.path.join( genDir, module.name + "+" + category + ".m" ), "wt" )
 
-	writeObjCImplHeader( objCImpl, module.name )			
+	objCIface.write( OBJCHeaderForCategory( module ) )
+	objCImpl.write( OBJCModuleForCategory( module ) )
+	objCIfaceCategory.write( OBJCCategoryHeader( module, category ) )
+	objCImplCategory.write( OBJCategory( module, category ) )
 
-	for genTypeName in module.typeList.keys():
-		writeOBJCTypeDeclaration( objCIface, module.typeList[genTypeName] )
-		writeOBJCTypeImplementation( objCImpl, module.typeList[genTypeName] )
+def writeObjCImplementation( genDir, category, module ):
 
-	if len( module.methods ) != 0:
-		writeObjCIfaceDeclaration( objCIface, module.name )
-		writeObjCImplDeclaration( objCImpl, module.name )
-		objCIface.write("\n/* methods */\n\n")
-		objCImpl.write("\n/* implementation */\n\n")	
+	if not os.path.exists( genDir ):
+	    os.makedirs( genDir )
 
-	for method in module.methods:
-		writeOBJCMethodDeclaration( objCIface, method, implementation = False )
-		writeOBJCMethodImplementation( objCImpl, method )
+	if category is not None and len(category) > 0:
+		writeObjCImplementationCategory( genDir, category, module )
+	else:
+		writeObjCImplementationMonolith( genDir, module )
 
-	if len( module.methods ) != 0:
-		writeObjCIfaceFooter( objCIface, module.name )
-		writeObjCImplFooter( objCImpl, module.name )
-
-	writeObjCFooter( objCImpl )
 

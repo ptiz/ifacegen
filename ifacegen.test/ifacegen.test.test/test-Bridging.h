@@ -11,6 +11,8 @@
 
 #import "OBCTest.h"
 #import "OBCTypes.h"
+#import "OBCCategory.h"
+#import "OBCCategory+RPC.h"
 #import "IFTransport.h"
 #import "IFHTTPTransport.h"
 #import "IFHTTPTransport+Protected.h"

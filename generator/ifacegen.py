@@ -1,5 +1,7 @@
 # Created by Evgeny Kamyshanov on March, 2014
-# Copyright (c) 2013-2014 BEFREE Ltd. 
+# Copyright (c) 2013-2014 BEFREE Ltd.
+# Modified by Evgeny Kamyshanov on March, 2015
+# Copyright (c) 2014-2015 Evgeny Kamyshanov
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +30,7 @@ import os
 from collections import OrderedDict
 from string import Template
 
-def processIface( jsonFile, verbose, typeNamePrefix, outDir ):
+def processIface( jsonFile, verbose, typeNamePrefix, outDir, category ):
 
 	if outDir is not None:
 		genDir = os.path.abspath( outDir )
@@ -50,15 +52,16 @@ def processIface( jsonFile, verbose, typeNamePrefix, outDir ):
 
 	if genDir is None:
 		genDir = 'gen-objc'
-	writeObjCImplementation( genDir, module )
+	writeObjCImplementation( genDir, category, module )
 
 def main():
 	parser = argparse.ArgumentParser(description='JSON-ObjC interface generator')
 	
 	parser.add_argument('rpcInput', metavar='I', type=unicode, nargs = '+', help = 'Input JSON RPC files')
-	parser.add_argument('--prefix', action='store', required=False, help='Class and methods prefix')
+	parser.add_argument('--prefix', type=unicode, action='store', required=False, help='Class and methods prefix')
 	parser.add_argument('--verbose', action='store_true', required=False, help='Verbose mode')
 	parser.add_argument('-o', '--outdir', action='store', required=False, help="Output directory name")
+	parser.add_argument('--category', type=unicode, action='store', required=False, help='Generate a separate category files for de-/serialization methods')
 
 	parsedArgs = parser.parse_args()
 	if len(sys.argv) == 1:
@@ -67,10 +70,13 @@ def main():
 
 	try:
 		for rpcInput in parsedArgs.rpcInput:
-			processIface( rpcInput, parsedArgs.verbose, parsedArgs.prefix, parsedArgs.outdir )
+			processIface( rpcInput, parsedArgs.verbose, parsedArgs.prefix, parsedArgs.outdir, parsedArgs.category )
 	except Exception as ex:
 		print( str(ex) )
 		sys.exit(1)
+	except:
+		print( "Unexpected error:" + sys.exc_info()[0] )
+		sys.exit(1)		
 
 	return 0
 

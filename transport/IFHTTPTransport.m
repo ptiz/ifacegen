@@ -30,7 +30,7 @@
 #   define IFDebugLog(...)
 #endif
 
-NSString* const IFHTTPTransportErrorDomain = @"com.ifree.ifacegen.transport.httperror";
+NSString* const IFHTTPTransportErrorDomain = @"com.oss.ifacegen.transport.httperror";
 
 @interface IFHTTPTransport()
 
@@ -50,8 +50,7 @@ NSString* const IFHTTPTransportErrorDomain = @"com.ifree.ifacegen.transport.http
 
         NSString* appVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
         NSString* appName = [[NSBundle mainBundle] bundleIdentifier];
-        self.userAgent = [NSString
-                     stringWithFormat:@"%@ %@", appName, appVersion];
+        self.userAgent = [NSString stringWithFormat:@"%@ %@", appName, appVersion];
     }
     return self;
 }
@@ -169,7 +168,7 @@ NSString* const IFHTTPTransportErrorDomain = @"com.ifree.ifacegen.transport.http
                                                   length:[request.HTTPBody length]
                                                 encoding:NSUTF8StringEncoding];
 
-        IFDebugLog(@"HTTPTransport to be written in URL \"%@\": %@", [request.URL absoluteString], json);
+        IFDebugLog(@"HTTPTransport is going to call URL \"%@\": %@", [request.URL absoluteString], json);
     }
 
     [request setValue:self.userAgent forHTTPHeaderField:@"User-Agent"];

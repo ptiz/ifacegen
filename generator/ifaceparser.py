@@ -120,8 +120,10 @@ def buildMethodFromJSON( jsonItem, typeList, importedTypeList ):
 		method.customRequestTypes[customRequestKey] = typeFromJSON( None, customRequestTypeName, customRequest, typeList, importedTypeList )
 		del typeList[method.customRequestTypes[customRequestKey].name]	
 
-	# flatten return type if it is only one filed in dictionary
-	if len( response ) == 1:
+	if response is None:
+		return method
+	elif len( response ) == 1:
+		# flatten return type if it is only one filed in dictionary
 		if type( response ) == types.ListType:
 			method.responseType = typeFromJSON( typeDecoration, "List", response, typeList, importedTypeList )
 			method.responseArgName = None
@@ -137,20 +139,23 @@ def buildMethodFromJSON( jsonItem, typeList, importedTypeList ):
 def parseModule( jsonFile ):
 	with open( jsonFile, "rt" ) as jFile:
 		jsonObj = json.load( jFile, object_pairs_hook=OrderedDict )
-		if jsonObj["iface"] is not None:
 
-			baseDir = os.path.dirname( jsonFile )
+		if jsonObj["iface"] is None:
+			raise Exception('Module ' + jsonFile + ' is not a valid ifacegen IDL file. "iface" section was not found.')
 
-			inputNameParts = os.path.basename( jsonFile ).split('.')		
-			module = GenModule( inputNameParts[0] )
+		baseDir = os.path.dirname( jsonFile )
 
-			for jsonItem in jsonObj["iface"]:
-				if "struct" in jsonItem:
-					buildTypeFromStructJSON( jsonItem, module.typeList, module.importedTypeList )
-				elif "procedure" in jsonItem:
-					module.methods.append( buildMethodFromJSON( jsonItem, module.typeList, module.importedTypeList ) )
-				elif "import" in jsonItem:
-					importModule( os.path.join( baseDir, jsonItem["import"]), fromModule=module )
+		inputNameParts = os.path.basename( jsonFile ).split('.')
+		module = GenModule( inputNameParts[0] )
+
+		for jsonItem in jsonObj["iface"]:
+			if "struct" in jsonItem:
+				buildTypeFromStructJSON( jsonItem, module.typeList, module.importedTypeList )
+			elif "procedure" in jsonItem:
+				module.methods.append( buildMethodFromJSON( jsonItem, module.typeList, module.importedTypeList ) )
+			elif "import" in jsonItem:
+				importModule( os.path.join( baseDir, jsonItem["import"]), fromModule=module )
+
 	return module
 
 def importModule( jsonFile, fromModule ):

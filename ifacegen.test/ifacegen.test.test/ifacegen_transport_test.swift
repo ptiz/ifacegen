@@ -1,10 +1,25 @@
-//
-//  ifacegen_transport_test.swift
-//  ifacegen.test
-//
-//  Created by Evgenii Kamyshanov on 27.01.15.
-//
-//
+/**
+*	Created by Evgeny Kamyshanov on Jan, 2015
+*	Copyright (c) 2014-2015 Evgeny Kamyshanov
+*
+*	Permission is hereby granted, free of charge, to any person obtaining a copy
+*	of this software and associated documentation files (the "Software"), to deal
+*	in the Software without restriction, including without limitation the rights
+*	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+*	copies of the Software, and to permit persons to whom the Software is
+*	furnished to do so, subject to the following conditions:
+*
+*	The above copyright notice and this permission notice shall be included in
+*	all copies or substantial portions of the Software.
+*
+*	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+*	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+*	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+*	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+*	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+*	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+*	THE SOFTWARE.
+**/
 
 import Foundation
 import XCTest
@@ -15,8 +30,13 @@ class TestTransport: IFHTTPTransport {
     var checkInput: ((NSData?) -> ())?
     var checkCustomInput: ((Dictionary<String, AnyObject>?) -> ())?
     
-    override init!(URL url: NSURL!) {
-        super.init(URL: url)
+    let responseFileName: String?
+    
+    init!(Response responseFileName: String?) {
+        super.init(URL: NSURL(fileURLWithPath: ""))
+        if let resFileName = responseFileName {
+            self.responseFileName = resFileName
+        }
     }
     
     override func writeAll(data: NSData!, prefix: String!, error: NSErrorPointer) -> Bool {
@@ -34,8 +54,10 @@ class TestTransport: IFHTTPTransport {
     }
     
     override func readAll() -> NSData! {
-        let response = "{\"response\":[{\"name\":\"John Doe\",\"id\":13,\"dimension\":13.1,\"passport\":{\"id\":12345,\"organization\":\"Org Inc.\" },\"children\":[{\"name\":\"John Doe J.\",\"birthdate\":8713452345}]}]}"
-        return response.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true);
+        if let responseFileName = self.responseFileName {
+            return NSData(contentsOfFile: NSBundle(forClass:self.classForCoder).pathForResource(responseFileName, ofType: "json")!)
+        }
+        return NSData()
     }
     
     func setCustomParams(params: Dictionary<String, AnyObject>) {
@@ -47,7 +69,7 @@ class ifacegen_transport_test: XCTestCase {
     
     func testCall() {
         
-        let testTransport = TestTransport(URL: NSURL(fileURLWithPath: "") )
+        let testTransport = TestTransport(Response: "test_transport_response")
         
         testTransport.checkURL = { (urlString) in
             if let url = urlString {
@@ -86,9 +108,14 @@ class ifacegen_transport_test: XCTestCase {
         
         let response = testService.getEmployeesWithToken("qwerty", andTimestamp: 13452345, andComplexParam: complexParam, andSimpleParam: 13, andEmployerId: 9876345, andFilter: [filter1, filter2], andError: nil)
         
-        XCTAssertEqual(response.count, 1, "Response objects count is wrong")
+        XCTAssertEqual(response.count, 2, "Response objects count is wrong")
         
-        let employee = response[0] as OBCEmployee
-        XCTAssertEqual(employee.name, "John Doe", "Employee name is wrong in response")
+        let employee1 = response[0] as OBCEmployee
+        XCTAssertEqual(employee1.name, "John Doe", "Employee1 name is wrong in response")
+        XCTAssertEqual(employee1.passport.periods.count, 5, "Periods count is wrong for Employee1 passport")
+        
+        let employee2 = response[1] as OBCEmployee
+        XCTAssertEqual(employee2.name, "Mary Doe", "Employee2 name is wrong in response")
+        XCTAssertTrue(employee2.passport.periods == nil, "Periods count is wrong for Employee2 passport")
     }
 }

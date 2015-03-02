@@ -120,8 +120,10 @@ def buildMethodFromJSON( jsonItem, typeList, importedTypeList ):
 		method.customRequestTypes[customRequestKey] = typeFromJSON( None, customRequestTypeName, customRequest, typeList, importedTypeList )
 		del typeList[method.customRequestTypes[customRequestKey].name]	
 
-	# flatten return type if it is only one filed in dictionary
-	if len( response ) == 1:
+	if response is None:
+		return method
+	elif len( response ) == 1:
+		# flatten return type if it is only one filed in dictionary
 		if type( response ) == types.ListType:
 			method.responseType = typeFromJSON( typeDecoration, "List", response, typeList, importedTypeList )
 			method.responseArgName = None

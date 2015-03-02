@@ -40,7 +40,7 @@ def OBJCAssumeType( genType ):
 	return "_ERROR_"
 
 def OBJCDecorateTypeForDict( objcTypeStr, genType ):
-	template = Template('NULLABLE($objcTypeStr)')
+	template = Template('($objcTypeStr == nil ? [NSNull null] : $objcTypeStr)')
 	if genType.sType == 'bool' or genType.sType == 'int32' or genType.sType == 'int64' or genType.sType == 'double':
 		template = Template('@($objcTypeStr)')
 	if genType.sType == 'rawstr':
@@ -325,7 +325,7 @@ def OBJCUnwindTypeToDict( genType, objcArgName, level, recursive=True ):
 
 	elif isinstance( genType, GenListType ):
 		if isinstance( genType.itemType, GenIntegralType ):
-			return 'NULLABLE(%s)' % (objcArgName)
+			return Template('($objcArgName == nil ? [NSNull null] : $objcArgName)').substitute(objcArgName=objcArgName)
 		else:
 			arrayTemplate = Template("""\
 ^NSArray*(NSArray* inArr) {
@@ -450,7 +450,7 @@ def OBJCRPCMethodImplementation( method ):
 	jsonArgsTemplate = Template('[NSJSONSerialization dataWithJSONObject:$jsonArgDict options:jsonFormatOption error:error]')
 	customArgsTemplate = Template("""\
 	if (![self.transport respondsToSelector:@selector($customArgSectionName:)]) {
-		assert("Transport does not respond to selector $customArgSectionName:.");
+		assert("Transport does not respond to selector $customArgSectionName:");
 	} else {
 		[self.transport performSelector:@selector($customArgSectionName:) withObject:$customArgDict];
 	}
@@ -474,7 +474,8 @@ $setCustomArgs
 		return$emptyVal;
 	}
 	$returnStr
-}""")
+}
+""")
 
 	customArgsList = []
 	for customRequestTypeKey in method.customRequestTypes.keys():
@@ -519,7 +520,6 @@ OBJCImplementationPreamble = """\
 #pragma clang diagnostic ignored "-Wunused"
 #pragma clang diagnostic ignored "-Wundeclared-selector"
 
-#define NULLABLE( s ) (s == nil ? [NSNull null] : s)
 static const NSUInteger jsonFormatOption = 
 #ifdef DEBUG
 	NSJSONWritingPrettyPrinted;
@@ -550,7 +550,7 @@ $conclusion
 	return template.substitute(generatedWarning=OBJCGeneratedWarning, modHeader=module.name, preamble=OBJCImplementationPreamble, typeImplementationList=OBJCTypeImplementationList( module, OBJCTypeImplementation ), rpcImplementation=OBJCRPCImplementation( module ), conclusion=OBJCImplementationConclusion)
 
 def OBJCModuleForCategory( module ):
-	template = Template("""
+	template = Template("""\
 $generatedWarning
 
 #import "$modHeader.h"

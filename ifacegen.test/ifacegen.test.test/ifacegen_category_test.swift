@@ -36,10 +36,10 @@ class ifacegen_category_test: XCTestCase {
         let dict = model.dictionaryWithError(&error)
         XCTAssertNotNil(dict, "Serialization was unsuccessful")
         
-        let revisions = dict["revisions"] as NSArray
-        let revision = revisions.objectAtIndex(0) as NSDictionary
-        let modelDict = revision.objectForKey("model") as NSDictionary
-        let modelName = modelDict.objectForKey("name") as String!
+        let revisions = dict["revisions"] as! NSArray
+        let revision = revisions.objectAtIndex(0) as! NSDictionary
+        let modelDict = revision.objectForKey("model") as! NSDictionary
+        let modelName = modelDict.objectForKey("name") as! String!
         XCTAssertTrue(modelName == "BMod-old", "Serialization was not successful")
     }
     

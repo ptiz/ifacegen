@@ -83,10 +83,21 @@ def buildTypeFromStructJSON( jsonItem, typeList, importedTypeList ):
 				raise Exception("Unknown base type %s for type %s" % retType.name, parentTypeName )
 	return retType
 
-def buildMethodFromJSON( jsonItem, typeList, importedTypeList ):
+validHTTPMethodNames = set(["get", "head", "post", "put", "delete"])
+
+def matchHTTPMethod( jsonItem, methodKey, match ):
+	for validMethodName in validHTTPMethodNames:
+		if methodKey == validMethodName:
+			match[0] = jsonItem[methodKey]
+			match[1] = methodKey.capitalize()
+			return True
+	return False
+
+def buildMethodFromJSON( jsonItem, typeList, importedTypeList, method=None ):
 
 	prefix = None
 	methodName = None
+	httpMethod = None
 	request = None
 	customRequests = OrderedDict()
 	response = None
@@ -100,6 +111,9 @@ def buildMethodFromJSON( jsonItem, typeList, importedTypeList ):
 			response = jsonItem["response"]
 		elif methodKey == "request":
 			request = jsonItem["request"]
+		elif methodKey in validHTTPMethodNames:
+			methodName = jsonItem[methodKey]
+			httpMethod = methodKey.lower()
 		else:
 			customRequests[methodKey] = jsonItem[methodKey]
 
@@ -108,6 +122,8 @@ def buildMethodFromJSON( jsonItem, typeList, importedTypeList ):
 
 	method = GenMethod( methodName, prefix )
 	typeDecoration = capitalizeFirstLetter( methodName )
+
+	method.httpMethod = httpMethod
 
 	if request is not None:
 		requestTypeName = "%s_json_args" % methodName
@@ -155,6 +171,10 @@ def parseModule( jsonFile ):
 				module.methods.append( buildMethodFromJSON( jsonItem, module.typeList, module.importedTypeList ) )
 			elif "import" in jsonItem:
 				importModule( os.path.join( baseDir, jsonItem["import"]), fromModule=module )
+
+			for validMethodName in validHTTPMethodNames:
+				if validMethodName in jsonItem:
+					module.methods.append( buildMethodFromJSON( jsonItem, module.typeList, module.importedTypeList ) )
 
 	return module
 

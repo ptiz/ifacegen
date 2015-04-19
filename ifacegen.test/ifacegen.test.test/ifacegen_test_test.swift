@@ -63,8 +63,6 @@ class ifacegen_test_test: XCTestCase {
         
         var error:NSError?
         let data = self.employer.dumpWithError(&error)
-//        let dataStr = NSString(data: data, encoding: NSUTF8StringEncoding);
-//        NSLog("%@", dataStr!);
         
         XCTAssertNil(error, "Serialization was unsuccessful")
         
@@ -72,8 +70,8 @@ class ifacegen_test_test: XCTestCase {
         
         XCTAssertEqual(desEmployer.stuff.count, 2, "Data was not deserialized successfully")
         
-        let desEmployee0 = desEmployer.stuff[0] as OBCEmployee
-        let desEmployee1 = desEmployer.stuff[1] as OBCEmployee
+        let desEmployee0 = desEmployer.stuff[0] as! OBCEmployee
+        let desEmployee1 = desEmployer.stuff[1] as! OBCEmployee
         
         XCTAssertEqual(desEmployee0.name, "empl0", "Employee.name is wrong")
         XCTAssertTrue(desEmployee0.passport.theId == 786234, "Employee pass is wrong")
@@ -81,14 +79,14 @@ class ifacegen_test_test: XCTestCase {
         XCTAssertTrue(desEmployee1.children.count == 2, "Children1 array is wrong")
         XCTAssertTrue(desEmployee0.employmentRec.count == 2, "Employment record is wrong for Employee0")
         
-        let array = desEmployee0.employmentRec[1] as [AnyObject]
-        let itemItem = array[1] as OBCEmployeeEmploymentRecItemItem
+        let array = desEmployee0.employmentRec[1] as! [AnyObject]
+        let itemItem = array[1] as! OBCEmployeeEmploymentRecItemItem
         XCTAssertTrue( itemItem.begin == 5, "Employee0.employmentRec[1][1].begin is wrong")
         
-        let desChild = desEmployee1.children[1] as OBCEmployeeChildrenItem
+        let desChild = desEmployee1.children[1] as! OBCEmployeeChildrenItem
         XCTAssertEqual(desChild.name, "Mary", "Child name is wrong")
         
-        let employmentDataValue = desEmployee0.employmentData["data"] as String
+        let employmentDataValue = desEmployee0.employmentData["data"] as! String
         XCTAssertEqual(employmentDataValue, "any", "employmentData is wrong for Employee0")
     }
     

@@ -25,7 +25,7 @@
 
 @interface IFHTTPTransport (Protected)
 
-- (NSMutableURLRequest*)prepareRequestWithURL:(NSURL*)url data:(NSData*)data;
+- (NSMutableURLRequest*)prepareRequestWithURL:(NSURL*)url method:(IFHTTPMethod)method data:(NSData*)data;
 - (NSString*)buildRequestParamsString:(NSDictionary*)requestParams;
 - (BOOL)shouldBreakOnError:(NSError*)error;
 

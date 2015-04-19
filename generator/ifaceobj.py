@@ -204,6 +204,7 @@ class GenMethod:
 	def __init__( self, name, prefix ):
 		self.name = name
 		self.prefix = prefix
+		self.httpMethod = None
 		self.requestJsonType = None
 		self.customRequestTypes = OrderedDict()
 		self.responseType = None

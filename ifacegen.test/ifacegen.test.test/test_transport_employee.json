@@ -1,0 +1,11 @@
+{
+"name":"John Doe",
+"id":1234,
+"married":false,          
+"passport":{
+    "id": 34567,
+    "organization": "MCC",
+    "periods": [13, 14, 15]
+	},
+"age":33.33
+}

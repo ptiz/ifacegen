@@ -36,6 +36,12 @@ def OBJCAssumeType( genType ):
 		return 'NSArray';
 	return "_ERROR_"
 
+def OBJCHTTPEnumFromName( httpMethodName ):
+	httpMethodMap = { "get": "IFHTTPMETHOD_GET", "head": "IFHTTPMETHOD_HEAD", "post": "IFHTTPMETHOD_POST", "put": "IFHTTPMETHOD_PUT", "delete": "IFHTTPMETHOD_DELETE" }
+	if httpMethodName in httpMethodMap:
+		return httpMethodMap[httpMethodName]
+	return "_ERROR_"
+
 def OBJCDecorateTypeForDict( objcTypeStr, genType ):
 	template = Template('($objcTypeStr == nil ? [NSNull null] : $objcTypeStr)')
 	if genType.sType == 'bool' or genType.sType == 'int32' or genType.sType == 'int64' or genType.sType == 'double':
@@ -80,6 +86,12 @@ def OBJCEmptyValForType( genType ):
 def OBJCAppendIfNotEmpty( list, strItem ):
 	if strItem is not None and len(strItem) > 0:
 		list.append( strItem )
+
+def isModuleDependsOnHTTPTransport( module ):
+	for method in module.methods:
+		if method.httpMethod is not None:
+			return True
+	return False
 
 ############################
 # Header declaration
@@ -230,10 +242,8 @@ OBJCGeneratedWarning = """\
  */"""
 
 OBJCHeaderIFImports = """\
-#import "IFTransport.h"
 #import "IFServiceClient.h"
 """
-
 OBJCHeaderTemplate = Template("""\
 $generatedWarning
 
@@ -454,12 +464,15 @@ def OBJCRPCMethodImplementation( method ):
 """)
 	returnTemplate = Template('return $response;')
 
+	transportMethodTemplate = Template('[self.transport writeAll:jsonData prefix:$prefix error:error]')
+	transportHTTPMethodTemplate = Template('[(IFHTTPTransport*)self.transport writeAll:jsonData prefix:$prefix method:$httpMethod error:error]')
+
 	template = Template("""\
 $declaration {
 	id tmp;
 $setCustomArgs
 	NSData* jsonData = $jsonData;
-	if ( ![self.transport writeAll:jsonData prefix:$prefix error:error] ) {
+	if ( !$transportMethod ) {
 		return$emptyVal;
 	}
 	NSData* outputData = [self.transport readAll];
@@ -488,13 +501,17 @@ $setCustomArgs
 	if method.prefix is not None:
 		prefix = '@"%s"' % (method.prefix)
 
+	transportMethod = transportMethodTemplate.substitute(prefix=prefix)
+	if method.httpMethod is not None:
+		transportMethod = transportHTTPMethodTemplate.substitute(prefix=prefix, httpMethod=OBJCHTTPEnumFromName(method.httpMethod))
+
 	returnStr = ''
 	emptyVal = ''
 	if method.responseType is not None:
 		returnStr = returnTemplate.substitute( response=OBJCTypeFromDictionary( method.responseType, 'output', level=2 ) )
 		emptyVal = ' ' + OBJCEmptyValForType( method.responseType )
 
-	return template.substitute( declaration=OBJCRPCMethodDeclaration( method ), setCustomArgs=setCustomArgs, jsonData=jsonData, prefix=prefix, returnStr=returnStr, emptyVal=emptyVal )
+	return template.substitute( declaration=OBJCRPCMethodDeclaration( method ), setCustomArgs=setCustomArgs, jsonData=jsonData, transportMethod=transportMethod, returnStr=returnStr, emptyVal=emptyVal )
 
 def OBJCRPCImplementation( module ):
 	if len(module.methods) == 0:
@@ -528,12 +545,20 @@ OBJCImplementationConclusion = """\
 #pragma clang diagnostic pop
 """
 
+transportImportListTemplate = Template("""\
+#import "$modHeader.h"
+#import "IFServiceClient+Protected.h" """)
+
+transportHTTPImportListTemplate = Template("""\
+#import "$modHeader.h"
+#import "IFHTTPTransport.h"
+#import "IFServiceClient+Protected.h" """)
+
 def OBJCModule( module ):
 	template = Template("""\
 $generatedWarning
 
-#import "$modHeader.h"
-#import "IFServiceClient+Protected.h"
+$importList
 
 $preamble
 
@@ -544,7 +569,10 @@ $rpcImplementation
 $conclusion
 """)
 
-	return template.substitute(generatedWarning=OBJCGeneratedWarning, modHeader=module.name, preamble=OBJCImplementationPreamble, typeImplementationList=OBJCTypeImplementationList( module, OBJCTypeImplementation ), rpcImplementation=OBJCRPCImplementation( module ), conclusion=OBJCImplementationConclusion)
+	importList = transportImportListTemplate.substitute( modHeader=module.name )
+	if isModuleDependsOnHTTPTransport( module ):
+		importList = transportHTTPImportListTemplate.substitute( modHeader=module.name )
+	return template.substitute(generatedWarning=OBJCGeneratedWarning, importList=importList, preamble=OBJCImplementationPreamble, typeImplementationList=OBJCTypeImplementationList( module, OBJCTypeImplementation ), rpcImplementation=OBJCRPCImplementation( module ), conclusion=OBJCImplementationConclusion)
 
 def OBJCModuleForCategory( module ):
 	template = Template("""\

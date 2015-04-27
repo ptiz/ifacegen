@@ -29,12 +29,21 @@ class TestTransport: IFHTTPTransport {
     var checkURL: ((String?) -> ())?
     var checkInput: ((NSData?) -> ())?
     var checkCustomInput: ((Dictionary<String, AnyObject>?) -> ())?
+    var checkHTTPMethod: ((IFHTTPMethod) -> ())?
     
     let responseFileName: String?
     
-    init!(Response responseFileName: String?) {
+    init(ResponseFileName responseFileName: String?) {
         self.responseFileName = responseFileName
-        super.init(URL: NSURL(fileURLWithPath: ""))
+        super.init(URL:NSURL(string: ""))
+    }
+    
+    override func writeAll(data: NSData!, prefix: String!, method: IFHTTPMethod, error: NSErrorPointer) -> Bool {
+        if let checkHTTPMethod = self.checkHTTPMethod {
+            checkHTTPMethod( method )
+        }
+        
+        return true
     }
     
     override func writeAll(data: NSData!, prefix: String!, error: NSErrorPointer) -> Bool {
@@ -67,7 +76,7 @@ class ifacegen_transport_test: XCTestCase {
     
     func testCall() {
         
-        let testTransport = TestTransport(Response: "test_transport_response")
+        let testTransport = TestTransport(ResponseFileName: "test_transport_response")
         
         testTransport.checkURL = { (urlString) in
             if let url = urlString {
@@ -115,5 +124,21 @@ class ifacegen_transport_test: XCTestCase {
         let employee2 = response[1] as! OBCEmployee
         XCTAssertEqual(employee2.name, "Mary Doe", "Employee2 name is wrong in response")
         XCTAssertTrue(employee2.passport.periods == nil, "Periods count is wrong for Employee2 passport")
+    }
+    
+    func testHTTPCall() {
+        
+        let transport = TestTransport(ResponseFileName: nil)
+        
+        transport.checkHTTPMethod = { (method:IFHTTPMethod)->() in
+            XCTAssert( method == .IFHTTPMETHOD_PUT, "HTTP method is wrong")
+            println("HTTP method: \(method)")
+        }
+        
+        let employee = OBCEmployee(JSONData: NSData(contentsOfFile: NSBundle(forClass:self.classForCoder).pathForResource("test_transport_employee", ofType: "json")!), error: nil)
+        XCTAssert(employee.age == 33.33, "Epmployee was not desirialized properly")
+        
+        let testService = OBCTest(transport: transport)
+        testService.methodForPutWithEmployee(employee, andError: nil)
     }
 }

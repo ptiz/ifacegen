@@ -63,8 +63,6 @@ class ifacegen_test_test: XCTestCase {
         
         var error:NSError?
         let data = self.employer.dumpWithError(&error)
-//        let dataStr = NSString(data: data, encoding: NSUTF8StringEncoding);
-//        NSLog("%@", dataStr!);
         
         XCTAssertNil(error, "Serialization was unsuccessful")
         

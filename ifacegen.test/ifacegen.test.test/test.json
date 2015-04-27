@@ -60,7 +60,19 @@
 },
 
 {
-"procedure": "procedureCall"
+"head": "procedureCall"
+},
+
+{
+"get": "methodForGet",
+"url_params": {"token": "string"},
+"response": {"session_id": "int64"}
+},
+
+{
+"put": "methodForPut",
+"request": { "employee":"Employee" },
+"prefix": "employees"
 }
 
 ]}

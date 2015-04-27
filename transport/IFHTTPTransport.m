@@ -61,81 +61,84 @@ NSString* const IFHTTPTransportErrorDomain = @"com.oss.ifacegen.transport.httper
 
 #pragma mark - Transport proto
 
-- (BOOL)writeAll:(NSData*)data prefix:(NSString*)prefix error:(NSError* __autoreleasing*)error {
-
+- (BOOL)writeAll:(NSData*)data prefix:(NSString*)prefix method:(IFHTTPMethod)method error:(NSError* __autoreleasing*)error {
     *error = nil;
-
+    
     self.currentAnswer = nil;
     self.curentResponse = nil;
-
+    
     if ( prefix == nil ) {
         prefix = @"";
     }
-
+    
     NSURL* requestURL;
     if ( [prefix length] && [prefix characterAtIndex:0] == ':' ) {
         requestURL = [NSURL URLWithString:
                       [[self.rootURL absoluteString] stringByAppendingString:prefix]];
     } else {
-       requestURL = [self.rootURL URLByAppendingPathComponent:prefix];
+        requestURL = [self.rootURL URLByAppendingPathComponent:prefix];
     }
-
+    
     NSString* requestParamsString;
     if ( self.currentRequestParams != nil ) {
         requestParamsString = [self buildRequestParamsString:self.currentRequestParams];
         requestURL =
-            [NSURL URLWithString:
-             [[requestURL absoluteString] stringByAppendingString:requestParamsString]];
+        [NSURL URLWithString:
+         [[requestURL absoluteString] stringByAppendingString:requestParamsString]];
     }
-
-    NSMutableURLRequest* request = [self prepareRequestWithURL:requestURL data:data];
-
+    
+    NSMutableURLRequest* request = [self prepareRequestWithURL:requestURL method:method data:data];
+    
     NSHTTPURLResponse* response;
     NSInteger retriesCounter = self.retriesCount;
     while ( retriesCounter-- ) {
         self.currentAnswer = [NSURLConnection sendSynchronousRequest:request
-                                              returningResponse:&response
-                                                          error:error];
-
+                                                   returningResponse:&response
+                                                               error:error];
+        
         if ( *error == nil || [self shouldBreakOnError:*error] ) {
             break;
         }
-
+        
         sleep(10);
     }
-
+    
     if ( *error != nil ) {
         return NO;
     }
-
+    
     self.currentRequestParams = nil;
     self.curentResponse = response;
-
+    
     IFDebugLog(@"Response code: %ld", (long)[self.curentResponse statusCode]);
-
+    
     if ( [self.curentResponse statusCode] < 200 || [self.curentResponse statusCode] > 202 ) {
-
+        
         NSDictionary* userInfo = @{ @"NSLocalizedDescriptionKey": [NSHTTPURLResponse localizedStringForStatusCode:
                                                                    [self.curentResponse statusCode]
                                                                    ]};
-
+        
         *error = [[NSError alloc] initWithDomain:IFHTTPTransportErrorDomain
                                             code:[self.curentResponse statusCode]
                                         userInfo:userInfo];
-
+        
         return NO;
     }
-
+    
     if ( self.currentAnswer == nil || [self.currentAnswer length] == 0 ) {
         return YES;
     }
-
+    
     IFDebugLog(@"Response body: %@", [[NSString alloc] initWithBytes:[self.currentAnswer bytes]
-                                                         length:[self.currentAnswer length]
-                                                       encoding:NSUTF8StringEncoding]
-                                                       );
-
+                                                              length:[self.currentAnswer length]
+                                                            encoding:NSUTF8StringEncoding]
+               );
+    
     return YES;
+}
+
+- (BOOL)writeAll:(NSData*)data prefix:(NSString*)prefix error:(NSError* __autoreleasing*)error {
+    return [self writeAll:data prefix:prefix method:IFHTTPMETHOD_AUTO error:error];
 }
 
 - (NSData*)readAll {
@@ -148,12 +151,18 @@ NSString* const IFHTTPTransportErrorDomain = @"com.oss.ifacegen.transport.httper
 
 #pragma mark - Overrides
 
-- (NSMutableURLRequest*)prepareRequestWithURL:(NSURL*)url data:(NSData*)data {
+static NSString* const methods[] = { @"", @"GET", @"HEAD", @"POST", @"PUT", @"DELETE" };
 
+- (NSMutableURLRequest*)prepareRequestWithURL:(NSURL*)url httpMethod:(IFHTTPMethod)method data:(NSData*)data {
+    
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
     IFDebugLog(@"Request: %@", request);
 
-    [request setHTTPMethod:( data == nil ? @"GET" : @"POST" )];
+    if ( method == IFHTTPMETHOD_AUTO ) {
+        method = data == nil ? IFHTTPMETHOD_GET : IFHTTPMETHOD_POST;
+    }
+    
+    [request setHTTPMethod:methods[method]];
 
     if ( data != nil ) {
         [request setHTTPBody: data];

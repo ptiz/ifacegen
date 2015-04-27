@@ -26,12 +26,23 @@
 
 extern NSString* const IFHTTPTransportErrorDomain;
 
+typedef NS_ENUM(NSInteger, IFHTTPMethod) {
+	IFHTTPMETHOD_AUTO,
+    IFHTTPMETHOD_GET,
+    IFHTTPMETHOD_HEAD,
+    IFHTTPMETHOD_POST,
+    IFHTTPMETHOD_PUT,
+    IFHTTPMETHOD_DELETE
+};
+
 @interface IFHTTPTransport : NSObject<IFTransport>
 
 - (id)initWithURL:(NSURL*)url;
 
 - (void)setUrlParams:(NSDictionary*)params;
 - (NSHTTPURLResponse*)currentResponse;
+
+- (BOOL)writeAll:(NSData*)data prefix:(NSString*)prefix method:(IFHTTPMethod)method error:(NSError* __autoreleasing*)error;
 
 @property (nonatomic) NSInteger retriesCount;
 @property (nonatomic) NSString* userAgent;

@@ -19,12 +19,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+
 from ifaceparser import *
-import argparse
-import sys
-import types
 import os
-from collections import OrderedDict
 from string import Template
 
 def OBJCAssumeType( genType ):

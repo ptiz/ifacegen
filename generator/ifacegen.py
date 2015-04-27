@@ -21,16 +21,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from ifaceparser import *
+
 from ifaceobjcgen import *
+from ifaceswiftgen import *
 import argparse
 import sys
-import types
 import os
-from collections import OrderedDict
-from string import Template
 
-def processIface( jsonFile, verbose, typeNamePrefix, outDir, category ):
+def processIface( jsonFile, verbose, typeNamePrefix, outDir, category, genType ):
 
 	if outDir is not None:
 		genDir = os.path.abspath( outDir )
@@ -52,7 +50,14 @@ def processIface( jsonFile, verbose, typeNamePrefix, outDir, category ):
 
 	if genDir is None:
 		genDir = 'gen-objc'
-	writeObjCImplementation( genDir, category, module )
+
+	if genType is None or genType == 'objc':
+		writeObjCImplementation( genDir, category, module )
+	elif genType == 'swift':
+		writeSwiftImplementation( genDir, category, module )
+	else:
+		print("Unknown generator: " + genType)
+
 
 def main():
 	parser = argparse.ArgumentParser(description='JSON-ObjC interface generator')
@@ -60,17 +65,18 @@ def main():
 	parser.add_argument('rpcInput', metavar='I', type=unicode, nargs = '+', help = 'Input JSON RPC files')
 	parser.add_argument('--prefix', type=unicode, action='store', required=False, help='Class and methods prefix')
 	parser.add_argument('--verbose', action='store_true', required=False, help='Verbose mode')
+	parser.add_argument('--gen', required=False, help="Type of generator. Use 'swift' or 'objc'")
 	parser.add_argument('-o', '--outdir', action='store', required=False, help="Output directory name")
 	parser.add_argument('--category', type=unicode, action='store', required=False, help='Generate a separate category files for de-/serialization methods')
 
 	parsedArgs = parser.parse_args()
 	if len(sys.argv) == 1:
-	    parser.print_help()
-	    return 0
+		parser.print_help()
+		return 0
 
 	try:
 		for rpcInput in parsedArgs.rpcInput:
-			processIface( rpcInput, parsedArgs.verbose, parsedArgs.prefix, parsedArgs.outdir, parsedArgs.category )
+			processIface( rpcInput, parsedArgs.verbose, parsedArgs.prefix, parsedArgs.outdir, parsedArgs.category, parsedArgs.gen )
 	except Exception as ex:
 		print( str(ex) )
 		sys.exit(1)

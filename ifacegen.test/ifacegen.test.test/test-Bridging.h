@@ -16,5 +16,7 @@
 #import "IFTransport.h"
 #import "IFHTTPTransport.h"
 #import "IFHTTPTransport+Protected.h"
+#import "IFServiceClient.h"
+#import "IFServiceClient+Protected.h"
 
 #endif

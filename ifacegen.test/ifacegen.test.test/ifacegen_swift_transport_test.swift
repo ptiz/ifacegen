@@ -91,7 +91,7 @@ class ifacegen_swift_transport_test: XCTestCase {
                 if let json = NSJSONSerialization.JSONObjectWithData(input, options:.AllowFragments, error: nil) as? [String : AnyObject] {
                     XCTAssertTrue((json["employer_id"] as? NSNumber)?.longLongValue == 9876345, "Input wasn't made well")
                     let filters: AnyObject? = json["filter"]
-                    if let filter2 = filters?[1] as? Dictionary<String, AnyObject> {
+                    if let filter2 = filters?[1] as? [String : AnyObject] {
                         XCTAssertTrue(filter2["payload"] as! String == "filter2", "Input wasn't made well")
                     } else {
                         XCTAssert(false, "Input is nil")
@@ -101,7 +101,7 @@ class ifacegen_swift_transport_test: XCTestCase {
         }
 
         testTransport.checkCustomInput = { (param) in
-            let complexParam = param?["complex_param"] as! Dictionary<String, AnyObject>?
+            let complexParam = param?["complex_param"] as! [String : AnyObject]?
             XCTAssertTrue(complexParam?["complex_field"] as? NSString == "complex field", "Custom complex parameter is wrong")
 
             let simpleParam = param?["simple_param"] as! NSNumber?

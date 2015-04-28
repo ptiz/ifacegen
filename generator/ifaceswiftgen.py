@@ -390,8 +390,8 @@ def SwiftTypeImplementationForCategory( genType ):
 class $typeName {
 $properties
 
-    init() {
-    }
+	init() {
+	}
 $initImplList
 }
 """)
@@ -417,10 +417,9 @@ def SwiftTypeImplementationList( module, implGenerator ):
 
 def SwiftRPCMethodImplementation( method ):
 	jsonArgsTemplate = Template('NSJSONSerialization.dataWithJSONObject($jsonArgDict, options: NSJSONWritingOptions.PrettyPrinted, error: &error)')
-	# TODO: find alternative for performSelector
 	customArgsTemplate = Template("""\
-		if let isMethodSupported = self.transport?.respondsToSelector(Selector("$customArgSectionName:")) {
-			/*tr.$customArgSectionName($customArgDict)*/
+		if let conProtocol = self.transport as? $protocolName {
+			conProtocol.$customArgSectionName($customArgDict)
 		} else {
 			assertionFailure("Transport does not respond to selector $customArgSectionName:")
 		}
@@ -451,14 +450,14 @@ def SwiftRPCMethodImplementation( method ):
 	customArgsList = []
 	for customRequestTypeKey in method.customRequestTypes.keys():
 		customRequestType = method.customRequestTypes[customRequestTypeKey]
-		customArgsList.append( customArgsTemplate.substitute( customArgSectionName=makeAlias('set_' + customRequestTypeKey), customArgDict=SwiftUnwindTypeToDict(
-			customRequestType, None, 3)) )
+		customArgsList.append( customArgsTemplate.substitute( protocolName=makeAlias('_' + method.name) + 'Protocol', customArgSectionName=makeAlias('set_' + customRequestTypeKey), customArgDict=SwiftUnwindTypeToDict(
+			customRequestType, None, 4)) )
 	setCustomArgs = '\n'.join(customArgsList)
 
 	jsonData='nil'
 	if method.requestJsonType is not None:
 		jsonData = jsonArgsTemplate.substitute( jsonArgDict=SwiftUnwindTypeToDict(method.requestJsonType, None,
-																				  level=2))
+																				  level=4))
 
 	prefix = 'prefix'
 	if method.prefix is not None:
@@ -471,6 +470,26 @@ def SwiftRPCMethodImplementation( method ):
 		emptyVal = ' ' + SwiftEmptyValForType(method.responseType)
 
 	return template.substitute( declaration=SwiftRPCMethodDeclaration(method), setCustomArgs=setCustomArgs, jsonData=jsonData, prefix=prefix, returnStr=returnStr, emptyVal=emptyVal )
+
+def SwiftRPCProtocolDeclaration( module ):
+	if len(module.methods) == 0:
+		return ''
+
+	template = Template("""
+protocol $protocolName {
+$methodListDeclaration
+}
+""")
+	protocolsList = []
+	for method in module.methods:
+		if len(method.customRequestTypes.keys()) == 0:
+			continue
+		methodList = []
+		for customRequestTypeKey in method.customRequestTypes.keys():
+			methodList.append('\tfunc ' + makeAlias('set_' + customRequestTypeKey) + '([String : AnyObject]?)')
+		protocolsList.append(template.substitute(protocolName=makeAlias('_' + method.name) + "Protocol", methodListDeclaration='\n'.join(methodList)))
+
+	return '\n'.join(protocolsList)
 
 def SwiftRPCImplementation( module ):
 	if len(module.methods) == 0:
@@ -497,13 +516,15 @@ import Foundation
 
 $typeImplementationList
 
+$rpcProtocolDeclaration
+
 $rpcImplementation
 
 """)
 
 	return template.substitute(generatedWarning=SwiftGeneratedWarning, modHeader=module.name, typeImplementationList=SwiftTypeImplementationList(
-		module, SwiftTypeImplementation), rpcImplementation=SwiftRPCImplementation(
-		module))
+		module, SwiftTypeImplementation), rpcProtocolDeclaration=SwiftRPCProtocolDeclaration( module ),
+		rpcImplementation=SwiftRPCImplementation( module))
 
 def SwiftModuleForCategory( module ):
 	template = Template("""\

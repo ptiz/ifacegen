@@ -44,8 +44,14 @@ def SwiftAssumeType( genType, optional=False ):
 
 def SwiftDecorateTypeForDict( objcTypeStr, genType ):
 	template = Template('($objcTypeStr == nil ? NSNull() : $objcTypeStr as! AnyObject)')
-	#if genType.sType == 'bool' or genType.sType == 'int32' or genType.sType == 'int64' or genType.sType == 'double':
-	#	template = Template('$objcTypeStr')
+	if genType.sType == 'bool':
+		template = Template('($objcTypeStr == nil ? NSNull() : NSNumber(bool: $objcTypeStr!))')
+	if genType.sType == 'int32':
+		template = Template('($objcTypeStr == nil ? NSNull() : NSNumber(int: $objcTypeStr!))')
+	if genType.sType == 'int64':
+		template = Template('($objcTypeStr == nil ? NSNull() : NSNumber(longLong: $objcTypeStr!))')
+	if genType.sType == 'double':
+		template = Template('($objcTypeStr == nil ? NSNull() : NSNumber(double: $objcTypeStr!))')
 	if genType.sType == 'rawstr':
 		template = Template('NSString(data: NSJSONSerialization.dataWithJSONObject($objcTypeStr as AnyObject, options: NSJSONWritingOptions.PrettyPrinted, error: error), encoding: NSUTF8StringEncoding)')
 	return template.substitute( objcTypeStr=objcTypeStr )
@@ -291,18 +297,30 @@ def SwiftComplexTypeFieldListFromDictionary( genType, objcDictArgName ):
 			fieldType, objcDataGetter, 1)) )
 	return '\n\t\t'.join( fieldList )
 
-def SwiftTypeSerializationImplList( genType ):
+def SwiftTypeSerializationImplList( genType, isCategory=False ):
 	overridePrefix = ''
 	superInitCall = ''
+	convenience = ''
+	defaultInitTemplate = Template("""${conveniencePref}${overridePref}init(){
+		$superInit
+	}""")
 	if genType.baseType is not None:
-		overridePrefix = 'override'
+		overridePrefix = 'override '
 		superInitCall = 'super.init()'
+	if isCategory:
+		convenience = 'convenience '
+		superInitCall = 'self.init()'
+		# There is not default init for category
+		defaultInitTemplate = Template("""""")
+
+	defaultInitValue = defaultInitTemplate.substitute(conveniencePref=convenience, overridePref=overridePrefix, superInit=superInitCall)
+
 	template = Template("""
-	$overridePref func dictionary(inout error: NSError?) -> [String : AnyObject] {
+	${overridePref}func dictionary(inout error: NSError?) -> [String : AnyObject] {
 		return $typeDictionary
 	}
 
-	$overridePref func dump(inout error: NSError?) -> NSData? {
+	${overridePref}func dump(inout error: NSError?) -> NSData? {
 		var dict = self.dictionary(&error)
 		if let e = error {
 			return nil
@@ -311,15 +329,11 @@ def SwiftTypeSerializationImplList( genType ):
 		}
 	}
 
-	$overridePref func read(dict: [String : AnyObject]?, inout error: NSError?) {
+	${overridePref}func read(dict: [String : AnyObject]?, inout error: NSError?) {
 		$complexTypeFieldsFromDictionary
 	}
 
-	$overridePref init(){
-		$superInit
-	}
-
-	$overridePref init?(dictionary: [String : AnyObject]!, inout error: NSError?) {
+	${conveniencePref}${overridePref}init?(dictionary: [String : AnyObject]!, inout error: NSError?) {
 		$superInit
 		if dictionary == nil {
 			return nil
@@ -330,7 +344,7 @@ def SwiftTypeSerializationImplList( genType ):
 		}
 	}
 
-	$overridePref init?(jsonData: NSData?, inout error: NSError?) {
+	${conveniencePref}${overridePref}init?(jsonData: NSData?, inout error: NSError?) {
 		$superInit
 		if let jData = jsonData {
 			let dict = NSJSONSerialization.JSONObjectWithData(jData, options: .AllowFragments, error: &error) as! [String : AnyObject]
@@ -345,10 +359,12 @@ def SwiftTypeSerializationImplList( genType ):
 			return nil
 		}
 	}
+
+	$defaultInit
 """)
 	
-	return template.substitute( overridePref=overridePrefix, typeDictionary=SwiftUnwindTypeToDict(genType, 'self', 3), complexTypeFieldsFromDictionary=SwiftComplexTypeFieldListFromDictionary(
-		genType, 'dict'), superInit=superInitCall)
+	return template.substitute( conveniencePref=convenience, overridePref=overridePrefix, typeDictionary=SwiftUnwindTypeToDict(genType, 'self', 3), complexTypeFieldsFromDictionary=SwiftComplexTypeFieldListFromDictionary(
+		genType, 'dict'), superInit=superInitCall, defaultInit=defaultInitValue)
 	
 def SwiftTypeImplementation( genType ):
 	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
@@ -372,10 +388,14 @@ def SwiftTypeImplementationForCategory( genType ):
 		return ''
 	template = Template("""\
 class $typeName {
+$properties
+
+    init() {
+    }
 $initImplList
 }
 """)
-	return template.substitute( typeName=genType.name, initImplList=SwiftTypeInitImplList(genType))
+	return template.substitute( typeName=genType.name, properties=SwiftTypePropertyList( genType ), initImplList=SwiftTypeInitImplList(genType))
 
 def SwiftCategoryTypeImplementation( genType, category ):
 	if isinstance( genType, GenIntegralType ) or isinstance( genType, GenListType ):
@@ -386,7 +406,7 @@ $serializationImplList
 }
 """)
 	return template.substitute( typeName=genType.name, category=category, serializationImplList=SwiftTypeSerializationImplList(
-		genType))
+		genType, isCategory=True))
 
 def SwiftTypeImplementationList( module, implGenerator ):
 	implList = []
@@ -397,9 +417,9 @@ def SwiftTypeImplementationList( module, implGenerator ):
 
 def SwiftRPCMethodImplementation( method ):
 	jsonArgsTemplate = Template('NSJSONSerialization.dataWithJSONObject($jsonArgDict, options: NSJSONWritingOptions.PrettyPrinted, error: &error)')
-    # TODO: find alternative for performSelector
+	# TODO: find alternative for performSelector
 	customArgsTemplate = Template("""\
-	    if let isMethodSupported = self.transport?.respondsToSelector(Selector("$customArgSectionName:")) {
+		if let isMethodSupported = self.transport?.respondsToSelector(Selector("$customArgSectionName:")) {
 			/*tr.$customArgSectionName($customArgDict)*/
 		} else {
 			assertionFailure("Transport does not respond to selector $customArgSectionName:")
@@ -413,16 +433,16 @@ def SwiftRPCMethodImplementation( method ):
 		let jsonData: NSData! = $jsonData
 		if let wrAll = self.transport?.writeAll(jsonData, prefix: $prefix, error: &error) {
 			if let outData = self.transport?.readAll() {
-			    let output: AnyObject? = NSJSONSerialization.JSONObjectWithData(outData, options: .AllowFragments, error: &error)
-			    if let er = error {
-				    return$emptyVal
-			    }
-			    $returnStr
-		    } else {
-			    return $emptyVal
-		    }
+				let output: AnyObject? = NSJSONSerialization.JSONObjectWithData(outData, options: .AllowFragments, error: &error)
+				if let er = error {
+					return$emptyVal
+				}
+				$returnStr
+			} else {
+				return $emptyVal
+			}
 		} else {
-		    return$emptyVal
+			return$emptyVal
 		}
 
 	}

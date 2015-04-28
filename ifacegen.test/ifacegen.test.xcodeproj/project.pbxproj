@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		3A7D05D51AEEA50D0036BD1B /* test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7D05D31AEEA50D0036BD1B /* test.swift */; };
 		3A7D05D61AEEA50D0036BD1B /* types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7D05D41AEEA50D0036BD1B /* types.swift */; };
+		3A7D05E11AEEA97A0036BD1B /* category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7D05DF1AEEA97A0036BD1B /* category.swift */; };
+		3A7D05E21AEEA97A0036BD1B /* category+RPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7D05E01AEEA97A0036BD1B /* category+RPC.swift */; };
+		3A7D05E41AEEAFF30036BD1B /* ifacegen_swift_test_test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7D05E31AEEAFF30036BD1B /* ifacegen_swift_test_test.swift */; };
+		3A7D05E61AEF82950036BD1B /* ifacegen_swift_transport_test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7D05E51AEF82950036BD1B /* ifacegen_swift_transport_test.swift */; };
+		3A7D05E81AEF858F0036BD1B /* ifacegen_swift_category_test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7D05E71AEF858F0036BD1B /* ifacegen_swift_category_test.swift */; };
 		5B6352B21A791B3600C13DF0 /* OBCTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B6352B11A791B3600C13DF0 /* OBCTest.m */; };
 		5B85E1AB1A963B290037F82D /* category.json in Resources */ = {isa = PBXBuildFile; fileRef = 5B85E1AA1A963B290037F82D /* category.json */; };
 		5B85E1AE1A963B620037F82D /* OBCCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B85E1AD1A963B620037F82D /* OBCCategory.m */; };
@@ -29,6 +34,11 @@
 /* Begin PBXFileReference section */
 		3A7D05D31AEEA50D0036BD1B /* test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = test.swift; sourceTree = "<group>"; };
 		3A7D05D41AEEA50D0036BD1B /* types.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = types.swift; sourceTree = "<group>"; };
+		3A7D05DF1AEEA97A0036BD1B /* category.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = category.swift; sourceTree = "<group>"; };
+		3A7D05E01AEEA97A0036BD1B /* category+RPC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "category+RPC.swift"; sourceTree = "<group>"; };
+		3A7D05E31AEEAFF30036BD1B /* ifacegen_swift_test_test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ifacegen_swift_test_test.swift; sourceTree = "<group>"; };
+		3A7D05E51AEF82950036BD1B /* ifacegen_swift_transport_test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ifacegen_swift_transport_test.swift; sourceTree = "<group>"; };
+		3A7D05E71AEF858F0036BD1B /* ifacegen_swift_category_test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ifacegen_swift_category_test.swift; sourceTree = "<group>"; };
 		5B6352B01A791B3600C13DF0 /* OBCTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OBCTest.h; sourceTree = "<group>"; };
 		5B6352B11A791B3600C13DF0 /* OBCTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OBCTest.m; sourceTree = "<group>"; };
 		5B85E1AA1A963B290037F82D /* category.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = category.json; sourceTree = "<group>"; };
@@ -90,6 +100,8 @@
 		5BE09E7A1A2475BC00AEC506 /* ifacegen.test.test */ = {
 			isa = PBXGroup;
 			children = (
+				3A7D05DF1AEEA97A0036BD1B /* category.swift */,
+				3A7D05E01AEEA97A0036BD1B /* category+RPC.swift */,
 				3A7D05D31AEEA50D0036BD1B /* test.swift */,
 				3A7D05D41AEEA50D0036BD1B /* types.swift */,
 				5BA77FF81A9738EE00192FD9 /* OBCCategory+RPC.h */,
@@ -110,6 +122,9 @@
 				5BE09E7D1A2475BC00AEC506 /* ifacegen_test_test.swift */,
 				5BC93E461A77A1C500A6C3F6 /* ifacegen_transport_test.swift */,
 				5BA77FFB1A97671500192FD9 /* ifacegen_category_test.swift */,
+				3A7D05E31AEEAFF30036BD1B /* ifacegen_swift_test_test.swift */,
+				3A7D05E51AEF82950036BD1B /* ifacegen_swift_transport_test.swift */,
+				3A7D05E71AEF858F0036BD1B /* ifacegen_swift_category_test.swift */,
 				5BE09E7B1A2475BC00AEC506 /* Supporting Files */,
 			);
 			path = ifacegen.test.test;
@@ -216,7 +231,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "python ../generator/ifacegen.py -o ifacegen.test.test/ --prefix OBC --verbose ifacegen.test.test/test.json ifacegen.test.test/types.json\npython ../generator/ifacegen.py -o ifacegen.test.test/ --prefix OBC --verbose --category RPC ifacegen.test.test/category.json\npython ../generator/ifacegen.py -o ifacegen.test.test/ --gen swift --verbose ifacegen.test.test/test.json ifacegen.test.test/types.json";
+			shellScript = "python ../generator/ifacegen.py -o ifacegen.test.test/ --prefix OBC --verbose ifacegen.test.test/test.json ifacegen.test.test/types.json\npython ../generator/ifacegen.py -o ifacegen.test.test/ --prefix OBC --verbose --category RPC ifacegen.test.test/category.json\npython ../generator/ifacegen.py -o ifacegen.test.test/ --gen swift --verbose ifacegen.test.test/test.json ifacegen.test.test/types.json\npython ../generator/ifacegen.py -o ifacegen.test.test/ --gen swift --verbose --category RPC ifacegen.test.test/category.json";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -225,18 +240,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3A7D05E41AEEAFF30036BD1B /* ifacegen_swift_test_test.swift in Sources */,
 				C1C75DAB1AA0983600BCBDBF /* IFServiceClient+Protected.m in Sources */,
 				5B6352B21A791B3600C13DF0 /* OBCTest.m in Sources */,
 				5BA77FFA1A9738EE00192FD9 /* OBCCategory+RPC.m in Sources */,
 				3A7D05D61AEEA50D0036BD1B /* types.swift in Sources */,
 				5BE09E8B1A24771A00AEC506 /* IFHTTPTransport.m in Sources */,
+				3A7D05E21AEEA97A0036BD1B /* category+RPC.swift in Sources */,
 				5BC93E471A77A1C500A6C3F6 /* ifacegen_transport_test.swift in Sources */,
+				3A7D05E81AEF858F0036BD1B /* ifacegen_swift_category_test.swift in Sources */,
 				5BE09E7E1A2475BC00AEC506 /* ifacegen_test_test.swift in Sources */,
 				5BA77FFC1A97671500192FD9 /* ifacegen_category_test.swift in Sources */,
 				5B85E1AE1A963B620037F82D /* OBCCategory.m in Sources */,
 				5BE8D5631A8CA664007E4146 /* OBCTypes.m in Sources */,
+				3A7D05E11AEEA97A0036BD1B /* category.swift in Sources */,
 				C1C20A291A9B6C9E00A4D192 /* IFServiceClient.m in Sources */,
 				3A7D05D51AEEA50D0036BD1B /* test.swift in Sources */,
+				3A7D05E61AEF82950036BD1B /* ifacegen_swift_transport_test.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

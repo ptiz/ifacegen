@@ -46,7 +46,7 @@
 		"employer_id": "int64",
         "filter": [ {"payload":"string"} ]
     },
-"url_params": {
+"extra_params": {
 		"token": "string",
 		"timestamp": "int64"
 	},
@@ -65,7 +65,7 @@
 
 {
 "get": "methodForGet",
-"url_params": {"token": "string"},
+"extra_params": {"token": "string"},
 "response": {"session_id": "int64"}
 },
 

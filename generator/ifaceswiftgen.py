@@ -42,16 +42,32 @@ def SwiftAssumeType( genType, optional=False ):
 		return SwiftCheckOptional ('[%s]' % SwiftAssumeType(genType.itemType) , optional)
 	return "_ERROR_"
 
-def SwiftDecorateTypeForDict( objcTypeStr, genType ):
-	template = Template('($objcTypeStr == nil ? NSNull() : $objcTypeStr as! AnyObject)')
+def SwiftGetNumberValue(genType):
+	if genType.sType == "bool":
+		return 'boolValue'
+	if genType.sType == "int32":
+		return 'intValue'
+	if genType.sType == "int64":
+		return 'longLongValue'
+	if genType.sType == "double":
+		return 'doubleValue'
+	return "ERROR"
+
+def SwiftDecorateTypeForDict( objcTypeStr, genType, wrapToNull=True ):
+	wrapTemplate = ''
+	optional = ''
+	if wrapToNull is True:
+		wrapTemplate = objcTypeStr + ' == nil ? NSNull() : '
+		optional = '!'
+	template = Template(wrapTemplate + '$objcTypeStr as! AnyObject')
 	if genType.sType == 'bool':
-		template = Template('($objcTypeStr == nil ? NSNull() : NSNumber(bool: $objcTypeStr!))')
+		template = Template(wrapTemplate + 'NSNumber(bool: $objcTypeStr%s)' % optional)
 	if genType.sType == 'int32':
-		template = Template('($objcTypeStr == nil ? NSNull() : NSNumber(int: $objcTypeStr!))')
+		template = Template(wrapTemplate + 'NSNumber(int: $objcTypeStr%s)' % optional)
 	if genType.sType == 'int64':
-		template = Template('($objcTypeStr == nil ? NSNull() : NSNumber(longLong: $objcTypeStr!))')
+		template = Template(wrapTemplate + ' NSNumber(longLong: $objcTypeStr%s)' % optional)
 	if genType.sType == 'double':
-		template = Template('($objcTypeStr == nil ? NSNull() : NSNumber(double: $objcTypeStr!))')
+		template = Template(wrapTemplate + ' NSNumber(double: $objcTypeStr%s)' % optional)
 	if genType.sType == 'rawstr':
 		template = Template('NSString(data: NSJSONSerialization.dataWithJSONObject($objcTypeStr as AnyObject, options: NSJSONWritingOptions.PrettyPrinted, error: error), encoding: NSUTF8StringEncoding)')
 	return template.substitute( objcTypeStr=objcTypeStr )
@@ -60,10 +76,12 @@ def SwiftDecorateTypeFromJSON( genType, varValue ):
 	templateNSNumberStr = Template('($tmpVarValue as? NSNumber)?.$selector')
 	templateNSStringStr = Template('$tmpVarValue as? String')
 	templateNSDictionaryStr = Template('$tmpVarValue as? [String : AnyObject]')
-	templateNSArrayStr = Template('$tmpVarValue as? $itemType')
 	templateRawNSDictionaryStr = Template(' $tmpVarValue as? NSJSONSerialization.JSONObjectWithData:((tmp as? String)?.dataUsingEncoding(NSUTF8StringEncoding), options: .AllowFragments, error: &error)')
 	if isinstance( genType, GenListType ):
-		return templateNSArrayStr.substitute( tmpVarValue=varValue, itemType=SwiftAssumeType( genType ) )
+		if genType.itemType.ptr == '':
+			return '(%s as? [NSNumber])?.map{$0.%s}' % (varValue, SwiftGetNumberValue( genType.itemType ))
+		else:
+			return Template('$tmpVarValue as? $itemType').substitute( tmpVarValue=varValue, itemType=SwiftAssumeType( genType ) )
 	if not isinstance( genType, GenIntegralType ):
 		return "ERROR"
 	if genType.sType == "bool":
@@ -241,7 +259,7 @@ def SwiftUnwindTypeToDict( genType, objcArgName, level, recursive=True ):
 
 	elif isinstance( genType, GenListType ):
 		if isinstance( genType.itemType, GenIntegralType ):
-			return Template('($objcArgName == nil ? NSNull() : $objcArgName as! AnyObject)').substitute(objcArgName=objcArgName)
+			return """(%s == nil ? NSNull() : %s!.map {%s})""" % (objcArgName, objcArgName, SwiftDecorateTypeForDict('$0', genType.itemType, wrapToNull=False))
 		else:
 			# TODO: inside map don't cast to any type
 			if objcArgName != '$0':
@@ -253,8 +271,7 @@ $tabLevel} as AnyObject""")
 $tabLevel\t$argValue
 $tabLevel} as AnyObject""")
 			return arrayTemplate.substitute( tabLevel='\t'*level, argValue=SwiftUnwindTypeToDict(
-				genType.itemType, #'($0 as? %s)' % (SwiftAssumeType( genType.itemType )), level + 2, recursive=False), objcArgName=objcArgName )
-									'$0', level + 2, recursive=False), objcArgName=objcArgName )
+				genType.itemType, '$0', level + 2, recursive=False), objcArgName=objcArgName )
 
 def SwiftListTypeFromDictionary( genType, objcDataGetter, level ):
 
@@ -486,7 +503,7 @@ $methodListDeclaration
 			continue
 		methodList = []
 		for customRequestTypeKey in method.customRequestTypes.keys():
-			methodList.append('\tfunc ' + makeAlias('set_' + customRequestTypeKey) + '([String : AnyObject]?)')
+			methodList.append('\tfunc ' + makeAlias('set_' + customRequestTypeKey) + '(' + makeAlias(customRequestTypeKey) +  ': Dictionary<String, AnyObject>!)')
 		protocolsList.append(template.substitute(protocolName=makeAlias('_' + method.name) + "Protocol", methodListDeclaration='\n'.join(methodList)))
 
 	return '\n'.join(protocolsList)

@@ -24,7 +24,7 @@
 import Foundation
 import XCTest
 
-class TestSwiftTransport: IFHTTPTransport {
+class TestSwiftTransport: IFHTTPTransport, GetEmployeesProtocol, MethodForGetProtocol {
 
     var checkURL: ((String?) -> ())?
     var checkInput: ((NSData?) -> ())?
@@ -67,8 +67,12 @@ class TestSwiftTransport: IFHTTPTransport {
         return NSData()
     }
 
-    func setCustomParams(params: Dictionary<String, AnyObject>) {
-        self.checkCustomInput?(params)
+    func setCustomParams(customParams: Dictionary<String, AnyObject>!) {
+        self.checkCustomInput?(customParams)
+    }
+
+    func setExtraParams(extraParams: Dictionary<String, AnyObject>!) {
+        self.setUrlParams(extraParams)
     }
 }
 
@@ -125,6 +129,7 @@ class ifacegen_swift_transport_test: XCTestCase {
         let employee2 = response![1]
         XCTAssertEqual(employee2.name!, "Mary Doe", "Employee2 name is wrong in response")
         XCTAssertTrue(employee2.passport!.periods == nil, "Periods count is wrong for Employee2 passport")
+
     }
 
     func testHTTPCall() {

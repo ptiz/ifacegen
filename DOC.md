@@ -186,18 +186,41 @@ From one IDL file one ObjC class will be created. All structures described will 
 
 JSON dictionaries nested into "typedef" are translated to structures with automatic naming:
 ```json
+{
+"struct": "User",
 "typedef": {
-	"nested":{
-		"field":"int32"
+	"nested": {
+		"field": "int32"
 	}
+    }
 }
 ```
+will be translated in
+```objc
+@interface UserNested: NSObject
+- (instancetype)initWithField:(int32_t)field;
+...
+@property (nonatomic) int32_t field;
+@end
+
+@interface User: NSObject
+- (instancetype)initWithNested:(UserNested*)nested;
+...
+@property (nonatomic) UserNested* nested;
+@end
+```
+
 Arrays are also supported. Following code will be translated into class with "stringItems" property of type NSArray*:
 ```json
 "typedef": {
-	"string_items":[<item type>]
+	"string_items":["User"]
 }
 ```
+will be translated in
+```objc
+@property (nonatomic) NSArray* /*User*/ stringItems;
+```
+
 Field names like "id" and "void" will be decorated in code with "the" prefix, so "id" changes into "theId". The same happens with fields which names starting with "new", "alloc", "copy" and "mutableCopy". Names in code also will be converted in CamelCase if they_are_not_yet.
 
 You can inherit one struct from another. Generated class ExtendedItem explicitly inherits BaseItem with all fields serialization/deserialization:
@@ -240,12 +263,43 @@ Explicitly declared structures can be imported from another IDL file:
 ...
 }
 ```
-"url_params" field describes parameters to be passed as URL parts. "request" field used for passing parameters throug JSON data. Any of them can be avoided.
+"method" can be one of HTTP methods: "get", "head", "post", "put", "delete", "patch", "options" or "trace", or "procedure" for automatic mode.
+
+"endpoint" can contain parameters also, they should be surrounded by "${}":
+```json
+{
+"get": "userDocs",
+"endpoint": "api/user/${userName}/docs",
+"response": "UserDoc"
+}
+```
+will be translated in RPC method:
+```objc
+- (UserDoc*)userDocsWithUserName:(NSString*)userName;
+```
+
+"url_params" field describes parameters to be passed as URL parts. 
+"request" field used for passing parameters throug JSON data. 
+
+"custom params section" may contain any IDL type declarations. Custom section requires the transport responds to corresponding selector:
+```json
+"custom_params": { "User" }
+```
+requires transport responds to
+```objc
+- (void)customParams:(NSDictionary*)parameters;
+```
+Obviously you should iherit from IFHTTPTransport or create class that conforms IFTransport protocol to support custom parameters. Please refer IFHTTPTransport (Protected) category for methods that intentended to be used in successors (inc. testing).
+
+Any of these fields can be avoided.
+
+##Testing
+You should inherit custom transport for passing in generated RPC classes, that can provide test data as a response. Refer ifacegen.test.test project for [Swift] implementation.
 
 ##Limitations
 - For ARC only;
 - NSJSONSerialization used in generated code for JSON data creation, so there is intermediate dictionary created before a data writing in a transport;
+- IFHTTPTransport uses NSURLConnection;
 - No "date", "enum" etc. in atomic IDL types. Only int32, int64, double, string, bool, raw и rawstr. "raw" will be converted in NSDictionary from JSON dictionary and "rawstr" — in NSDictionary from JSON dictionary encoded in string (like this: "data": "{\"weird\":42,\"str\":\"yes\"}");
 - Types importing system is weak and doesn't recognize and handle loops, diamonds and other tricks;
-- No forwarding struct declaration;
 - No readable error messages for parser and generator yet. 

@@ -61,32 +61,13 @@ NSString* const IFHTTPTransportErrorDomain = @"com.oss.ifacegen.transport.httper
 
 #pragma mark - Transport proto
 
-- (BOOL)writeAll:(NSData*)data prefix:(NSString*)prefix method:(IFHTTPMethod)method error:(NSError* __autoreleasing*)error {
+- (BOOL)writeAll:(NSData*)data endpoint:(NSString*)endpoint method:(IFHTTPMethod)method error:(NSError* __autoreleasing*)error {
     *error = nil;
     
     self.currentAnswer = nil;
     self.curentResponse = nil;
     
-    if ( prefix == nil ) {
-        prefix = @"";
-    }
-    
-    NSURL* requestURL;
-    if ( [prefix length] && [prefix characterAtIndex:0] == ':' ) {
-        requestURL = [NSURL URLWithString:
-                      [[self.rootURL absoluteString] stringByAppendingString:prefix]];
-    } else {
-        requestURL = [self.rootURL URLByAppendingPathComponent:prefix];
-    }
-    
-    NSString* requestParamsString;
-    if ( self.currentRequestParams != nil ) {
-        requestParamsString = [self buildRequestParamsString:self.currentRequestParams];
-        requestURL =
-        [NSURL URLWithString:
-         [[requestURL absoluteString] stringByAppendingString:requestParamsString]];
-    }
-    
+    NSURL* requestURL = [self buildURL:endpoint];
     NSMutableURLRequest* request = [self prepareRequestWithURL:requestURL method:method data:data];
     
     NSHTTPURLResponse* response;
@@ -137,8 +118,8 @@ NSString* const IFHTTPTransportErrorDomain = @"com.oss.ifacegen.transport.httper
     return YES;
 }
 
-- (BOOL)writeAll:(NSData*)data prefix:(NSString*)prefix error:(NSError* __autoreleasing*)error {
-    return [self writeAll:data prefix:prefix method:IFHTTPMETHOD_AUTO error:error];
+- (BOOL)writeAll:(NSData*)data endpoint:(NSString*)endpoint error:(NSError* __autoreleasing*)error {
+    return [self writeAll:data endpoint:endpoint method:IFHTTPMETHOD_AUTO error:error];
 }
 
 - (NSData*)readAll {
@@ -151,7 +132,28 @@ NSString* const IFHTTPTransportErrorDomain = @"com.oss.ifacegen.transport.httper
 
 #pragma mark - Overrides
 
-static NSString* const methods[] = { @"", @"GET", @"HEAD", @"POST", @"PUT", @"DELETE" };
+static NSString* const methods[] = { @"", @"GET", @"HEAD", @"POST", @"PUT", @"DELETE", @"PATCH", @"OPTIONS", @"TRACE" };
+
+- (NSURL*)buildURL:(NSString*)endpoint {
+    if ( endpoint == nil ) {
+        endpoint = @"";
+    }
+    
+    NSURL* requestURL;
+    if ( [endpoint length] && [endpoint characterAtIndex:0] == ':' ) {
+        requestURL = [NSURL URLWithString: [[self.rootURL absoluteString] stringByAppendingString:endpoint]];
+    } else {
+        requestURL = [self.rootURL URLByAppendingPathComponent:endpoint];
+    }
+    
+    NSString* requestParamsString;
+    if ( self.currentRequestParams != nil ) {
+        requestParamsString = [self buildRequestParamsString:self.currentRequestParams];
+        requestURL = [NSURL URLWithString: [[requestURL absoluteString] stringByAppendingString:requestParamsString]];
+    }
+    
+    return requestURL;
+}
 
 - (NSMutableURLRequest*)prepareRequestWithURL:(NSURL*)url httpMethod:(IFHTTPMethod)method data:(NSData*)data {
     

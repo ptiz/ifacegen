@@ -1,7 +1,7 @@
 # ifacegen
 
 ##What is it for
-You need this tool, if you like me have to connect few RESTful services in every app and completely fed up with endless manual json dictionaries handling. Forget about error prone string literals comparing, you will have native classes and methods for remote services like if they were your local objects.
+You need this tool, if you like me have to connect several RESTful services in every app and completely fed up with endless manual json dictionaries handling. Forget about error prone string literals comparing, you will have native classes and methods for remote services like if they were your local objects.
 
 ## What is it
 ifacegen is a code generator, it simplifies using of existing REST+JSON APIs from Objective-C code. ifacegen makes native wrappers for remote service calls and JSON dictionaries. Simple IDL used for description of existing protocol. This is a fork from initial repo, that you can find at https://bitbucket.org/ifreefree/ifacegen

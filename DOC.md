@@ -61,20 +61,19 @@ Let's make some IDL. Surprisingly, it's JSON itself. It consists of same diction
 
 {
 "procedure": "placeDetails",
-"prefix": "/place/details/json",
-"prerequest": {
+"endpoint": "/place/details/json",
+"url_params": {
     "key":"string",
     "reference": "string",    
     "sensor": "string"   
   },
-"request" : {},
 "response": "GoogleDetailsResult" 
 }
 
 ]}
 ```
 
-The "prerequest" field describes URL parameters, they only can be "string" types. "request" field can hold any structs and atomic types as described.
+The "url_params" field describes URL parameters.
 
 Then we need some codegen:
 ```
@@ -83,73 +82,52 @@ $ python ifacegen.py GoogleClient.json
 
 After that we have two files: GoogleClient.h and GoogleClient.m. This is how GoogleClient.h looks like:
 ```objc
-#import <Foundation/Foundation.h>
-#import "Transport.h"
+@implementation GoogleLocation
 
-@interface GoogleLocation: NSObject
-- (NSData*)dumpWithError:(NSError* __autoreleasing*)error;
-- (id)initWithLat:(double_t)lat
-	andLng:(double_t)lng;
-- (id)initWithDictionary:(NSDictionary*)dictionary error:(NSError* __autoreleasing*)error;
-- (id)initWithJSONData:(NSData*)jsonData error:(NSError* __autoreleasing*)error;
-@property (nonatomic) double_t lat;
-@property (nonatomic) double_t lng;
-@end;
+- (instancetype)initWithLat:(double_t)lat
+	andLng:(double_t)lng {
+	if (self=[super init]) {
+		_lat = lat;
+		_lng = lng;
+	}
+	return self;
+}
 
-@interface GooglePlaceGeometry: NSObject
-@property (nonatomic) GoogleLocation* location;
-@end;
+- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error {
+	return @{
+		@"lat":@(self.lat),
+		@"lng":@(self.lng)
+	};
+}
 
-@interface GooglePlaceDetailsGeometry: NSObject
-@property (nonatomic) GoogleLocation* location;
-@end;
+- (NSData*)dumpWithError:(NSError* __autoreleasing*)error {
+	NSDictionary* dict = [self dictionaryWithError:error];
+	if (*error) return nil;
+	else return [NSJSONSerialization dataWithJSONObject:[self dictionaryWithError:error] options:jsonFormatOption error:error];
+}
 
-@interface GooglePlaceDetails: NSObject
-- (NSData*)dumpWithError:(NSError* __autoreleasing*)error;
-- (id)initWithFormattedAddress:(NSString*)formattedAddress
-	andFormattedPhoneNumber:(NSString*)formattedPhoneNumber
-	andGeometry:(GooglePlaceDetailsGeometry*)geometry
-	andName:(NSString*)name
-	andTypes:(NSArray*)types;
-- (id)initWithDictionary:(NSDictionary*)dictionary error:(NSError* __autoreleasing*)error;
-- (id)initWithJSONData:(NSData*)jsonData error:(NSError* __autoreleasing*)error;
-@property (nonatomic) NSString* formattedAddress;
-@property (nonatomic) NSString* formattedPhoneNumber;
-@property (nonatomic) GooglePlaceDetailsGeometry* geometry;
-@property (nonatomic) NSString* name;
-@property (nonatomic) NSArray* /*NSString*/ types;
-@end;
+- (void)readDictionary:(NSDictionary*)dict withError:(NSError* __autoreleasing*)error {
+	id tmp;
+	self.lat = ( tmp = dict[@"lat"], [tmp isEqual:[NSNull null]] ? 0.0 : ((NSNumber*)tmp).doubleValue );
+	self.lng = ( tmp = dict[@"lng"], [tmp isEqual:[NSNull null]] ? 0.0 : ((NSNumber*)tmp).doubleValue );
+}
 
-@interface GoogleDetailsResult: NSObject
-- (NSData*)dumpWithError:(NSError* __autoreleasing*)error;
-- (id)initWithResult:(GooglePlaceDetails*)result
-	andStatus:(NSString*)status;
-- (id)initWithDictionary:(NSDictionary*)dictionary error:(NSError* __autoreleasing*)error;
-- (id)initWithJSONData:(NSData*)jsonData error:(NSError* __autoreleasing*)error;
-@property (nonatomic) GooglePlaceDetails* result;
-@property (nonatomic) NSString* status;
-@end;
-
-@interface GoogleClient: NSObject
-
-- (id)initWithTransport:(NSObject<Transport>*)transport;
-
-/* methods */
-
-- (GoogleDetailsResult*)placeDetailsWithKey:(NSString*)key
-		andReference:(NSString*)reference
-		andSensor:(NSString*)sensor
-		andLanguage:(NSString*)language
-		andError:(NSError* __autoreleasing*)error;
-@end
+- (instancetype)initWithDictionary:(NSDictionary*)dictionary error:(NSError* __autoreleasing*)error {
+	if ( dictionary == nil ) return nil;
+	if (self = [super init]) {
+		[self readDictionary:dictionary withError:error];
+		if ( error && *error != nil ) self = nil;
+	}
+	return self;
+}
 ```
 
 That's all. Now you can create a client and start making calls! Somewhere in your code:
 ```objc
-#import "HTTPTransport.h"
+#import "IFHTTPTransport.h"
 //...
   NSString* googleAPIHost = @"https://maps.googleapis.com/maps/api";
-  self.transport = [[HTTPTransport alloc] initWithURL:[NSURL URLWithString:googleAPIHost]];
+  self.transport = [[IFHTTPTransport alloc] initWithURL:[NSURL URLWithString:googleAPIHost]];
   self.google = [[GoogleClient alloc] initWithTransport:self.transport];
 //...
   NSError* error;
@@ -161,16 +139,17 @@ That's all. Now you can create a client and start making calls! Somewhere in you
                           andError:&error];
 ```
 
-Transport protocol (and its out-of-the-box realization HTTPTransport) used by generated classes to make network calls has only synchronous methods. No blocks of callback delegates at all. Client code is free to wrap these calls in async manner according its needs.
+Transport protocol (and its out-of-the-box realization IFHTTPTransport) used by generated classes to make network calls has only synchronous methods. No blocks of callback delegates at all. Client code is free to wrap these calls in async manner according its needs.
 
 ##ifacegen console tool
 Usage: 
 ```
-$ python ifacegen.py [-h] [--prefix PREFIX] [-o OUTDIR] I [I ...]
+$ python ifacegen.py [-h] [--prefix PREFIX] [-o OUTDIR] [--category CATEGORY] I [I ...]
 ```
 - h shows help; 
 - PREFIX is a string, ObjC namespace prefix that is added to a name of each class to be generated; 
 - OUTDIR is a string, path to directory where the generated files to be placed. By default these files will be placed into a "gen-objc" subdirectory of working dir;
+- CATEGORY is a string, suffix for category in which all serilaization methods will be placed;
 - I [I ...] are IDL file names to be processed.
  
 ##IDL description
@@ -219,7 +198,7 @@ Arrays are also supported. Following code will be translated into class with "st
 	"string_items":[<item type>]
 }
 ```
-Field names like "id" and"void" will be decorated in code with "the" prefix, so "id" changes into "theId". The same happens with fields which names starting with "new", "alloc", "copy" and "mutableCopy". Names in code also will be converted in CamelCase if they_are_not_yet.
+Field names like "id" and "void" will be decorated in code with "the" prefix, so "id" changes into "theId". The same happens with fields which names starting with "new", "alloc", "copy" and "mutableCopy". Names in code also will be converted in CamelCase if they_are_not_yet.
 
 You can inherit one struct from another. Generated class ExtendedItem explicitly inherits BaseItem with all fields serialization/deserialization:
 ```json
@@ -249,17 +228,19 @@ Explicitly declared structures can be imported from another IDL file:
 ####Remote method declaration
 ```json
 {
-"procedure": "<procedure name for ObjC>",
-"prefix": "<remote service method prefix to be combined into resulting URL>",
-"prerequest": {
-		"<parameter to be passed in url>": "string",
+"<method>": "<procedure name for ObjC>",
+"endpoint": "<remote service endpoint to be combined into resulting URL>",
+"url_params": {
+		"<parameter to be passed in url>": <typename>,
 		...
 	},
 "request" : <any explicit structure name or implicit struct declaration in brackets>,
-"response": <any explicit structure name or implicit struct declaration in brackets>
+"response": <any explicit structure name or implicit struct declaration in brackets>,
+<custom params section>: <any explicit structure name or implicit struct declaration in brackets>
+...
 }
 ```
-"prerequest" field describes parameters to be passed as URL parts. Their data type must be only "string". "request" field used for passing parameters throug JSON data. Any of them can be declared as empty JSON dictionary if not needed.
+"url_params" field describes parameters to be passed as URL parts. "request" field used for passing parameters throug JSON data. Any of them can be avoided.
 
 ##Limitations
 - For ARC only;

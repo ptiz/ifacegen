@@ -42,7 +42,7 @@ typedef NS_ENUM(NSInteger, IFHTTPMethod) {
 - (void)setUrlParams:(NSDictionary*)params;
 - (NSHTTPURLResponse*)currentResponse;
 
-- (BOOL)writeAll:(NSData*)data prefix:(NSString*)prefix method:(IFHTTPMethod)method error:(NSError* __autoreleasing*)error;
+- (BOOL)writeAll:(NSData*)data endpoint:(NSString*)endpoint method:(IFHTTPMethod)method error:(NSError* __autoreleasing*)error;
 
 @property (nonatomic) NSInteger retriesCount;
 @property (nonatomic) NSString* userAgent;

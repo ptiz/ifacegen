@@ -61,22 +61,22 @@ NSString* const IFHTTPTransportErrorDomain = @"com.oss.ifacegen.transport.httper
 
 #pragma mark - Transport proto
 
-- (BOOL)writeAll:(NSData*)data prefix:(NSString*)prefix method:(IFHTTPMethod)method error:(NSError* __autoreleasing*)error {
+- (BOOL)writeAll:(NSData*)data endpoint:(NSString*)endpoint method:(IFHTTPMethod)method error:(NSError* __autoreleasing*)error {
     *error = nil;
     
     self.currentAnswer = nil;
     self.curentResponse = nil;
     
-    if ( prefix == nil ) {
-        prefix = @"";
+    if ( endpoint == nil ) {
+        endpoint = @"";
     }
     
     NSURL* requestURL;
-    if ( [prefix length] && [prefix characterAtIndex:0] == ':' ) {
+    if ( [endpoint length] && [endpoint characterAtIndex:0] == ':' ) {
         requestURL = [NSURL URLWithString:
-                      [[self.rootURL absoluteString] stringByAppendingString:prefix]];
+                      [[self.rootURL absoluteString] stringByAppendingString:endpoint]];
     } else {
-        requestURL = [self.rootURL URLByAppendingPathComponent:prefix];
+        requestURL = [self.rootURL URLByAppendingPathComponent:endpoint];
     }
     
     NSString* requestParamsString;
@@ -137,8 +137,8 @@ NSString* const IFHTTPTransportErrorDomain = @"com.oss.ifacegen.transport.httper
     return YES;
 }
 
-- (BOOL)writeAll:(NSData*)data prefix:(NSString*)prefix error:(NSError* __autoreleasing*)error {
-    return [self writeAll:data prefix:prefix method:IFHTTPMETHOD_AUTO error:error];
+- (BOOL)writeAll:(NSData*)data endpoint:(NSString*)endpoint error:(NSError* __autoreleasing*)error {
+    return [self writeAll:data endpoint:endpoint method:IFHTTPMETHOD_AUTO error:error];
 }
 
 - (NSData*)readAll {

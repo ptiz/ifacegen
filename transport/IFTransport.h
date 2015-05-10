@@ -25,7 +25,7 @@
 
 @protocol IFTransport<NSObject>
 
-- (BOOL)writeAll:(NSData*)data prefix:(NSString*)prefix error:(NSError* __autoreleasing*)error;
+- (BOOL)writeAll:(NSData*)data endpoint:(NSString*)endpoint error:(NSError* __autoreleasing*)error;
 - (NSData*)readAll;
 
 @end

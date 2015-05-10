@@ -33,12 +33,12 @@ class TestTransport: IFHTTPTransport {
     
     let responseFileName: String?
     
-    init(ResponseFileName responseFileName: String?) {
+    init(_ responseFileName: String?) {
         self.responseFileName = responseFileName
         super.init(URL:NSURL(string: ""))
     }
     
-    override func writeAll(data: NSData!, prefix: String!, method: IFHTTPMethod, error: NSErrorPointer) -> Bool {
+    override func writeAll(data: NSData!, endpoint: String!, method: IFHTTPMethod, error: NSErrorPointer) -> Bool {
         if let checkHTTPMethod = self.checkHTTPMethod {
             checkHTTPMethod( method )
         }
@@ -46,7 +46,7 @@ class TestTransport: IFHTTPTransport {
         return true
     }
     
-    override func writeAll(data: NSData!, prefix: String!, error: NSErrorPointer) -> Bool {
+    override func writeAll(data: NSData!, endpoint: String!, error: NSErrorPointer) -> Bool {
         
         if let requestParams = self.currentRequestParams {
             let requestParamsString = self.buildRequestParamsString(requestParams)
@@ -76,7 +76,7 @@ class ifacegen_transport_test: XCTestCase {
     
     func testCall() {
         
-        let testTransport = TestTransport(ResponseFileName: "test_transport_response")
+        let testTransport = TestTransport("test_transport_response")
         
         testTransport.checkURL = { (urlString) in
             if let url = urlString {
@@ -128,7 +128,7 @@ class ifacegen_transport_test: XCTestCase {
     
     func testHTTPCall() {
         
-        let transport = TestTransport(ResponseFileName: nil)
+        let transport = TestTransport(nil)
         
         transport.checkHTTPMethod = { (method:IFHTTPMethod)->() in
             XCTAssert( method == .IFHTTPMETHOD_PUT, "HTTP method is wrong")
@@ -141,4 +141,5 @@ class ifacegen_transport_test: XCTestCase {
         let testService = OBCTest(transport: transport)
         testService.methodForPutWithEmployee(employee, andError: nil)
     }
+        
 }

@@ -23,6 +23,7 @@ import json
 import sys
 import types
 import os
+import re
 from collections import OrderedDict
 from ifaceobj import *
 
@@ -95,18 +96,19 @@ def matchHTTPMethod( jsonItem, methodKey, match ):
 
 def buildMethodFromJSON( jsonItem, typeList, importedTypeList, method=None ):
 
-	prefix = None
+	endpoint = None
 	methodName = None
 	httpMethod = None
 	request = None
 	customRequests = OrderedDict()
 	response = None
+	restfulParams = None
 
 	for methodKey in jsonItem.keys():
 		if methodKey == "procedure":
 			methodName = jsonItem["procedure"]
-		elif methodKey == "prefix":
-			prefix = jsonItem["prefix"]
+		elif methodKey == "endpoint":
+			endpoint = jsonItem["endpoint"]
 		elif methodKey == "response":
 			response = jsonItem["response"]
 		elif methodKey == "request":
@@ -118,21 +120,30 @@ def buildMethodFromJSON( jsonItem, typeList, importedTypeList, method=None ):
 			customRequests[methodKey] = jsonItem[methodKey]
 
 	if methodName is None:
-		raise Exception("No method name provided for method in IDL: %s" % jsonItem)
+		raise Exception('No method name provided for method in IDL: %s' % jsonItem)
 
-	method = GenMethod( methodName, prefix )
+	method = GenMethod( methodName, endpoint )
 	typeDecoration = capitalizeFirstLetter( methodName )
 
 	method.httpMethod = httpMethod
 
 	if request is not None:
-		requestTypeName = "%s_json_args" % methodName
+		requestTypeName = '%s_json_args' % methodName
 		method.requestJsonType = typeFromJSON( None, requestTypeName, request, typeList, importedTypeList )
 		del typeList[method.requestJsonType.name]
 
+	if endpoint is not None:
+		restfulParams = re.findall( r'\$\{(\w+)\}', endpoint )
+		if len(restfulParams) > 0:
+			restfulParamsTypeName = '%s_restful_args' % methodName
+			restfulParamsType = GenComplexType( '', restfulParamsTypeName )
+			for parm in restfulParams:
+				restfulParamsType.addFieldType( parm, GenIntegralType('string') )
+			method.restfulParamsType = restfulParamsType
+
 	for customRequestKey in customRequests.keys():
 		customRequest = customRequests[customRequestKey]
-		customRequestTypeName = "%s_%s_args" % (methodName, customRequestKey)
+		customRequestTypeName = '%s_%s_args' % (methodName, customRequestKey)
 		method.customRequestTypes[customRequestKey] = typeFromJSON( None, customRequestTypeName, customRequest, typeList, importedTypeList )
 		del typeList[method.customRequestTypes[customRequestKey].name]	
 

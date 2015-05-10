@@ -8,10 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		36A368EA7238CCAACECD45DE /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 669A32DFA01FBF7C130260C4 /* libPods.a */; };
-		5B0CA2DF1A0F6EB200E0CF12 /* vk.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B0CA2DC1A0F6EB200E0CF12 /* vk.m */; };
-		5B0CA2E01A0F6EB200E0CF12 /* vkimport.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B0CA2DE1A0F6EB200E0CF12 /* vkimport.m */; };
-		7A2C13B018B6340C00B55F5B /* vk.json in Resources */ = {isa = PBXBuildFile; fileRef = 7A2C13AF18B6340C00B55F5B /* vk.json */; };
-		7A2C13B718BCD3E300B55F5B /* vkimport.json in Resources */ = {isa = PBXBuildFile; fileRef = 7A2C13B618BCD3E300B55F5B /* vkimport.json */; };
 		7AD7A3A718B5F02E00EB9A4F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7AD7A3A618B5F02E00EB9A4F /* Foundation.framework */; };
 		7AD7A3A918B5F02E00EB9A4F /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7AD7A3A818B5F02E00EB9A4F /* CoreGraphics.framework */; };
 		7AD7A3AB18B5F02E00EB9A4F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7AD7A3AA18B5F02E00EB9A4F /* UIKit.framework */; };
@@ -21,17 +17,15 @@
 		7AD7A3BA18B5F02E00EB9A4F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7AD7A3B818B5F02E00EB9A4F /* Main.storyboard */; };
 		7AD7A3BD18B5F02E00EB9A4F /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AD7A3BC18B5F02E00EB9A4F /* ViewController.m */; };
 		7AD7A3BF18B5F02E00EB9A4F /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7AD7A3BE18B5F02E00EB9A4F /* Images.xcassets */; };
+		C15BAD6F1AFFBE5900BCFA32 /* gittypes.json in Resources */ = {isa = PBXBuildFile; fileRef = C15BAD6E1AFFBE5900BCFA32 /* gittypes.json */; };
+		C15BAD711AFFBE6A00BCFA32 /* git.json in Resources */ = {isa = PBXBuildFile; fileRef = C15BAD701AFFBE6A00BCFA32 /* git.json */; };
+		C15BAD761AFFC1DE00BCFA32 /* git.m in Sources */ = {isa = PBXBuildFile; fileRef = C15BAD731AFFC1DE00BCFA32 /* git.m */; };
+		C15BAD771AFFC1DE00BCFA32 /* gittypes.m in Sources */ = {isa = PBXBuildFile; fileRef = C15BAD751AFFC1DE00BCFA32 /* gittypes.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		044A33AC4C3614D405BE1585 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
-		5B0CA2DB1A0F6EB200E0CF12 /* vk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vk.h; path = ifacegen.example/vk.h; sourceTree = "<group>"; };
-		5B0CA2DC1A0F6EB200E0CF12 /* vk.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = vk.m; path = ifacegen.example/vk.m; sourceTree = "<group>"; };
-		5B0CA2DD1A0F6EB200E0CF12 /* vkimport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vkimport.h; path = ifacegen.example/vkimport.h; sourceTree = "<group>"; };
-		5B0CA2DE1A0F6EB200E0CF12 /* vkimport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = vkimport.m; path = ifacegen.example/vkimport.m; sourceTree = "<group>"; };
 		669A32DFA01FBF7C130260C4 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		7A2C13AF18B6340C00B55F5B /* vk.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = vk.json; path = rpc/vk.json; sourceTree = "<group>"; };
-		7A2C13B618BCD3E300B55F5B /* vkimport.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = vkimport.json; path = rpc/vkimport.json; sourceTree = "<group>"; };
 		7AD7A3A318B5F02E00EB9A4F /* ifacegen.example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ifacegen.example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AD7A3A618B5F02E00EB9A4F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		7AD7A3A818B5F02E00EB9A4F /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -48,6 +42,12 @@
 		7AD7A3BE18B5F02E00EB9A4F /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		7AD7A3C518B5F02E00EB9A4F /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		BF12EDDDE2476CC2A2E85E66 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		C15BAD6E1AFFBE5900BCFA32 /* gittypes.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = gittypes.json; path = rpc/gittypes.json; sourceTree = "<group>"; };
+		C15BAD701AFFBE6A00BCFA32 /* git.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = git.json; path = rpc/git.json; sourceTree = "<group>"; };
+		C15BAD721AFFC1DE00BCFA32 /* git.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = git.h; path = ifacegen.example/git.h; sourceTree = "<group>"; };
+		C15BAD731AFFC1DE00BCFA32 /* git.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = git.m; path = ifacegen.example/git.m; sourceTree = "<group>"; };
+		C15BAD741AFFC1DE00BCFA32 /* gittypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gittypes.h; path = ifacegen.example/gittypes.h; sourceTree = "<group>"; };
+		C15BAD751AFFC1DE00BCFA32 /* gittypes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = gittypes.m; path = ifacegen.example/gittypes.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,8 +68,8 @@
 		7A2C13AE18B6340300B55F5B /* RPC */ = {
 			isa = PBXGroup;
 			children = (
-				7A2C13B618BCD3E300B55F5B /* vkimport.json */,
-				7A2C13AF18B6340C00B55F5B /* vk.json */,
+				C15BAD6E1AFFBE5900BCFA32 /* gittypes.json */,
+				C15BAD701AFFBE6A00BCFA32 /* git.json */,
 			);
 			name = RPC;
 			sourceTree = "<group>";
@@ -134,10 +134,10 @@
 		7AD7A3E718B62DCD00EB9A4F /* Generated */ = {
 			isa = PBXGroup;
 			children = (
-				5B0CA2DB1A0F6EB200E0CF12 /* vk.h */,
-				5B0CA2DC1A0F6EB200E0CF12 /* vk.m */,
-				5B0CA2DD1A0F6EB200E0CF12 /* vkimport.h */,
-				5B0CA2DE1A0F6EB200E0CF12 /* vkimport.m */,
+				C15BAD721AFFC1DE00BCFA32 /* git.h */,
+				C15BAD731AFFC1DE00BCFA32 /* git.m */,
+				C15BAD741AFFC1DE00BCFA32 /* gittypes.h */,
+				C15BAD751AFFC1DE00BCFA32 /* gittypes.m */,
 			);
 			name = Generated;
 			sourceTree = "<group>";
@@ -205,11 +205,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7A2C13B018B6340C00B55F5B /* vk.json in Resources */,
+				C15BAD711AFFBE6A00BCFA32 /* git.json in Resources */,
 				7AD7A3BF18B5F02E00EB9A4F /* Images.xcassets in Resources */,
 				7AD7A3B118B5F02E00EB9A4F /* InfoPlist.strings in Resources */,
 				7AD7A3BA18B5F02E00EB9A4F /* Main.storyboard in Resources */,
-				7A2C13B718BCD3E300B55F5B /* vkimport.json in Resources */,
+				C15BAD6F1AFFBE5900BCFA32 /* gittypes.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,7 +227,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "##\npython Pods/ifacegen/generator/ifacegen.py rpc/vk.json rpc/vkimport.json -o ifacegen.example/";
+			shellScript = "##\npython Pods/ifacegen/generator/ifacegen.py rpc/gittypes.json rpc/git.json -o ifacegen.example/";
 		};
 		A99801CBF70E6C23A66A018E /* Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -266,11 +266,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5B0CA2E01A0F6EB200E0CF12 /* vkimport.m in Sources */,
-				5B0CA2DF1A0F6EB200E0CF12 /* vk.m in Sources */,
+				C15BAD761AFFC1DE00BCFA32 /* git.m in Sources */,
 				7AD7A3BD18B5F02E00EB9A4F /* ViewController.m in Sources */,
 				7AD7A3B718B5F02E00EB9A4F /* AppDelegate.m in Sources */,
 				7AD7A3B318B5F02E00EB9A4F /* main.m in Sources */,
+				C15BAD771AFFC1DE00BCFA32 /* gittypes.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

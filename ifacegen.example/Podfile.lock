@@ -2,9 +2,19 @@ PODS:
   - ifacegen (0.1.1)
 
 DEPENDENCIES:
-  - ifacegen (~> 0.1.1)
+  - ifacegen (from `https://github.com/ptiz/ifacegen.git`, branch `develop`)
+
+EXTERNAL SOURCES:
+  ifacegen:
+    :branch: develop
+    :git: https://github.com/ptiz/ifacegen.git
+
+CHECKOUT OPTIONS:
+  ifacegen:
+    :commit: 4befd93ae78ac05677d9c830c5acb1ab9375d73a
+    :git: https://github.com/ptiz/ifacegen.git
 
 SPEC CHECKSUMS:
-  ifacegen: 4e9529bba336481c26bf75ee4672b54b1c22e215
+  ifacegen: 617a5be080cae221c5d6cd3d2f7ca8cebd2fc999
 
-COCOAPODS: 0.35.0
+COCOAPODS: 0.36.4

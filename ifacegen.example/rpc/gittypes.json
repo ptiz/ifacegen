@@ -1,0 +1,39 @@
+{"iface":[
+ 
+{
+"struct": "GitUser",
+"typedef": {
+      "login": "string",
+      "id": "int64",
+      "avatar_url": "string",
+      "name": "string"
+      }  
+},
+
+{
+"struct": "GitPublicUser",
+"extends": "GitUser",
+"typedef": {
+      "email": "string",
+      "public_repos": "int32",
+      "followers": "int32",
+      "following": "int32"
+      }
+},
+
+{
+"struct": "GitRepo",
+"typedef":  {
+    "id": "int32",
+    "name": "string",
+    "owner": "GitUser",
+    "description": "string",
+    "url": "string",
+    "forks": "int32",
+    "open_issues": "int32",
+    "watchers": "int32"
+  }
+}
+
+
+]}

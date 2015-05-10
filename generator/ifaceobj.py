@@ -201,11 +201,12 @@ class GenListType( GenType ):
 		return "GenListType " + self.name + ", item: " + str( self.itemType )
 
 class GenMethod:
-	def __init__( self, name, prefix ):
+	def __init__( self, name, endpoint ):
 		self.name = name
-		self.prefix = prefix
+		self.endpoint = endpoint
 		self.httpMethod = None
 		self.requestJsonType = None
+		self.restfulParamsType = None
 		self.customRequestTypes = OrderedDict()
 		self.responseType = None
 		self.responseArgName = None

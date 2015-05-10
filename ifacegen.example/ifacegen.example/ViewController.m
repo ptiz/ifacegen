@@ -23,7 +23,7 @@
 
 #import "ViewController.h"
 #import "IFHTTPTransport.h"
-#import "vk.h"
+#import "git.h"
 
 static NSString* const cellId = @"ViewControllerCellId";
 
@@ -31,11 +31,13 @@ static NSString* const cellId = @"ViewControllerCellId";
 
 @property (strong, nonatomic) IBOutlet UITableView *tableView;
 @property (strong, nonatomic) IBOutlet UITextField *userNameTextField;
-@property (strong, nonatomic) IBOutlet UIButton *getWallButton;
+@property (strong, nonatomic) IBOutlet UIButton *getReposButton;
+@property (strong, nonatomic) IBOutlet UILabel *userLabel;
+@property (strong, nonatomic) IBOutlet UILabel *userEmailLabel;
 
-@property (atomic, strong) NSArray* wallItems;
+@property (atomic, strong) NSArray* userRepos;
 
-@property (nonatomic) vk* vkClient;
+@property (nonatomic) git* gitClient;
 
 @end
 
@@ -47,11 +49,11 @@ static NSString* const cellId = @"ViewControllerCellId";
 
     if ( self ) {
 
-        self.wallItems = @[];
+        self.userRepos = @[];
 
-        NSURL* vkURL = [NSURL URLWithString:@"http://api.vk.com/method"];
-        id<IFTransport> transport = [[IFHTTPTransport alloc] initWithURL:vkURL];
-        self.vkClient = [[vk alloc] initWithTransport:transport];
+        NSURL* gitURL = [NSURL URLWithString:@"https://api.github.com"];
+        id<IFTransport> transport = [[IFHTTPTransport alloc] initWithURL:gitURL];
+        self.gitClient = [[git alloc] initWithTransport:transport];
 
     }
     return self;
@@ -65,56 +67,38 @@ static NSString* const cellId = @"ViewControllerCellId";
 
     [self.userNameTextField resignFirstResponder];
 
-    NSString* userId = self.userNameTextField.text;
-    if ( [userId length] == 0 ) {
+    NSString* userName = self.userNameTextField.text;
+    if ( [userName length] == 0 ) {
         return;
     }
 
     __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
 
-        weakSelf.getWallButton.enabled = NO;
-
+        weakSelf.getReposButton.enabled = NO;
+        weakSelf.userRepos = @[];
+        
         NSError* error;
-        VkWallInfo* response = [weakSelf.vkClient vkWallWithOwnerId:userId
-                                                           andCount:@"30"
-                                                               andV:@"5.10"
-                                                           andError:&error];
-
-        weakSelf.wallItems = @[];
+        GitPublicUser* userInfo = [weakSelf.gitClient userWithUserName:userName andError:&error];
+        if (!error) {
+            weakSelf.userRepos = [weakSelf.gitClient reposWithUserName:userName andError:&error];
+        }
 
         if ( error ) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                [[[UIAlertView alloc] initWithTitle:@"HTTP Error"
+                [[[UIAlertView alloc] initWithTitle:@"Error"
                                            message:error.localizedDescription
                                           delegate:nil
                                  cancelButtonTitle:@"OK"
                                  otherButtonTitles:nil] show];
             });
 
-        } else if ( response.error ) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[[UIAlertView alloc] initWithTitle:@"VK Error"
-                                            message:response.error.errorMsg
-                                           delegate:nil
-                                  cancelButtonTitle:@"OK"
-                                  otherButtonTitles:nil] show];
-            });
-        } else {
-            weakSelf.wallItems = [response.response.items sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
-                vkResponseItem* item1 = (vkResponseItem*)obj1;
-                vkResponseItem* item2 = (vkResponseItem*)obj2;
-                if ( item1.date < item2.date ) {
-                    return NSOrderedDescending;
-                } else if ( item1.date == item2.date ) {
-                    return NSOrderedSame;
-                } else
-                    return NSOrderedAscending;
-            }];
         }
-
+        
         dispatch_async(dispatch_get_main_queue(), ^{
-            weakSelf.getWallButton.enabled = YES;
+            weakSelf.getReposButton.enabled = YES;
+            weakSelf.userLabel.text = userInfo.name;
+            weakSelf.userEmailLabel.text = userInfo.email;
             [weakSelf.tableView reloadData];
         });
     });
@@ -124,7 +108,7 @@ static NSString* const cellId = @"ViewControllerCellId";
 #pragma mark - UITableViewDataSource
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.wallItems.count;
+    return self.userRepos.count;
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -134,20 +118,10 @@ static NSString* const cellId = @"ViewControllerCellId";
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:cellId];
     }
 
-    vkResponseItem* wallItem = self.wallItems[indexPath.row];
-
-    NSDate* date = [NSDate dateWithTimeIntervalSince1970:wallItem.date];
-    NSString* dateFormatted = [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterShortStyle];
+    GitRepo* repo = self.userRepos[indexPath.row];
     
-    cell.textLabel.text = [NSString stringWithFormat:@"%@ (%lu att.)", dateFormatted, (unsigned long)wallItem.attachments.count];
-    if ( [wallItem.text length] ) {
-        cell.detailTextLabel.text = wallItem.text;
-    } else if ( [wallItem.theCopyHistory count] ) {
-        vkResponseItemBase* copyHistoryItem = wallItem.theCopyHistory[0];
-        cell.detailTextLabel.text = copyHistoryItem.text;
-    } else {
-        cell.detailTextLabel.text = @"---";
-    }
+    cell.textLabel.text = repo.name;
+    cell.detailTextLabel.text = [NSString stringWithFormat:@"Forks: %d, issues: %d, watchers: %d", repo.forks, repo.openIssues, repo.watchers];
 
     return cell;
 }

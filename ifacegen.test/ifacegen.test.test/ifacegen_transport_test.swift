@@ -26,35 +26,30 @@ import XCTest
 
 class TestTransport: IFHTTPTransport {
     
-    var checkURL: ((String?) -> ())?
+    var checkURL: ((NSURL?) -> ())?
     var checkInput: ((NSData?) -> ())?
     var checkCustomInput: ((Dictionary<String, AnyObject>?) -> ())?
     var checkHTTPMethod: ((IFHTTPMethod) -> ())?
     
     let responseFileName: String?
     
-    init(ResponseFileName responseFileName: String?) {
+    init(_ responseFileName: String?) {
         self.responseFileName = responseFileName
-        super.init(URL:NSURL(string: ""))
+        super.init(URL:NSURL(string: "http://localhost"))
     }
     
-    override func writeAll(data: NSData!, prefix: String!, method: IFHTTPMethod, error: NSErrorPointer) -> Bool {
+    override func writeAll(data: NSData!, endpoint: String!, method: IFHTTPMethod, error: NSErrorPointer) -> Bool {
         if let checkHTTPMethod = self.checkHTTPMethod {
             checkHTTPMethod( method )
         }
         
-        return true
-    }
-    
-    override func writeAll(data: NSData!, prefix: String!, error: NSErrorPointer) -> Bool {
-        
-        if let requestParams = self.currentRequestParams {
-            let requestParamsString = self.buildRequestParamsString(requestParams)
-            self.checkURL?(requestParamsString)
+        if let checkURL = self.checkURL {
+            let requestParamsString = self.buildURL(endpoint)
+            checkURL(requestParamsString)
         }
         
-        if let input = data {
-            self.checkInput?(input)
+        if let checkInput = self.checkInput, input = data {
+            checkInput(input)
         }
         
         return true
@@ -76,11 +71,11 @@ class ifacegen_transport_test: XCTestCase {
     
     func testCall() {
         
-        let testTransport = TestTransport(ResponseFileName: "test_transport_response")
+        let testTransport = TestTransport("test_transport_response")
         
-        testTransport.checkURL = { (urlString) in
-            if let url = urlString {
-                XCTAssertEqual(url, "?token=qwerty&timestamp=13452345", "URL wasn't made well")
+        testTransport.checkURL = { (url) in
+            if let checkUrl = url {
+                XCTAssertEqual(checkUrl.absoluteString!, "http://localhost/employees?token=qwerty&timestamp=13452345", "URL wasn't made well")
             } else {
                 XCTAssert(false, "URL is nil")
             }
@@ -128,7 +123,7 @@ class ifacegen_transport_test: XCTestCase {
     
     func testHTTPCall() {
         
-        let transport = TestTransport(ResponseFileName: nil)
+        let transport = TestTransport(nil)
         
         transport.checkHTTPMethod = { (method:IFHTTPMethod)->() in
             XCTAssert( method == .IFHTTPMETHOD_PUT, "HTTP method is wrong")
@@ -140,5 +135,22 @@ class ifacegen_transport_test: XCTestCase {
         
         let testService = OBCTest(transport: transport)
         testService.methodForPutWithEmployee(employee, andError: nil)
+    }
+    
+    func testEdpointParams() {
+        
+        let transport = TestTransport("test_restful_parameters")
+        
+        transport.checkURL = { (url) in
+            if let checkUrl = url {
+                XCTAssertEqual(checkUrl.absoluteString!, "http://localhost/users/johndoe123/repos?token=9712394867142", "URL wasn't made well")
+            } else {
+                XCTAssert(false, "URL is nil")
+            }
+        }
+        
+        let testService = OBCTest(transport: transport)
+        testService.gitStarredReposWithUser("johndoe123", andToken:"9712394867142", andError: nil)
+        
     }
 }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6250" systemVersion="13F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="vXZ-lx-hvc">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7531" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="vXZ-lx-hvc">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6244"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7520"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -18,45 +18,74 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter VK user id here" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="6UR-0G-exx">
-                                <rect key="frame" x="20" y="30" width="280" height="30"/>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter git user name here" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="6UR-0G-exx">
+                                <rect key="frame" x="20" y="30" width="187" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="V46-y1-dgW">
-                                <rect key="frame" x="119" y="68" width="82" height="30"/>
-                                <state key="normal" title="Get the wall">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="getWallButtonPressed:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="BUL-tp-LEY"/>
-                                </connections>
-                            </button>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="NQ5-3U-Cv0">
-                                <rect key="frame" x="0.0" y="111" width="320" height="457"/>
+                                <rect key="frame" x="0.0" y="140" width="320" height="428"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <sections/>
                                 <connections>
                                     <outlet property="dataSource" destination="vXZ-lx-hvc" id="bfU-1j-Y6V"/>
                                 </connections>
                             </tableView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hs9-hd-y8k" userLabel="User">
+                                <rect key="frame" x="20" y="74" width="284" height="29"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="29" id="gKd-XY-y2K"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="19"/>
+                                <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6WG-oc-PSg" userLabel="UserEmail">
+                                <rect key="frame" x="20" y="106" width="284" height="26"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="26" id="Sbu-Pd-XNS"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="V46-y1-dgW">
+                                <rect key="frame" x="215" y="30" width="89" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="89" id="kEA-U4-8C9"/>
+                                </constraints>
+                                <state key="normal" title="Get repos">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="getWallButtonPressed:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="BUL-tp-LEY"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="NQ5-3U-Cv0" firstAttribute="top" secondItem="6WG-oc-PSg" secondAttribute="bottom" constant="8" id="G6E-Yp-8Zn"/>
+                            <constraint firstItem="6WG-oc-PSg" firstAttribute="top" secondItem="hs9-hd-y8k" secondAttribute="bottom" constant="3" id="I8e-cN-SAU"/>
+                            <constraint firstItem="hs9-hd-y8k" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="4" id="K8x-zX-rkD"/>
+                            <constraint firstItem="V46-y1-dgW" firstAttribute="trailing" secondItem="kh9-bI-dsS" secondAttribute="trailingMargin" id="MFU-FA-jaF"/>
                             <constraint firstItem="6UR-0G-exx" firstAttribute="top" secondItem="zt7-yB-SEF" secondAttribute="bottom" constant="10" id="Obf-uP-nSL"/>
-                            <constraint firstAttribute="centerX" secondItem="V46-y1-dgW" secondAttribute="centerX" id="V6E-93-N2l"/>
+                            <constraint firstItem="V46-y1-dgW" firstAttribute="leading" secondItem="6UR-0G-exx" secondAttribute="trailing" constant="8" id="Tdc-ez-zPe"/>
+                            <constraint firstItem="hs9-hd-y8k" firstAttribute="trailing" secondItem="kh9-bI-dsS" secondAttribute="trailingMargin" id="UA2-ty-q4o"/>
+                            <constraint firstItem="hs9-hd-y8k" firstAttribute="top" secondItem="6UR-0G-exx" secondAttribute="bottom" constant="14" id="ZqO-2E-AHY"/>
                             <constraint firstAttribute="trailingMargin" secondItem="NQ5-3U-Cv0" secondAttribute="trailing" constant="-16" id="bIb-Lb-V4r"/>
+                            <constraint firstItem="V46-y1-dgW" firstAttribute="top" secondItem="zt7-yB-SEF" secondAttribute="bottom" constant="10" id="eUT-yX-3c6"/>
+                            <constraint firstItem="6WG-oc-PSg" firstAttribute="trailing" secondItem="kh9-bI-dsS" secondAttribute="trailingMargin" id="hbT-95-uJH"/>
                             <constraint firstItem="sfV-9o-2bY" firstAttribute="top" secondItem="NQ5-3U-Cv0" secondAttribute="bottom" id="hfw-zb-yx9"/>
-                            <constraint firstItem="NQ5-3U-Cv0" firstAttribute="top" secondItem="V46-y1-dgW" secondAttribute="bottom" constant="13" id="hqu-W0-P6L"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="6UR-0G-exx" secondAttribute="trailing" constant="4" id="ltH-Yz-k6H"/>
-                            <constraint firstItem="V46-y1-dgW" firstAttribute="top" secondItem="6UR-0G-exx" secondAttribute="bottom" constant="8" id="lxJ-cj-iog"/>
                             <constraint firstItem="6UR-0G-exx" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="4" id="wQr-Vz-eN4"/>
+                            <constraint firstItem="6WG-oc-PSg" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="4" id="xSk-Go-xx6"/>
                             <constraint firstItem="NQ5-3U-Cv0" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="-16" id="zg4-hX-6QJ"/>
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="getWallButton" destination="V46-y1-dgW" id="xoZ-94-p6r"/>
+                        <outlet property="getReposButton" destination="V46-y1-dgW" id="M8P-gp-UHf"/>
                         <outlet property="tableView" destination="NQ5-3U-Cv0" id="0Il-Gw-APw"/>
+                        <outlet property="userEmailLabel" destination="6WG-oc-PSg" id="txB-0w-AJG"/>
+                        <outlet property="userLabel" destination="hs9-hd-y8k" id="dhf-2N-XWb"/>
                         <outlet property="userNameTextField" destination="6UR-0G-exx" id="Hka-b9-Njl"/>
                     </connections>
                 </viewController>

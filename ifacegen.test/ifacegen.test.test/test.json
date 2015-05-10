@@ -35,13 +35,13 @@
 
 {
 "procedure": "simpleCall",
-"prefix": "all",
+"endpoint": "all",
 "response": { "code" : "int32" }
 },
 
 {
 "procedure": "getEmployees",
-"prefix": "employees",
+"endpoint": "employees",
 "request": {
 		"employer_id": "int64",
         "filter": [ {"payload":"string"} ]
@@ -72,7 +72,14 @@
 {
 "put": "methodForPut",
 "request": { "employee":"Employee" },
-"prefix": "employees"
+"endpoint": "employees"
+},
+
+{
+"get": "gitStarredRepos",
+"endpoint": "users/${user}/repos",
+"url_params": {"token": "string"},          
+"response": [{ "id": "int64", "name": "string" }]
 }
 
 ]}

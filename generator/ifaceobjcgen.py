@@ -202,8 +202,10 @@ def OBJCRPCMethodDeclaration( method ):
 	template = Template('- ($responseType)${methodName}With$argList')
 	argList = []
 
-	if method.prefix is None:
-		argList.append('Prefix:(NSString*)prefix')
+	if method.endpoint is None:
+		argList.append('Endpoint:(NSString*)endpoint')
+	if method.restfulParamsType is not None:
+		argList.append( OBJCArgList( method.restfulParamsType ) )
 	for customRequestType in method.customRequestTypes.values():
 		argList.append( OBJCArgList( customRequestType ) )
 	if method.requestJsonType is not None:
@@ -465,10 +467,11 @@ def OBJCRPCMethodImplementation( method ):
 		[self.transport performSelector:@selector($customArgSectionName:) withObject:$customArgDict];
 	}
 """)
+	restfulParamsTemplate = Template('[NSString stringWithFormat:$endpoint, $restfulParamsArgList]')
 	returnTemplate = Template('return $response;')
 
-	transportMethodTemplate = Template('[self.transport writeAll:jsonData prefix:$prefix error:error]')
-	transportHTTPMethodTemplate = Template('[(IFHTTPTransport*)self.transport writeAll:jsonData prefix:$prefix method:$httpMethod error:error]')
+	transportMethodTemplate = Template('[self.transport writeAll:jsonData endpoint:$endpoint error:error]')
+	transportHTTPMethodTemplate = Template('[(IFHTTPTransport*)self.transport writeAll:jsonData endpoint:$endpoint method:$httpMethod error:error]')
 
 	template = Template("""\
 $declaration {
@@ -500,13 +503,18 @@ $setCustomArgs
 	if method.requestJsonType is not None:
 		jsonData = jsonArgsTemplate.substitute( jsonArgDict=OBJCUnwindTypeToDict( method.requestJsonType, None, level=2 ) )	
 
-	prefix = 'prefix'
-	if method.prefix is not None:
-		prefix = '@"%s"' % (method.prefix)
+	restfulParamsArgs = ''
+	endpoint = 'endpoint'
+	if method.endpoint is not None:
+		endpoint = '@"%s"' % (method.endpoint)
+		if method.restfulParamsType is not None:
+			endpointStr = '@"%s"' % (re.sub(r'\$\{(\w+)\}', '%@', method.endpoint))
+			restfulParamsArgsList = ', '.join( method.restfulParamsType.fieldNames() )
+			endpoint = restfulParamsTemplate.substitute( endpoint=endpointStr, restfulParamsArgList=restfulParamsArgsList )			
 
-	transportMethod = transportMethodTemplate.substitute(prefix=prefix)
+	transportMethod = transportMethodTemplate.substitute(endpoint=endpoint)
 	if method.httpMethod is not None:
-		transportMethod = transportHTTPMethodTemplate.substitute(prefix=prefix, httpMethod=OBJCHTTPEnumFromName(method.httpMethod))
+		transportMethod = transportHTTPMethodTemplate.substitute(endpoint=endpoint, httpMethod=OBJCHTTPEnumFromName(method.httpMethod))
 
 	returnStr = ''
 	emptyVal = ''

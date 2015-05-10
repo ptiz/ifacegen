@@ -67,26 +67,7 @@ NSString* const IFHTTPTransportErrorDomain = @"com.oss.ifacegen.transport.httper
     self.currentAnswer = nil;
     self.curentResponse = nil;
     
-    if ( endpoint == nil ) {
-        endpoint = @"";
-    }
-    
-    NSURL* requestURL;
-    if ( [endpoint length] && [endpoint characterAtIndex:0] == ':' ) {
-        requestURL = [NSURL URLWithString:
-                      [[self.rootURL absoluteString] stringByAppendingString:endpoint]];
-    } else {
-        requestURL = [self.rootURL URLByAppendingPathComponent:endpoint];
-    }
-    
-    NSString* requestParamsString;
-    if ( self.currentRequestParams != nil ) {
-        requestParamsString = [self buildRequestParamsString:self.currentRequestParams];
-        requestURL =
-        [NSURL URLWithString:
-         [[requestURL absoluteString] stringByAppendingString:requestParamsString]];
-    }
-    
+    NSURL* requestURL = [self buildURL:endpoint];
     NSMutableURLRequest* request = [self prepareRequestWithURL:requestURL method:method data:data];
     
     NSHTTPURLResponse* response;
@@ -152,6 +133,27 @@ NSString* const IFHTTPTransportErrorDomain = @"com.oss.ifacegen.transport.httper
 #pragma mark - Overrides
 
 static NSString* const methods[] = { @"", @"GET", @"HEAD", @"POST", @"PUT", @"DELETE", @"PATCH", @"OPTIONS", @"TRACE" };
+
+- (NSURL*)buildURL:(NSString*)endpoint {
+    if ( endpoint == nil ) {
+        endpoint = @"";
+    }
+    
+    NSURL* requestURL;
+    if ( [endpoint length] && [endpoint characterAtIndex:0] == ':' ) {
+        requestURL = [NSURL URLWithString: [[self.rootURL absoluteString] stringByAppendingString:endpoint]];
+    } else {
+        requestURL = [self.rootURL URLByAppendingPathComponent:endpoint];
+    }
+    
+    NSString* requestParamsString;
+    if ( self.currentRequestParams != nil ) {
+        requestParamsString = [self buildRequestParamsString:self.currentRequestParams];
+        requestURL = [NSURL URLWithString: [[requestURL absoluteString] stringByAppendingString:requestParamsString]];
+    }
+    
+    return requestURL;
+}
 
 - (NSMutableURLRequest*)prepareRequestWithURL:(NSURL*)url httpMethod:(IFHTTPMethod)method data:(NSData*)data {
     

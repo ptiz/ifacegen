@@ -78,6 +78,7 @@
 {
 "get": "gitStarredRepos",
 "endpoint": "users/${user}/repos",
+"url_params": {"token": "string"},          
 "response": [{ "id": "int64", "name": "string" }]
 }
 

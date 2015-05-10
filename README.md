@@ -39,7 +39,7 @@ python Pods/ifacegen/generator/ifacegen.py <IDL file names> -o <output directory
 ```
 
 ##Documentation and Example
-Example can be found in the repo. Also see a tutorial in [DOC file](DOC.md)
+Example can be found in the repo. Also see IDL description and a tutorial in [DOC file](DOC.md)
 
 ##ToDo
 - Mandatory fields;

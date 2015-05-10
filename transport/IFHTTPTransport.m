@@ -151,7 +151,7 @@ NSString* const IFHTTPTransportErrorDomain = @"com.oss.ifacegen.transport.httper
 
 #pragma mark - Overrides
 
-static NSString* const methods[] = { @"", @"GET", @"HEAD", @"POST", @"PUT", @"DELETE" };
+static NSString* const methods[] = { @"", @"GET", @"HEAD", @"POST", @"PUT", @"DELETE", @"PATCH", @"OPTIONS", @"TRACE" };
 
 - (NSMutableURLRequest*)prepareRequestWithURL:(NSURL*)url httpMethod:(IFHTTPMethod)method data:(NSData*)data {
     

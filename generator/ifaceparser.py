@@ -84,7 +84,7 @@ def buildTypeFromStructJSON( jsonItem, typeList, importedTypeList ):
 				raise Exception("Unknown base type %s for type %s" % retType.name, parentTypeName )
 	return retType
 
-validHTTPMethodNames = set(["get", "head", "post", "put", "delete"])
+validHTTPMethodNames = set(["get", "head", "post", "put", "delete", "patch", "options", "trace"])
 
 def matchHTTPMethod( jsonItem, methodKey, match ):
 	for validMethodName in validHTTPMethodNames:

@@ -3,4 +3,4 @@ platform :ios, '7.0'
 
 workspace 'ifacegen.example'
 
-pod 'ifacegen',  :git => 'https://github.com/ptiz/ifacegen.git', :branch => 'develop'
+pod 'ifacegen', '~> 1.0.0'

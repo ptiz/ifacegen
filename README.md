@@ -38,6 +38,7 @@ If you use Cocoapods to install the tool, you may want to add "Run Script" phase
 python Pods/ifacegen/generator/ifacegen.py <IDL file names> -o <output directory>
 ```
 
+##Documentation and Example
 Example can be found in the repo. Also see a tutorial in [DOC file](DOC.md)
 
 ##ToDo

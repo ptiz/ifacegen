@@ -175,11 +175,12 @@ static NSString* const methods[] = { @"", @"GET", @"HEAD", @"POST", @"PUT", @"DE
         [request setValue:[NSString stringWithFormat:@"%lu", (unsigned long)[request.HTTPBody length]]
        forHTTPHeaderField:@"Content-Length"];
 
-        NSString* json = [[NSString alloc] initWithBytes:[request.HTTPBody bytes]
-                                                  length:[request.HTTPBody length]
-                                                encoding:NSUTF8StringEncoding];
+        IFDebugLog(@"HTTPTransport is going to call URL \"%@\": %@",
+                   [request.URL absoluteString],
+                   [[NSString alloc] initWithBytes:[request.HTTPBody bytes]
+                                            length:[request.HTTPBody length]
+                                          encoding:NSUTF8StringEncoding]);
 
-        IFDebugLog(@"HTTPTransport is going to call URL \"%@\": %@", [request.URL absoluteString], json);
     }
 
     [request setValue:self.userAgent forHTTPHeaderField:@"User-Agent"];

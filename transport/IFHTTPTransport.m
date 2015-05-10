@@ -50,7 +50,7 @@ NSString* const IFHTTPTransportErrorDomain = @"com.oss.ifacegen.transport.httper
 
         NSString* appVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"];
         NSString* appName = [[NSBundle mainBundle] bundleIdentifier];
-        self.userAgent = [NSString stringWithFormat:@"%@ %@", appName, appVersion];
+        self.userAgent = [NSString stringWithFormat:@"%@/%@", appName, appVersion];
     }
     return self;
 }
@@ -155,7 +155,7 @@ static NSString* const methods[] = { @"", @"GET", @"HEAD", @"POST", @"PUT", @"DE
     return requestURL;
 }
 
-- (NSMutableURLRequest*)prepareRequestWithURL:(NSURL*)url httpMethod:(IFHTTPMethod)method data:(NSData*)data {
+- (NSMutableURLRequest*)prepareRequestWithURL:(NSURL*)url method:(IFHTTPMethod)method data:(NSData*)data {
     
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
     IFDebugLog(@"Request: %@", request);

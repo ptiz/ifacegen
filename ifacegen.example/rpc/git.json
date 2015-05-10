@@ -1,0 +1,17 @@
+{"iface": [
+
+{"import": "gittypes.json"},
+
+{
+"get": "user",
+"endpoint": "users/${userName}",
+"response": "GitPublicUser"
+},
+
+{
+"get": "repos",
+"endpoint": "users/${userName}/repos",
+"response": ["GitRepo"]
+}
+
+]}

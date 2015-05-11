@@ -283,7 +283,7 @@ will be translated in RPC method:
 
 "custom params section" may contain any IDL type declarations. Custom section requires the transport responds to corresponding selector:
 ```json
-"custom_params": { "User" }
+"custom_params": { "auth_token": "int64" }
 ```
 requires transport responds to
 ```objc

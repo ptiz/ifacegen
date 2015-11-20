@@ -160,7 +160,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 5BE09E811A2475BC00AEC506 /* Build configuration list for PBXNativeTarget "ifacegen.test.test" */;
 			buildPhases = (
-				5BE09E821A24769000AEC506 /* ShellScript */,
+				5BE09E821A24769000AEC506 /* Run Script */,
 				5BE09E741A2475BC00AEC506 /* Sources */,
 				5BE09E751A2475BC00AEC506 /* Frameworks */,
 				5BE09E761A2475BC00AEC506 /* Resources */,
@@ -180,6 +180,7 @@
 		5BE09E6E1A24753C00AEC506 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0610;
 				TargetAttributes = {
 					5BE09E771A2475BC00AEC506 = {
@@ -220,13 +221,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		5BE09E821A24769000AEC506 /* ShellScript */ = {
+		5BE09E821A24769000AEC506 /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
+			name = "Run Script";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;

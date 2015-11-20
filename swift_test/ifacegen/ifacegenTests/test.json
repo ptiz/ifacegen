@@ -1,0 +1,78 @@
+{"iface":[
+    
+{"import": "types.json"},
+          
+{
+"struct": "Employee",
+"extends": "Human",
+"typedef": {
+		"age":"double",
+        "employment_rec": [ [ { "begin": "int64", "end": "int64" } ] ],
+        "employment_data": "raw",
+		"children":[{
+				"name":"string",
+				"birthdate":"int64"
+			}]
+	}
+},
+
+{
+"struct": "Employer",
+"typedef": {
+		"stuff":["Employee"],
+		"info": "raw"
+	}
+},
+
+{
+"struct": "Department",
+"typedef": {
+		"name": "string",
+		"employees": [ "Employee" ],
+		"departments": [ "Department" ]
+	}
+},
+
+{
+"procedure": "simpleCall",
+"prefix": "all",
+"response": { "code" : "int32" }
+},
+
+{
+"procedure": "getEmployees",
+"prefix": "employees",
+"request": {
+		"employer_id": "int64",
+        "filter": [ {"payload":"string"} ]
+    },
+"extra_params": {
+		"token": "string",
+		"timestamp": "int64"
+	},
+"custom_params": {
+		"complex_param": {
+			"complex_field": "string"
+		},
+        "simple_param": "int32"
+	},
+"response": { "response" : [ "Employee" ] }
+},
+
+{
+"head": "procedureCall"
+},
+
+{
+"get": "methodForGet",
+"extra_params": {"token": "string"},
+"response": {"session_id": "int64"}
+},
+
+{
+"put": "methodForPut",
+"request": { "employee":"Employee" },
+"prefix": "employees"
+}
+
+]}

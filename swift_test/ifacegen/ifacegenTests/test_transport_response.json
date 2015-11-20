@@ -1,0 +1,73 @@
+[
+  {
+    "employment_rec" : [
+      [
+        {
+          "begin" : 1,
+          "end" : 2
+        }
+      ],
+      [
+        {
+          "begin" : 3,
+          "end" : 4
+        },
+        {
+          "begin" : 5,
+          "end" : 6
+        }
+      ]
+    ],
+    "id" : 781341234,
+    "age" : 345.67,
+    "children" : [
+      {
+        "name" : "Mary",
+        "birthdate" : 1425129383
+      }
+    ],
+    "employment_data" : {
+      "data" : "any"
+    },
+    "passport" : {
+      "id" : 786234,
+      "organization" : "10 OM",
+      "periods" : [ 
+        1425129383, 
+        1425129384, 
+        1425129385, 
+        1425129386, 
+        1425129387 
+      ]
+    },
+    "name" : "John Doe",
+    "married" : true
+  },
+  {
+    "employment_rec" : [
+
+    ],
+    "id" : 87245,
+    "age" : 623.76,
+    "children" : [
+      {
+        "name" : "Mary",
+        "birthdate" : 1425129383
+      },
+      {
+        "name" : "Mary",
+        "birthdate" : 1425129383
+      }
+    ],
+    "employment_data" : {
+      "any" : "data"
+    },
+    "passport" : {
+      "id" : 786234,
+      "organization" : "10 OM",
+      "periods" : null
+    },
+    "name" : "Mary Doe",
+    "married" : false
+  }
+]

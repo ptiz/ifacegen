@@ -18,6 +18,9 @@
 		277F5B4D1BFAA9BA000DBD16 /* category+RPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277F5B491BFAA9BA000DBD16 /* category+RPC.swift */; settings = {ASSET_TAGS = (); }; };
 		277F5B4E1BFAA9BA000DBD16 /* test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277F5B4A1BFAA9BA000DBD16 /* test.swift */; settings = {ASSET_TAGS = (); }; };
 		277F5B4F1BFAA9BA000DBD16 /* types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277F5B4B1BFAA9BA000DBD16 /* types.swift */; settings = {ASSET_TAGS = (); }; };
+		27B835131C00A172009B3D47 /* IFHTTPTransport.m in Sources */ = {isa = PBXBuildFile; fileRef = 27B8350C1C00A172009B3D47 /* IFHTTPTransport.m */; settings = {ASSET_TAGS = (); }; };
+		27B835141C00A172009B3D47 /* IFServiceClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 27B8350F1C00A172009B3D47 /* IFServiceClient.m */; settings = {ASSET_TAGS = (); }; };
+		27B835151C00A172009B3D47 /* IFServiceClient+Protected.m in Sources */ = {isa = PBXBuildFile; fileRef = 27B835111C00A172009B3D47 /* IFServiceClient+Protected.m */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +37,15 @@
 		277F5B491BFAA9BA000DBD16 /* category+RPC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "category+RPC.swift"; sourceTree = "<group>"; };
 		277F5B4A1BFAA9BA000DBD16 /* test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = test.swift; sourceTree = "<group>"; };
 		277F5B4B1BFAA9BA000DBD16 /* types.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = types.swift; sourceTree = "<group>"; };
+		27B835091C00A051009B3D47 /* test-header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "test-header.h"; sourceTree = "<group>"; };
+		27B8350B1C00A172009B3D47 /* IFHTTPTransport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IFHTTPTransport.h; path = ../../../transport/IFHTTPTransport.h; sourceTree = "<group>"; };
+		27B8350C1C00A172009B3D47 /* IFHTTPTransport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IFHTTPTransport.m; path = ../../../transport/IFHTTPTransport.m; sourceTree = "<group>"; };
+		27B8350D1C00A172009B3D47 /* IFHTTPTransport+Protected.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IFHTTPTransport+Protected.h"; path = "../../../transport/IFHTTPTransport+Protected.h"; sourceTree = "<group>"; };
+		27B8350E1C00A172009B3D47 /* IFServiceClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IFServiceClient.h; path = ../../../transport/IFServiceClient.h; sourceTree = "<group>"; };
+		27B8350F1C00A172009B3D47 /* IFServiceClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IFServiceClient.m; path = ../../../transport/IFServiceClient.m; sourceTree = "<group>"; };
+		27B835101C00A172009B3D47 /* IFServiceClient+Protected.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IFServiceClient+Protected.h"; path = "../../../transport/IFServiceClient+Protected.h"; sourceTree = "<group>"; };
+		27B835111C00A172009B3D47 /* IFServiceClient+Protected.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "IFServiceClient+Protected.m"; path = "../../../transport/IFServiceClient+Protected.m"; sourceTree = "<group>"; };
+		27B835121C00A172009B3D47 /* IFTransport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IFTransport.h; path = ../../../transport/IFTransport.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +86,7 @@
 		277F5B321BFAA65D000DBD16 /* ifacegenTests */ = {
 			isa = PBXGroup;
 			children = (
+				27B8350A1C00A162009B3D47 /* transport */,
 				277F5B471BFAA9A1000DBD16 /* Generated */,
 				277F5B331BFAA65D000DBD16 /* ifacegenTests.swift */,
 				277F5B351BFAA65D000DBD16 /* Info.plist */,
@@ -83,6 +96,7 @@
 				277F5B3E1BFAA947000DBD16 /* test_transport_response.json */,
 				277F5B3F1BFAA947000DBD16 /* test.json */,
 				277F5B401BFAA947000DBD16 /* types.json */,
+				27B835091C00A051009B3D47 /* test-header.h */,
 			);
 			path = ifacegenTests;
 			sourceTree = "<group>";
@@ -96,6 +110,21 @@
 				277F5B4B1BFAA9BA000DBD16 /* types.swift */,
 			);
 			name = Generated;
+			sourceTree = "<group>";
+		};
+		27B8350A1C00A162009B3D47 /* transport */ = {
+			isa = PBXGroup;
+			children = (
+				27B8350B1C00A172009B3D47 /* IFHTTPTransport.h */,
+				27B8350C1C00A172009B3D47 /* IFHTTPTransport.m */,
+				27B8350D1C00A172009B3D47 /* IFHTTPTransport+Protected.h */,
+				27B8350E1C00A172009B3D47 /* IFServiceClient.h */,
+				27B8350F1C00A172009B3D47 /* IFServiceClient.m */,
+				27B835101C00A172009B3D47 /* IFServiceClient+Protected.h */,
+				27B835111C00A172009B3D47 /* IFServiceClient+Protected.m */,
+				27B835121C00A172009B3D47 /* IFTransport.h */,
+			);
+			name = transport;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -188,9 +217,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27B835131C00A172009B3D47 /* IFHTTPTransport.m in Sources */,
 				277F5B341BFAA65D000DBD16 /* ifacegenTests.swift in Sources */,
+				27B835151C00A172009B3D47 /* IFServiceClient+Protected.m in Sources */,
 				277F5B4E1BFAA9BA000DBD16 /* test.swift in Sources */,
 				277F5B4F1BFAA9BA000DBD16 /* types.swift in Sources */,
+				27B835141C00A172009B3D47 /* IFServiceClient.m in Sources */,
 				277F5B4D1BFAA9BA000DBD16 /* category+RPC.swift in Sources */,
 				277F5B4C1BFAA9BA000DBD16 /* category.swift in Sources */,
 			);
@@ -289,6 +321,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = dydus.ifacegenTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "ifacegenTests/test-header.h";
 			};
 			name = Debug;
 		};
@@ -299,6 +332,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = dydus.ifacegenTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "ifacegenTests/test-header.h";
 			};
 			name = Release;
 		};
@@ -321,6 +355,7 @@
 				277F5B381BFAA65D000DBD16 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

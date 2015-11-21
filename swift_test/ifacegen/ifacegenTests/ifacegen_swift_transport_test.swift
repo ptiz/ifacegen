@@ -25,7 +25,6 @@ import Foundation
 import XCTest
 
 class TestSwiftTransport: IFHTTPTransport, GetEmployeesProtocol, MethodForGetProtocol {
-
     var checkURL: ((String?) -> ())?
     var checkInput: ((NSData?) -> ())?
     var checkCustomInput: ((Dictionary<String, AnyObject>?) -> ())?
@@ -38,15 +37,13 @@ class TestSwiftTransport: IFHTTPTransport, GetEmployeesProtocol, MethodForGetPro
         super.init(URL:NSURL(string: ""))
     }
 
-    override func writeAll(data: NSData!, prefix: String!, method: IFHTTPMethod, error: NSErrorPointer) -> Bool {
+    override func writeAll(data: NSData!, prefix: String!, method: IFHTTPMethod) throws {
         if let checkHTTPMethod = self.checkHTTPMethod {
             checkHTTPMethod( method )
         }
-
-        return true
     }
 
-    override func writeAll(data: NSData!, prefix: String!, error: NSErrorPointer) -> Bool {
+    override func writeAll(data: NSData!, prefix: String!) throws {
 
         if let requestParams = self.currentRequestParams {
             let requestParamsString = self.buildRequestParamsString(requestParams)
@@ -56,8 +53,6 @@ class TestSwiftTransport: IFHTTPTransport, GetEmployeesProtocol, MethodForGetPro
         if let input = data {
             self.checkInput?(input)
         }
-
-        return true
     }
 
     override func readAll() -> NSData! {
@@ -77,7 +72,6 @@ class TestSwiftTransport: IFHTTPTransport, GetEmployeesProtocol, MethodForGetPro
 }
 
 class ifacegen_swift_transport_test: XCTestCase {
-
     func testCall() {
 
         let testTransport = TestSwiftTransport(ResponseFileName: "test_transport_response")
@@ -92,7 +86,7 @@ class ifacegen_swift_transport_test: XCTestCase {
 
         testTransport.checkInput = { (inputData) in
             if let input = inputData {
-                if let json = NSJSONSerialization.JSONObjectWithData(input, options:.AllowFragments, error: nil) as? [String : AnyObject] {
+                if let json = try! NSJSONSerialization.JSONObjectWithData(input, options:.AllowFragments) as? [String : AnyObject] {
                     XCTAssertTrue((json["employer_id"] as? NSNumber)?.longLongValue == 9876345, "Input wasn't made well")
                     let filters: AnyObject? = json["filter"]
                     if let filter2 = filters?[1] as? [String : AnyObject] {
@@ -136,9 +130,9 @@ class ifacegen_swift_transport_test: XCTestCase {
 
         let transport = TestSwiftTransport(ResponseFileName: nil)
 
-        transport.checkHTTPMethod = { (method:IFHTTPMethod)->() in
+        transport.checkHTTPMethod = { (method: IFHTTPMethod)->() in
             XCTAssert( method == .IFHTTPMETHOD_PUT, "HTTP method is wrong")
-            println("HTTP method: \(method)")
+            print("HTTP method: \(method)")
         }
         var error: NSError?
         let employee = Employee(jsonData: NSData(contentsOfFile: NSBundle(forClass:self.classForCoder).pathForResource("test_transport_employee", ofType: "json")!), error: &error)

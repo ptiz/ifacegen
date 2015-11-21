@@ -27,11 +27,10 @@ import XCTest
 class ifacegen_swift_category_test: XCTestCase {
 
     func testCategoryDump() {
+        let prevModel = BusinessModel( name: "BMod-old", revisions: nil, theDescription: "Old Business Model" )
+        let model = BusinessModel( name: "BMod", revisions: [ BusinessModelRevisionsItem(version: 1, model: prevModel) ], theDescription: "Business model #1" )
 
-        var prevModel = BusinessModel( name: "BMod-old", revisions: nil, theDescription: "Old Business Model" )
-        var model = BusinessModel( name: "BMod", revisions: [ BusinessModelRevisionsItem(version: 1, model: prevModel) ], theDescription: "Business model #1" )
-
-        var error:NSError?
+        var error: NSError?
 
         let dict = model.dictionary(&error)
         XCTAssertNotNil(dict, "Serialization was unsuccessful")

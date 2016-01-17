@@ -28,7 +28,7 @@ class ifacegen_category_test: XCTestCase {
     
     func testCategoryDump() {
         
-        let prevModel = OBCBusinessModel( name: "BMod-old", andRevisions: nil, andTheDescription: "Old Business Model" )
+        let prevModel = OBCBusinessModel( name: "BMod-old", andRevisions: [], andTheDescription: "Old Business Model" )
         let model = OBCBusinessModel( name: "BMod", andRevisions: [ OBCBusinessModelRevisionsItem(version: 1, andModel: prevModel) ], andTheDescription: "Business model #1" )
         
         let dict = try! model.dictionary()
@@ -43,9 +43,9 @@ class ifacegen_category_test: XCTestCase {
     
     func testCategoryReading() {
         let data = NSData(contentsOfFile: NSBundle(forClass:self.classForCoder).pathForResource("test_category_data", ofType: "json")!)
-        let model = try! OBCBusinessModel(JSONData: data)
+        let model = try! OBCBusinessModel(JSONData: data!)
         let revisions = model.revisions
-        let nestedModel = revisions![0].model as OBCBusinessModel
+        let nestedModel = revisions[0].model
         
         XCTAssertTrue(nestedModel.name == "Nested BusMod", "Deserialization was not sucessful")
     }

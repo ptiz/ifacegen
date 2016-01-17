@@ -51,7 +51,7 @@ class ifacegen_test_test: XCTestCase {
         
         employer = OBCEmployer(stuff: [self.employee0, self.employee1], andInfo: ["review":"passed"])
         
-        internalDepartment = OBCDepartment(name: "Testers sub-dept.", andEmployees: [self.employee0], andDepartments: nil)
+        internalDepartment = OBCDepartment(name: "Testers sub-dept.", andEmployees: [self.employee0], andDepartments: [])
         department = OBCDepartment(name: "Research dept.", andEmployees: [self.employee0, self.employee1], andDepartments: [internalDepartment])
     }
     
@@ -66,8 +66,8 @@ class ifacegen_test_test: XCTestCase {
 
         XCTAssertEqual(desEmployer.stuff.count, 2, "Data was not deserialized successfully")
         
-        let desEmployee0 = desEmployer.stuff[0] as! OBCEmployee
-        let desEmployee1 = desEmployer.stuff[1] as! OBCEmployee
+        let desEmployee0 = desEmployer.stuff[0]
+        let desEmployee1 = desEmployer.stuff[1]
         
         XCTAssertEqual(desEmployee0.name, "empl0", "Employee.name is wrong")
         XCTAssertTrue(desEmployee0.passport.theId == 786234, "Employee pass is wrong")
@@ -75,11 +75,11 @@ class ifacegen_test_test: XCTestCase {
         XCTAssertTrue(desEmployee1.children.count == 2, "Children1 array is wrong")
         XCTAssertTrue(desEmployee0.employmentRec.count == 2, "Employment record is wrong for Employee0")
         
-        let array = desEmployee0.employmentRec[1] as! [AnyObject]
-        let itemItem = array[1] as! OBCEmployeeEmploymentRecItemItem
+        let array = desEmployee0.employmentRec[1]
+        let itemItem = array[1]
         XCTAssertTrue( itemItem.begin == 5, "Employee0.employmentRec[1][1].begin is wrong")
         
-        let desChild = desEmployee1.children[1] as! OBCEmployeeChildrenItem
+        let desChild = desEmployee1.children[1]
         XCTAssertEqual(desChild.name, "Mary", "Child name is wrong")
         
         let employmentDataValue = desEmployee0.employmentData["data"] as! String
@@ -99,16 +99,15 @@ class ifacegen_test_test: XCTestCase {
         let message = "{\"stuff\":[{\"wrong_value\":13}]}"
         let messageData = message.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true);
         
-        let employer = try! OBCEmployer(JSONData: messageData)
+        let employer = try! OBCEmployer(JSONData: messageData!)
 
         XCTAssertEqual(employer.stuff.count, 1, "Data was not deserialized successfully")
-        XCTAssertTrue(employer.info == nil, "Employer info is wrong")
         
         let wrongMessage = "{\"stuff\":[{\"wrong_value\":13}"
         let wrongMessageData = wrongMessage.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)
         
         do {
-            let _ = try OBCEmployer(JSONData: wrongMessageData)
+            let _ = try OBCEmployer(JSONData: wrongMessageData!)
             XCTFail("Wrong JSON data was read without an error")
         } catch {
         }

@@ -39,6 +39,26 @@ def OBJCAssumeType( genType ):
 		return 'NSArray';
 	return "_ERROR_"
 
+def OBJCAssumeGenericArgType( genType ):
+	if isinstance( genType, GenIntegralType ):
+		t = genType.sType
+		integralTypeMap = { "string": "NSString*", "bool": "NSNumber*", "int32": "NSNumber*", "int64": "NSNumber*", "double": "NSNumber*", "raw": "NSDictionary*", "rawstr": "NSDictionary*" }
+		if t in integralTypeMap:
+			return integralTypeMap[t]
+	if isinstance( genType, GenComplexType ):
+		return genType.name + "*"
+	if isinstance( genType, GenListType ):
+		template = Template('NSArray<$genericArg>*')
+		return template.substitute( genericArg=OBJCAssumeGenericArgType(genType.itemType) )
+	return "_ERROR_"
+
+def OBJCAssumeReturnType( genType ):
+	if isinstance( genType, GenListType ):
+		template = Template('NSArray<$genericArg>*')
+		return template.substitute( genericArg=OBJCAssumeGenericArgType(genType.itemType) )
+	template = Template('$typeName$typePtr')
+	return template.substitute( typeName=OBJCAssumeType(genType), typePtr=genType.ptr )
+
 def OBJCHTTPEnumFromName( httpMethodName ):
 	httpMethodMap = { "get": "IFHTTPMETHOD_GET", "head": "IFHTTPMETHOD_HEAD", "post": "IFHTTPMETHOD_POST", "put": "IFHTTPMETHOD_PUT", "delete": "IFHTTPMETHOD_DELETE" }
 	if httpMethodName in httpMethodMap:
@@ -51,7 +71,7 @@ def OBJCDecorateTypeForDict( objcTypeStr, genType ):
 		template = Template('@($objcTypeStr)')
 	if genType.sType == 'rawstr':
 		template = Template('[[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:$objcTypeStr options:jsonFormatOption error:error] encoding:NSUTF8StringEncoding]')
-	return template.substitute( objcTypeStr=objcTypeStr )
+	return template.substitute( objcTypeStr=objcTypeStr )		
 
 def OBJCDecorateTypeFromJSON( genType, varValue ):
 	templateNSNumberStr = Template('( tmp = $tmpVarValue, [tmp isEqual:[NSNull null]] ? $emptyVal : ((NSNumber*)tmp).$selector )')
@@ -102,11 +122,15 @@ def isModuleDependsOnHTTPTransport( module ):
 
 def OBJCArgList( genType ):
 	template = Template('$arg:($argType$argTypePtr)$argAlias')
+	listTemplate = Template('$arg:($argType<$genericArg>$argTypePtr)$argAlias')
 	argList = []
 	for fieldName in genType.allFieldNames():
 		fieldType = genType.fieldType(fieldName)
 		fieldAlias = genType.fieldAlias(fieldName)
-		argList.append( template.substitute( arg=capitalizeFirstLetter(fieldAlias), argType=OBJCAssumeType(fieldType), argTypePtr=fieldType.ptr, argAlias=fieldAlias ) )
+		if isinstance( fieldType, GenListType ):
+			argList.append( listTemplate.substitute( arg=capitalizeFirstLetter(fieldAlias), argType=OBJCAssumeType(fieldType), genericArg=OBJCAssumeGenericArgType( fieldType.itemType ), argTypePtr=fieldType.ptr, argAlias=fieldAlias ) )
+		else:		
+			argList.append( template.substitute( arg=capitalizeFirstLetter(fieldAlias), argType=OBJCAssumeType(fieldType), argTypePtr=fieldType.ptr, argAlias=fieldAlias ) )
 	return '\n\tand'.join(argList)
 
 def OBJCTypeInitDeclaration( genType ):
@@ -114,19 +138,19 @@ def OBJCTypeInitDeclaration( genType ):
 
 def OBJCTypeSerializersDeclarationList( genType ):
 	return """\
-- (instancetype)initWithDictionary:(NSDictionary*)dictionary error:(NSError* __autoreleasing*)error;
-- (instancetype)initWithJSONData:(NSData*)jsonData error:(NSError* __autoreleasing*)error;
-- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error;
-- (NSData*)dumpWithError:(NSError* __autoreleasing*)error;"""
+- (instancetype _Nullable)initWithDictionary:(NSDictionary*)dictionary error:(NSError**)error;
+- (instancetype _Nullable)initWithJSONData:(NSData*)jsonData error:(NSError**)error;
+- (NSDictionary* _Nullable)dictionaryWithError:(NSError**)error;
+- (NSData* _Nullable)dumpWithError:(NSError**)error;"""
 
 def OBJCTypePropertyList( genType ):
 	template = Template('@property (nonatomic) $propType$propTypePtr $propAlias;')
-	listTemplate = Template('@property (nonatomic) $propType$propTypePtr/*$itemType*/ $propAlias;')
+	listTemplate = Template('@property (nonatomic) $propType<$genericArg>$propTypePtr $propAlias;')
 	propList = []
 	for fieldName in genType.fieldNames():
 		fieldType = genType.fieldType(fieldName)
 		if isinstance( fieldType, GenListType ):
-			propList.append( listTemplate.substitute(propType=OBJCAssumeType( fieldType ), propTypePtr=fieldType.ptr, itemType=OBJCAssumeType( fieldType.itemType ), propAlias=genType.fieldAlias( fieldName )) )
+			propList.append( listTemplate.substitute(propType=OBJCAssumeType( fieldType ), genericArg=OBJCAssumeGenericArgType( fieldType.itemType ), propTypePtr=fieldType.ptr, itemType=OBJCAssumeType( fieldType.itemType ), propAlias=genType.fieldAlias( fieldName )) )
 		else:
 			propList.append( template.substitute(propType=OBJCAssumeType( fieldType ), propTypePtr=fieldType.ptr, propAlias=genType.fieldAlias( fieldName )) )
 	return '\n'.join(propList)
@@ -140,11 +164,13 @@ def OBJCTypeDeclaration( genType, serializersListGenerator ):
 		baseTypeName = genType.baseType.name
 
 	template = Template("""\
+NS_ASSUME_NONNULL_BEGIN
 @interface $typeName: $baseTypeName
 $init;
 $serializers
 $properties
 @end
+NS_ASSUME_NONNULL_END
 """)
 
 	return template.substitute(typeName=genType.name, baseTypeName=baseTypeName, init=OBJCTypeInitDeclaration( genType ), serializers=serializersListGenerator( genType ), properties=OBJCTypePropertyList( genType ))
@@ -154,9 +180,11 @@ def OBJCCategoryTypeDeclaration( genType, category ):
 		return ''
 
 	template = Template("""\
+NS_ASSUME_NONNULL_BEGIN 
 @interface $typeName($category)
 $serializers
 @end
+NS_ASSUME_NONNULL_END
 """)
 	return template.substitute( typeName=genType.name, category=category, serializers=OBJCTypeSerializersDeclarationList( genType ) )
 
@@ -199,7 +227,7 @@ def OBJCCategoryTypeDeclarationList( module, category ):
 
 #TODO: make a column if there are more than 2 args in the declaration
 def OBJCRPCMethodDeclaration( method ):
-	template = Template('- ($responseType)${methodName}With$argList')
+	template = Template('- ($responseType$nullable)${methodName}With$argList')
 	argList = []
 
 	if method.endpoint is None:
@@ -211,15 +239,18 @@ def OBJCRPCMethodDeclaration( method ):
 	if method.requestJsonType is not None:
 		argList.append( OBJCArgList( method.requestJsonType ) )
 
-	argList.append('Error:(NSError* __autoreleasing*)error')
+	argList.append('Error:(NSError**)error')
 
 	argListStr = '\n\tand'.join(argList)
 
 	responseType = 'void'
+	nullable = ''
 	if method.responseType is not None:
-		responseType = "%s%s" % ( OBJCAssumeType(method.responseType), method.responseType.ptr )
+		responseType = OBJCAssumeReturnType(method.responseType)
+		if method.responseType.ptr == '*':
+			nullable = ' _Nullable'
 
-	return template.substitute( responseType=responseType, methodName=method.name, argList=argListStr )
+	return template.substitute( responseType=responseType, nullable=nullable, methodName=method.name, argList=argListStr )
 
 def OBJCRPCMethodList( module ):
 	methodList = []
@@ -232,9 +263,11 @@ def OBCRPCDeclaration( module ):
 		return ''
 
 	template = Template("""\
+NS_ASSUME_NONNULL_BEGIN
 @interface $rpcClientName: IFServiceClient
 $methods;
 @end
+NS_ASSUME_NONNULL_END
 """)
 	return template.substitute( rpcClientName=module.name, methods=OBJCRPCMethodList( module ) )
 
@@ -382,22 +415,22 @@ def OBJCComplexTypeFieldListFromDictionary( genType, objcDictArgName ):
 
 def OBJCTypeSerializationImplList( genType ):
 	template = Template("""
-- (NSDictionary*)dictionaryWithError:(NSError* __autoreleasing*)error {
+- (NSDictionary*)dictionaryWithError:(NSError**)error {
 	return $typeDictionary;
 }
 
-- (NSData*)dumpWithError:(NSError* __autoreleasing*)error {
+- (NSData*)dumpWithError:(NSError**)error {
 	NSDictionary* dict = [self dictionaryWithError:error];
 	if (*error) return nil;
 	else return [NSJSONSerialization dataWithJSONObject:[self dictionaryWithError:error] options:jsonFormatOption error:error];
 }
 
-- (void)readDictionary:(NSDictionary*)dict withError:(NSError* __autoreleasing*)error {
+- (void)readDictionary:(NSDictionary*)dict withError:(NSError**)error {
 	id tmp;
 $complexTypeFieldsFromDictionary;
 }
 
-- (instancetype)initWithDictionary:(NSDictionary*)dictionary error:(NSError* __autoreleasing*)error {
+- (instancetype)initWithDictionary:(NSDictionary*)dictionary error:(NSError**)error {
 	if ( dictionary == nil ) return nil;
 	if (self = [super init]) {
 		[self readDictionary:dictionary withError:error];
@@ -406,7 +439,7 @@ $complexTypeFieldsFromDictionary;
 	return self;
 }
 
-- (instancetype)initWithJSONData:(NSData*)jsonData error:(NSError* __autoreleasing*)error {
+- (instancetype)initWithJSONData:(NSData*)jsonData error:(NSError**)error {
 	if ( jsonData == nil ) return nil;
 	if (self = [super init]) {
 		NSDictionary* dict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:error];

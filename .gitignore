@@ -20,3 +20,7 @@ ifacegen.test/ifacegen.test.test/category.swift
 ifacegen.test/ifacegen.test.test/category+RPC.swift
 generator/.idea
 ifacegen.test.xccheckout
+swift_test/ifacegen/ifacegenTests/category.swift
+swift_test/ifacegen/ifacegenTests/category+RPC.swift
+swift_test/ifacegen/ifacegenTests/types.swift
+swift_test/ifacegen/ifacegenTests/test.swift

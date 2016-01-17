@@ -1,0 +1,17 @@
+{"iface": [
+
+{
+"struct": "BusinessModel",
+"typedef": {
+		"name": "string",
+		"revisions": [ { "version": "int32", "model" : "BusinessModel" } ],
+		"description": "string"
+	}
+},
+
+{
+"procedure": "Run",
+"response": "string"
+}
+           
+]}

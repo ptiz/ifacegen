@@ -69,14 +69,14 @@ def SwiftDecorateTypeForDict( objcTypeStr, genType, wrapToNull=True ):
 	if genType.sType == 'double':
 		template = Template(wrapTemplate + ' NSNumber(double: $objcTypeStr%s)' % optional)
 	if genType.sType == 'rawstr':
-		template = Template('NSString(data: NSJSONSerialization.dataWithJSONObject($objcTypeStr as AnyObject, options: NSJSONWritingOptions.PrettyPrinted, error: error), encoding: NSUTF8StringEncoding)')
+		template = Template('NSString(data: try! NSJSONSerialization.dataWithJSONObject($objcTypeStr as AnyObject, options: [.PrettyPrinted]), encoding: NSUTF8StringEncoding)')
 	return template.substitute( objcTypeStr=objcTypeStr )
 
 def SwiftDecorateTypeFromJSON( genType, varValue ):
 	templateNSNumberStr = Template('($tmpVarValue as? NSNumber)?.$selector')
 	templateNSStringStr = Template('$tmpVarValue as? String')
 	templateNSDictionaryStr = Template('$tmpVarValue as? [String : AnyObject]')
-	templateRawNSDictionaryStr = Template(' $tmpVarValue as? NSJSONSerialization.JSONObjectWithData:((tmp as? String)?.dataUsingEncoding(NSUTF8StringEncoding), options: .AllowFragments, error: &error)')
+	templateRawNSDictionaryStr = Template(' $tmpVarValue as? try! NSJSONSerialization.JSONObjectWithData:((tmp as? String)?.dataUsingEncoding(NSUTF8StringEncoding), options: .AllowFragments)')
 	if isinstance( genType, GenListType ):
 		if genType.itemType.ptr == '':
 			return '(%s as? [NSNumber])?.map{$0.%s}' % (varValue, SwiftGetNumberValue( genType.itemType ))
@@ -338,12 +338,17 @@ def SwiftTypeSerializationImplList( genType, isCategory=False ):
 	}
 
 	${overridePref}func dump(inout error: NSError?) -> NSData? {
-		var dict = self.dictionary(&error)
-		if let e = error {
+		let dict = self.dictionary(&error)
+		if let _ = error {
 			return nil
-		} else {
-			return NSJSONSerialization.dataWithJSONObject(dict as AnyObject, options: NSJSONWritingOptions.PrettyPrinted, error: &error)
-		}
+		} 
+		do {
+    		let result = try NSJSONSerialization.dataWithJSONObject(dict, options: [.PrettyPrinted])
+    		return result
+		} catch let er as NSError {
+    		error = er
+    		return nil
+		}	
 	}
 
 	${overridePref}func read(dict: [String : AnyObject]?, inout error: NSError?) {
@@ -356,27 +361,24 @@ def SwiftTypeSerializationImplList( genType, isCategory=False ):
 			return nil
 		}
 		self.read(dictionary, error: &error)
-		if let e = error {
+		if let _ = error {
 			return nil
 		}
 	}
 
 	${conveniencePref}${overridePref}init?(jsonData: NSData?, inout error: NSError?) {
 		$superInit
-		if let jData = jsonData {
-			let dict = NSJSONSerialization.JSONObjectWithData(jData, options: .AllowFragments, error: &error) as! [String : AnyObject]
-			if let er = error {
+		do {
+			if let jsonData = jsonData, let dict = try NSJSONSerialization.JSONObjectWithData(jsonData, options: [.AllowFragments]) as? [String : AnyObject] {
+				self.read(dict, error: &error)
+			} else {
 				return nil
 			}
-			self.read(dict, error: &error)
-			if let er =  error {
-				return nil
-			}
-		} else {
+		} catch let er as NSError {
+			error = er
 			return nil
 		}
 	}
-
 	$defaultInit
 """)
 	
@@ -433,7 +435,7 @@ def SwiftTypeImplementationList( module, implGenerator ):
 	return '\n'.join( implList )
 
 def SwiftRPCMethodImplementation( method ):
-	jsonArgsTemplate = Template('NSJSONSerialization.dataWithJSONObject($jsonArgDict, options: NSJSONWritingOptions.PrettyPrinted, error: &error)')
+	jsonArgsTemplate = Template('try! NSJSONSerialization.dataWithJSONObject($jsonArgDict, options: [.PrettyPrinted])')
 	customArgsTemplate = Template("""\
 		if let conProtocol = self.transport as? $protocolName {
 			conProtocol.$customArgSectionName($customArgDict)
@@ -446,21 +448,18 @@ def SwiftRPCMethodImplementation( method ):
 	template = Template("""\
 	$declaration {
 	$setCustomArgs
-		let jsonData: NSData! = $jsonData
-		if let wrAll = self.transport?.writeAll(jsonData, prefix: $prefix, error: &error) {
+		do {
+			let jsonData: NSData! = $jsonData
+			try self.transport?.writeAll(jsonData, prefix: $prefix)
 			if let outData = self.transport?.readAll() {
-				let output: AnyObject? = NSJSONSerialization.JSONObjectWithData(outData, options: .AllowFragments, error: &error)
-				if let er = error {
-					return$emptyVal
-				}
+				let output = try NSJSONSerialization.JSONObjectWithData(outData, options: [.AllowFragments])
 				$returnStr
-			} else {
-				return $emptyVal
 			}
-		} else {
 			return$emptyVal
+		} catch let er as NSError {
+    		error = er
+    		return$emptyVal
 		}
-
 	}
 """)
 

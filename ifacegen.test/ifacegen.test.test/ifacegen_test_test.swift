@@ -61,13 +61,9 @@ class ifacegen_test_test: XCTestCase {
     
     func testSerialization() {
         
-        var error:NSError?
-        let data = self.employer.dumpWithError(&error)
-        
-        XCTAssertNil(error, "Serialization was unsuccessful")
-        
-        let desEmployer = OBCEmployer(JSONData: data, error: &error)
-        
+        let data = try! self.employer.dump()
+        let desEmployer = try! OBCEmployer(JSONData: data)
+
         XCTAssertEqual(desEmployer.stuff.count, 2, "Data was not deserialized successfully")
         
         let desEmployee0 = desEmployer.stuff[0] as! OBCEmployee
@@ -92,12 +88,8 @@ class ifacegen_test_test: XCTestCase {
     
     func testRecursiveTypes() {
         
-        var error:NSError?
-        let data = self.department.dumpWithError(&error)
-        
-        XCTAssertNil(error, "Serialization was unsuccessful")
-        
-        let desDepartment = OBCDepartment(JSONData: data, error: &error)
+        let data = try! self.department.dump()
+        let desDepartment = try! OBCDepartment(JSONData: data)
         
         XCTAssertEqual(desDepartment.departments.count, 1, "Data was not deserialized successfully")
     }
@@ -106,18 +98,19 @@ class ifacegen_test_test: XCTestCase {
         
         let message = "{\"stuff\":[{\"wrong_value\":13}]}"
         let messageData = message.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true);
-
-        var error:NSError?
-        let employer = OBCEmployer(JSONData: messageData, error: &error)
         
+        let employer = try! OBCEmployer(JSONData: messageData)
+
         XCTAssertEqual(employer.stuff.count, 1, "Data was not deserialized successfully")
         XCTAssertTrue(employer.info == nil, "Employer info is wrong")
         
         let wrongMessage = "{\"stuff\":[{\"wrong_value\":13}"
         let wrongMessageData = wrongMessage.dataUsingEncoding(NSUTF8StringEncoding, allowLossyConversion: true)
         
-        let wrongEmployer = OBCEmployer(JSONData: wrongMessageData, error: &error)
-        
-        XCTAssertNil(wrongEmployer, "Struct was initialized with wrong data")
+        do {
+            let _ = try OBCEmployer(JSONData: wrongMessageData)
+            XCTFail("Wrong JSON data was read without an error")
+        } catch {
+        }
     }
 }

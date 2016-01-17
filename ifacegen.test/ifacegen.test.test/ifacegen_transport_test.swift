@@ -38,7 +38,7 @@ class TestTransport: IFHTTPTransport {
         super.init(URL:NSURL(string: "http://localhost"))
     }
     
-    override func writeAll(data: NSData!, endpoint: String!, method: IFHTTPMethod, error: NSErrorPointer) -> Bool {
+    override func writeAll(data: NSData!, endpoint: String!, method: IFHTTPMethod) throws {
         if let checkHTTPMethod = self.checkHTTPMethod {
             checkHTTPMethod( method )
         }
@@ -51,8 +51,6 @@ class TestTransport: IFHTTPTransport {
         if let checkInput = self.checkInput, input = data {
             checkInput(input)
         }
-        
-        return true
     }
     
     override func readAll() -> NSData! {
@@ -75,7 +73,7 @@ class ifacegen_transport_test: XCTestCase {
         
         testTransport.checkURL = { (url) in
             if let checkUrl = url {
-                XCTAssertEqual(checkUrl.absoluteString!, "http://localhost/employees?token=qwerty&timestamp=13452345", "URL wasn't made well")
+                XCTAssertEqual(checkUrl.absoluteString, "http://localhost/employees?token=qwerty&timestamp=13452345", "URL wasn't made well")
             } else {
                 XCTAssert(false, "URL is nil")
             }
@@ -83,7 +81,7 @@ class ifacegen_transport_test: XCTestCase {
         
         testTransport.checkInput = { (inputData) in
             if let input = inputData {
-                if let json = NSJSONSerialization.JSONObjectWithData(input, options:.AllowFragments, error: nil) as? [String : AnyObject] {
+                if let json = (try? NSJSONSerialization.JSONObjectWithData(input, options:.AllowFragments)) as? [String : AnyObject] {
                     XCTAssertTrue((json["employer_id"] as? NSNumber)?.longLongValue == 9876345, "Input wasn't made well")
                     let filters: AnyObject? = json["filter"]
                     if let filter2 = filters?[1] as? Dictionary<String, AnyObject> {
@@ -108,15 +106,15 @@ class ifacegen_transport_test: XCTestCase {
         let filter2 = OBCGetEmployeesJsonArgsFilterItem(payload: "filter2")
         let complexParam = OBCGetEmployeesCustomParamsArgsComplexParam(complexField: "complex field")
         
-        let response = testService.getEmployeesWithToken("qwerty", andTimestamp: 13452345, andComplexParam: complexParam, andSimpleParam: 13, andEmployerId: 9876345, andFilter: [filter1, filter2], andError: nil)
+        let response = try? testService.getEmployeesWithToken("qwerty", andTimestamp: 13452345, andComplexParam: complexParam, andSimpleParam: 13, andEmployerId: 9876345, andFilter: [filter1, filter2])
         
-        XCTAssertEqual(response.count, 2, "Response objects count is wrong")
+        XCTAssertEqual(response!.count, 2, "Response objects count is wrong")
         
-        let employee1 = response[0] as! OBCEmployee
+        let employee1 = response![0] as! OBCEmployee
         XCTAssertEqual(employee1.name, "John Doe", "Employee1 name is wrong in response")
         XCTAssertEqual(employee1.passport.periods.count, 5, "Periods count is wrong for Employee1 passport")
         
-        let employee2 = response[1] as! OBCEmployee
+        let employee2 = response![1] as! OBCEmployee
         XCTAssertEqual(employee2.name, "Mary Doe", "Employee2 name is wrong in response")
         XCTAssertTrue(employee2.passport.periods == nil, "Periods count is wrong for Employee2 passport")
     }
@@ -127,11 +125,11 @@ class ifacegen_transport_test: XCTestCase {
         
         transport.checkHTTPMethod = { (method:IFHTTPMethod)->() in
             XCTAssert( method == .IFHTTPMETHOD_PUT, "HTTP method is wrong")
-            println("HTTP method: \(method)")
+            print("HTTP method: \(method)")
         }
         
-        let employee = OBCEmployee(JSONData: NSData(contentsOfFile: NSBundle(forClass:self.classForCoder).pathForResource("test_transport_employee", ofType: "json")!), error: nil)
-        XCTAssert(employee.age == 33.33, "Epmployee was not desirialized properly")
+        let employee = try? OBCEmployee(JSONData: NSData(contentsOfFile: NSBundle(forClass:self.classForCoder).pathForResource("test_transport_employee", ofType: "json")!))
+        XCTAssert(employee!.age == 33.33, "Epmployee was not desirialized properly")
         
         let testService = OBCTest(transport: transport)
         testService.methodForPutWithEmployee(employee, andError: nil)
@@ -143,14 +141,14 @@ class ifacegen_transport_test: XCTestCase {
         
         transport.checkURL = { (url) in
             if let checkUrl = url {
-                XCTAssertEqual(checkUrl.absoluteString!, "http://localhost/users/johndoe123/repos?token=9712394867142", "URL wasn't made well")
+                XCTAssertEqual(checkUrl.absoluteString, "http://localhost/users/johndoe123/repos?token=9712394867142", "URL wasn't made well")
             } else {
                 XCTAssert(false, "URL is nil")
             }
         }
         
         let testService = OBCTest(transport: transport)
-        testService.gitStarredReposWithUser("johndoe123", andToken:"9712394867142", andError: nil)
-        
+        let _ = try? testService.gitStarredReposWithUser("johndoe123", andToken:"9712394867142")
+
     }
 }

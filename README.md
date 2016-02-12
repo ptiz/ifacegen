@@ -1,6 +1,6 @@
 # ifacegen
 
-![Cocoapods](https://img.shields.io/cocoapods/v/ifacegen.svg?style=flat) ![License](https://img.shields.io/cocoapods/l/ifacegen.svg?style=flat)
+![CocoaPods](https://img.shields.io/cocoapods/v/ifacegen.svg?style=flat) ![License](https://img.shields.io/cocoapods/l/ifacegen.svg?style=flat)
 
 ##What is it for
 You need this tool, if you like me have to connect several RESTful services in every app and completely fed up with endless manual json dictionaries handling. Forget about error prone string literals comparing, you will have native classes and methods for remote services like if they were your local objects.
@@ -39,7 +39,7 @@ $ python ifacegen.py [-h] [--prefix PREFIX] [-o OUTDIR] [--category CATEGORY] I 
 - CATEGORY is a string, name of category, serialization methods will be placed in this category instead of class file itself; 
 - I [I ...] are IDL file names to be processed. 
 
-If you use Cocoapods to install the tool, you may want to add "Run Script" phase to your Build Phases, like this:
+If you use CocoaPods to install the tool, you may want to add "Run Script" phase to your Build Phases, like this:
 ```
 python Pods/ifacegen/generator/ifacegen.py <IDL file names> -o <output directory>
 ```
